@@ -59,7 +59,7 @@ namespace Game_API_Server.Controllers
             /* :: TODO :: Hive 응답으로 타이머 시간도 받아와서 expiry 설정하기 */
             int expiry = 1; //임시
             _redisDb.StringSet(auth.Email, auth.Token, TimeSpan.FromHours(expiry));
-            var tmpredis = _redisDb.StringGet(auth.Email);
+            //var tmpredis = _redisDb.StringGet(auth.Email);
 
 
             //접속한 적 있는 유저인지 확인 (유저 정보가 DB에 있는지 확인)
@@ -90,6 +90,12 @@ namespace Game_API_Server.Controllers
 
             // :: TODO :: DB에서 user 정보 가져와서 클라에게 보내주기
 
+            return Ok();
+        }
+
+        [Route("Test")]
+        public IActionResult Test()
+        {
             return Ok();
         }
     }
