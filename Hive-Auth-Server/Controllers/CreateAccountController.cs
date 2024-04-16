@@ -26,7 +26,7 @@ namespace Hive_Auth_Server.Controllers
         {
             _configuration = configuration;
 
-            var DbConnectString = _configuration.GetSection("DBConnection")["HiveDB"];
+            var DbConnectString = _configuration.GetConnectionString("HiveDB");
             _dbConnection = new MySqlConnection(DbConnectString);
             _dbConnection.Open();
 
@@ -35,6 +35,7 @@ namespace Hive_Auth_Server.Controllers
         }
 
         /* :: TODO :: 비동기로 구현 */
+        /* :: TODO :: 내부 기능들 서비스 단위로 분리하기 - 에러처리, 해싱, DB작업 */
         [HttpPost("create")]
         public async Task<ResponseDTO> Create(AccountDTO account)
         {
@@ -44,7 +45,7 @@ namespace Hive_Auth_Server.Controllers
                 /* :: TODO :: 에러처리. 어떤 방식으로 하는 게? Error용 DTO 만들기? or.. */
             }
 
-            //pw암호화(해싱)
+            //pw암호화(해싱); logincontroller에서 재사용^^ 분리 ㄱ
             string hashedPassword;
             byte[] hashedValue = SHA256.HashData(Encoding.UTF8.GetBytes(account.Password)); //8비트로 인코딩. 너무 큰 값은
 
