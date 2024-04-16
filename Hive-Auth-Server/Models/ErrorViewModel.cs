@@ -1,4 +1,4 @@
-namespace Server_Project_Com2us.Models
+namespace Hive_Auth_Server.Models
 {
     public class ErrorViewModel
     {

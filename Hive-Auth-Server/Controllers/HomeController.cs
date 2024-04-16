@@ -1,8 +1,8 @@
+using Hive_Auth_Server.Models;
 using Microsoft.AspNetCore.Mvc;
-using Server_Project_Com2us.Models;
 using System.Diagnostics;
 
-namespace Server_Project_Com2us.Controllers
+namespace Hive_Auth_Server.Controllers
 {
     public class HomeController : Controller
     {

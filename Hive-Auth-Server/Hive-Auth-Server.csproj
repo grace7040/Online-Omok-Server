@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>Server_Project_Com2us</RootNamespace>
+    <RootNamespace>Hive_Auth_Server</RootNamespace>
   </PropertyGroup>
 
 </Project>
