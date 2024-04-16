@@ -23,7 +23,8 @@ namespace Game_API_Server.Middleware
             _redisDb = _redisConnection.GetDatabase();
         }
 
-        // (??) 로그인 한 경우에만 이게 일어나도록..해야되는데 어떡하지? 미들웨어는 일괄동작한다며..
+        // 정상적인 유저가 게임 서버에 접속할 때는, 항상 하이브로부터 받은 토큰을 가지고 있는 상태일 것임. 
+        // 따라서 미들웨어로 일괄 적용 가능
         // :: TODO :: 내용들 분리하고, 비동기 처리하기
         public async Task Invoke(HttpContext context)
         {
