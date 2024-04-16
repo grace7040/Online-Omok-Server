@@ -22,8 +22,9 @@ namespace Hive_Auth_Server.Controllers
 
 
         // (??) 반환형을 어떻게 해야 하는지???? 타이머 설정해야 하니까 숫자로? 아님 DTO 만들어서??
+        //GameAPIServer의 LoginController가 참조함
         [HttpPost("checkauth")]
-        public async Task<IActionResult> CheckAuth(UserAuthDTO auth)
+        public IActionResult CheckAuth(UserAuthDTO auth)
         {
             //게임서버가 보낸 auth와 redis서버의 email-token값이 같은지 체크
             var token = _redisDb.StringGet(auth.Email);

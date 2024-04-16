@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Hive_Auth_Server.DTO
+namespace Game_API_Server.DTO
 {
     public class UserAuthDTO
     {
