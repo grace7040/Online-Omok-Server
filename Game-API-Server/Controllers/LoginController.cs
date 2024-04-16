@@ -63,7 +63,7 @@ namespace Game_API_Server.Controllers
 
 
             //접속한 적 있는 유저인지 확인 (유저 정보가 DB에 있는지 확인)
-            /* :: TODO :: 접속기록 체킹 로직 수정 */
+            /* :: TODO? :: 접속기록 체킹 로직 수정이 필요할까? */
             var result = (await _queryFactory.Query("user_game_data")
                                          .Select("level").Where("email", auth.Email)
                                          .GetAsync<int>()).FirstOrDefault();
