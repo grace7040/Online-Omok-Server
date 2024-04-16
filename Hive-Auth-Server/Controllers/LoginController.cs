@@ -11,8 +11,8 @@ namespace Hive_Auth_Server.Controllers
 {
     public class LoginController : Controller
     {
-        QueryFactory _queryFactory;
         IConfiguration _configuration;
+        QueryFactory _queryFactory;
         MySqlConnection _dbConnection;
         ConnectionMultiplexer _redisConnection;
         IDatabase _redisDb;
@@ -20,14 +20,15 @@ namespace Hive_Auth_Server.Controllers
         {
             _configuration = configuration;
 
-            var DbConnectString = _configuration.GetConnectionString("HiveDB");
-            _dbConnection = new MySqlConnection(DbConnectString);
+            var dbConnectString = _configuration.GetConnectionString("HiveDB");
+            _dbConnection = new MySqlConnection(dbConnectString);
             _dbConnection.Open();
 
             var compiler = new SqlKata.Compilers.MySqlCompiler();
             _queryFactory = new QueryFactory(_dbConnection, compiler);
 
-            _redisConnection = ConnectionMultiplexer.Connect(_configuration.GetConnectionString("HiveRedis"));
+            var redisConnectString = _configuration.GetConnectionString("HiveRedis");
+            _redisConnection = ConnectionMultiplexer.Connect(redisConnectString);
             _redisDb = _redisConnection.GetDatabase();
         }
 

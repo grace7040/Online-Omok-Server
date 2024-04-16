@@ -14,11 +14,10 @@ using Microsoft.AspNetCore.Html;
 namespace Hive_Auth_Server.Controllers
 {
     /* :: TODO :: db다루는 클래스 분리 & 에러 다루는 클래스 및 에러코드 구현*/
-    [Route("createaccount")]
     public class CreateAccountController : Controller
     {
-        QueryFactory _queryFactory;
         IConfiguration _configuration;
+        QueryFactory _queryFactory;
         MySqlConnection _dbConnection;
 
 
@@ -26,8 +25,8 @@ namespace Hive_Auth_Server.Controllers
         {
             _configuration = configuration;
 
-            var DbConnectString = _configuration.GetConnectionString("HiveDB");
-            _dbConnection = new MySqlConnection(DbConnectString);
+            var dbConnectString = _configuration.GetConnectionString("HiveDB");
+            _dbConnection = new MySqlConnection(dbConnectString);
             _dbConnection.Open();
 
             var compiler = new SqlKata.Compilers.MySqlCompiler();
@@ -36,7 +35,7 @@ namespace Hive_Auth_Server.Controllers
 
         /* :: TODO :: 비동기로 구현 */
         /* :: TODO :: 내부 기능들 서비스 단위로 분리하기 - 에러처리, 해싱, DB작업 */
-        [HttpPost("create")]
+        [HttpPost("createaccount")]
         public async Task<ResponseDTO> Create(AccountDTO account)
         {
             //데이터 validation
