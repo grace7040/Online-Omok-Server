@@ -5,7 +5,8 @@ using SqlKata.Execution;
 using System.Security.Cryptography;
 using System.Text;
 using System;
-using StackExchange.Redis;
+using CloudStructures;
+using CloudStructures.Structures;
 
 namespace Hive_Auth_Server.Controllers
 {
@@ -14,8 +15,7 @@ namespace Hive_Auth_Server.Controllers
         IConfiguration _configuration;
         QueryFactory _queryFactory;
         MySqlConnection _dbConnection;
-        ConnectionMultiplexer _redisConnection;
-        IDatabase _redisDb;
+        RedisConnection _redisConnection;
         public LoginController(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -27,9 +27,10 @@ namespace Hive_Auth_Server.Controllers
             var compiler = new SqlKata.Compilers.MySqlCompiler();
             _queryFactory = new QueryFactory(_dbConnection, compiler);
 
-            var redisConnectString = _configuration.GetConnectionString("HiveRedis");
-            _redisConnection = ConnectionMultiplexer.Connect(redisConnectString);
-            _redisDb = _redisConnection.GetDatabase();
+
+            var redisConnectString = configuration.GetConnectionString("HiveRedis");
+            var redisConfig = new RedisConfig("HiveRedis", redisConnectString!);
+            _redisConnection = new RedisConnection(redisConfig);
         }
 
 
@@ -74,8 +75,10 @@ namespace Hive_Auth_Server.Controllers
 
             //Redis에 저장
             int expiry = 1;
-            _redisDb.StringSet(account.Email, token, TimeSpan.FromHours(expiry));
-            //var tmpredis = _redisDb.StringGet(account.Email);
+            var query = new RedisString<string>(_redisConnection, account.Email, TimeSpan.FromHours(expiry));
+            await query.SetAsync(token, TimeSpan.FromHours(expiry));
+            var tmpredis = query.GetAsync().Result.Value;
+
 
             //유저에게 Token 전달
             UserAuthDTO response = new UserAuthDTO();

@@ -5,9 +5,11 @@ using SqlKata.Execution;
 using System.Security.Cryptography;
 using System.Text;
 using System;
-using StackExchange.Redis;
 using System.Net;
 using System.Security.Principal;
+using CloudStructures;
+using CloudStructures.Structures;
+using static Humanizer.In;
 
 namespace Game_API_Server.Controllers
 {
@@ -16,8 +18,8 @@ namespace Game_API_Server.Controllers
         IConfiguration _configuration;
         QueryFactory _queryFactory;
         MySqlConnection _dbConnection;
-        ConnectionMultiplexer _redisConnection;
-        IDatabase _redisDb;
+        RedisConnection _redisConnection;
+
         public LoginController(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -29,9 +31,9 @@ namespace Game_API_Server.Controllers
             var compiler = new SqlKata.Compilers.MySqlCompiler();
             _queryFactory = new QueryFactory(_dbConnection, compiler);
 
-            var redisConnectString = _configuration.GetConnectionString("GameRedis");
-            _redisConnection = ConnectionMultiplexer.Connect(redisConnectString);
-            _redisDb = _redisConnection.GetDatabase();
+            var redisConnectString = configuration.GetConnectionString("GameRedis");
+            var redisConfig = new RedisConfig("GameRedis", redisConnectString!);
+            _redisConnection = new RedisConnection(redisConfig);
         }
 
         [HttpPost("login")]
@@ -58,9 +60,9 @@ namespace Game_API_Server.Controllers
             //로그인 성공 - redis에 등록.
             /* :: TODO :: Hive 응답으로 타이머 시간도 받아와서 expiry 설정하기 */
             int expiry = 1; //임시
-            _redisDb.StringSet(auth.Email, auth.Token, TimeSpan.FromHours(expiry));
-            //var tmpredis = _redisDb.StringGet(auth.Email);
-
+            var query = new RedisString<string>(_redisConnection, auth.Email, TimeSpan.FromHours(expiry));
+            await query.SetAsync(auth.Token, TimeSpan.FromHours(expiry));
+            var tempredis = query.GetAsync().Result.Value;
 
             //접속한 적 있는 유저인지 확인 (유저 정보가 DB에 있는지 확인)
             /* :: TODO? :: 접속기록 체킹 로직 수정이 필요할까? */
