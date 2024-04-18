@@ -1,15 +1,7 @@
 ﻿using Hive_Auth_Server.DTO;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
-using static System.Net.WebRequestMethods;
 using System.Text;
-using SqlKata;
-using SqlKata.Execution;
-using Microsoft.Extensions.Configuration;
-using MySqlConnector;
-using Humanizer.Configuration;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Microsoft.AspNetCore.Html;
 
 namespace Hive_Auth_Server.Controllers
 {
@@ -17,20 +9,13 @@ namespace Hive_Auth_Server.Controllers
     public class CreateAccountController : Controller
     {
         IConfiguration _configuration;
-        QueryFactory _queryFactory;
-        MySqlConnection _dbConnection;
+        IHiveDb _hiveDb;
 
 
-        public CreateAccountController(IConfiguration configuration)
+        public CreateAccountController(IConfiguration configuration, IHiveDb hiveDb)
         {
             _configuration = configuration;
-
-            var dbConnectString = _configuration.GetConnectionString("HiveDB");
-            _dbConnection = new MySqlConnection(dbConnectString);
-            _dbConnection.Open();
-
-            var compiler = new SqlKata.Compilers.MySqlCompiler();
-            _queryFactory = new QueryFactory(_dbConnection, compiler);
+            _hiveDb = hiveDb;
         }
 
         /* :: TODO :: 비동기로 구현 */
@@ -50,17 +35,9 @@ namespace Hive_Auth_Server.Controllers
             hashedPassword = tmp.ToString();
 
             //DB에 추가
-            /* :: TODO :: DB에 이미 존재하는지 확인*/
-            var count = await _queryFactory.Query("user_account_data")
-                                  .InsertAsync(new { email = account.Email, password = hashedPassword });
+            ErrorCode result = await _hiveDb.InsertAccountAsync(account.Email, hashedPassword);
 
-            //DB 추가 실패 처리
-            if (count != 1)
-            {
-                /* :: TODO :: 실패 처리 */
-            }
-
-            return new ResponseDTO() { Result = ErrorCode.None };
+            return new ResponseDTO() { Result = result };
         }
     }
 }

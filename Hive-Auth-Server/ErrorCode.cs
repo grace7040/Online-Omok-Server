@@ -2,8 +2,13 @@
 {
     None = 0,
 
+    CreateAccountFailInsertAccount,
+    CreateAccountFailAlreadyExist,
+    CreateAccountFailException,
+
     LoginFailRegistRedis,
     LoginFailWrongPassword,
+    LoginFailNotExistEmail,
 
     CheckUserAuthFailNotMatch,
     CheckUserAuthFailNotExist,

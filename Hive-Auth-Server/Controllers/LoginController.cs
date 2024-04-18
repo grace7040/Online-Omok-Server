@@ -14,20 +14,13 @@ namespace Hive_Auth_Server.Controllers
     {
         IConfiguration _configuration;
         IMemoryDb _memoryDb;
-        QueryFactory _queryFactory;
-        MySqlConnection _dbConnection;
+        IHiveDb _hiveDb;
         
-        public LoginController(IConfiguration configuration, IMemoryDb memoryDb)
+        public LoginController(IConfiguration configuration, IMemoryDb memoryDb, IHiveDb hiveDb)
         {
             _configuration = configuration;
             _memoryDb = memoryDb;
-
-            var dbConnectString = _configuration.GetConnectionString("HiveDB");
-            _dbConnection = new MySqlConnection(dbConnectString);
-            _dbConnection.Open();
-
-            var compiler = new SqlKata.Compilers.MySqlCompiler();
-            _queryFactory = new QueryFactory(_dbConnection, compiler);
+            _hiveDb = hiveDb;
         }
 
 
@@ -36,12 +29,6 @@ namespace Hive_Auth_Server.Controllers
         [HttpPost("login")]
         public async Task<ResponseDTO> Login(ReqAccountDTO account)
         {
-            //account 정보 비교 with DB
-            var password = (await _queryFactory.Query("user_account_data")
-                                         .Select("password").Where("email", account.Email)
-                                         .GetAsync<string>()).FirstOrDefault();
-
-
             /* 서비스로 통일해야 할 임시코드 */
             string hashedPassword;
             byte[] hashedValue = SHA256.HashData(Encoding.UTF8.GetBytes(account.Password)); 
@@ -53,8 +40,10 @@ namespace Hive_Auth_Server.Controllers
             }
             hashedPassword = tmp.ToString();
 
+            //pw비교 with db
+            var password = _hiveDb.GetPasswordByEmailAsync(account.Email);
 
-            if(password != hashedPassword)
+            if (await password != hashedPassword)
             {
                 return new ResponseDTO { Result = ErrorCode.LoginFailWrongPassword };
             }
@@ -70,6 +59,7 @@ namespace Hive_Auth_Server.Controllers
 
 
             //Redis에 저장
+            /* :: TODO :: expiry 따로 빼서 관리 */
             int expiry = 1;
             ErrorCode result = await _memoryDb.RegistUserAsync(account.Email, token, TimeSpan.FromHours(expiry));
             if(result != ErrorCode.None)
