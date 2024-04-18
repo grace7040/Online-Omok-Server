@@ -1,16 +1,12 @@
+using Hive_Auth_Server.Repositories;
 using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddSingleton<IMemoryDb, RedisDb>();
 
 var app = builder.Build();
-
-app.UseRouting();
-
-app.UseAuthorization();
 
 app.MapControllers();
 

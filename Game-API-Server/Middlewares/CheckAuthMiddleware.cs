@@ -1,6 +1,7 @@
 ﻿using CloudStructures;
 using CloudStructures.Structures;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
 namespace Game_API_Server.Middleware
@@ -27,7 +28,7 @@ namespace Game_API_Server.Middleware
         // :: TODO :: 서비스 단위로 분리하고, 비동기 처리하기
         public async Task Invoke(HttpContext context)
         {
-            if(context.Request.Path == "/login")
+            if(context.Request.Path.Value == "/login")
             {
                 await _next(context);
             }

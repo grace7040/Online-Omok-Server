@@ -2,10 +2,8 @@
 
 namespace Hive_Auth_Server.DTO
 {
-    public class AccountDTO
+    public class ReqAccountDTO : RequestDTO
     {
-        public int Id { get; set; }
-
         [Required]
         [EmailAddress]
         [StringLength(50, ErrorMessage = "이메일은 50자까지 입력 가능합니다.")]

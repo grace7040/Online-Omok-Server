@@ -13,6 +13,7 @@ using static Humanizer.In;
 
 namespace Game_API_Server.Controllers
 {
+    [ApiController]
     public class LoginController : Controller
     {
         IConfiguration _configuration;
@@ -41,17 +42,15 @@ namespace Game_API_Server.Controllers
         public async Task<IActionResult> Login(UserAuthDTO auth)
         {
             //auth와 Hive의 토큰이 같은지체크. (Hive로 HttpRequest 보내기)
-            string hiveUrl = _configuration.GetConnectionString("HiveServer") + "/checkauth";
+            string email = auth.Email;
+            string token = auth.Token;
+            string hiveUrl = _configuration.GetConnectionString("HiveServer") + "/checkuserauth";
             HttpClient client = new();
-            var content = new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                { "Email",auth.Email },
-                { "Token",auth.Token }
-            });
-            var hiveResponse = await client.PostAsync(hiveUrl, content);
-           
+
+            var hiveResponse = await client.PostAsJsonAsync(hiveUrl, auth);
+
             //로그인 실패
-            if(hiveResponse.StatusCode != HttpStatusCode.OK)
+            if (hiveResponse.StatusCode != HttpStatusCode.OK)
             {
                 /* :: TODO :: 실패 처리 */
                 return BadRequest();
@@ -66,10 +65,9 @@ namespace Game_API_Server.Controllers
             //var tempredis = query.GetAsync().Result.Value;
 
             //접속한 적 있는 유저인지 확인 (유저 정보가 DB에 있는지 확인)
-            /* :: TODO? :: 접속기록 체킹 로직 수정이 필요할까? */
             var result = (await _queryFactory.Query("user_game_data")
                                          .Select("level").Where("email", auth.Email)
-                                         .GetAsync<int>()).FirstOrDefault();
+                                         .GetAsync<int>()).FirstOrDefault(); //firstordefault는 널 가능성 있을 때 사용
 
             //첫 접속인 경우, db에 등록. (db에 유저 정보가 없는 경우)
             if (result == 0)

@@ -5,20 +5,22 @@ using SqlKata.Execution;
 using System.Security.Cryptography;
 using System.Text;
 using System;
-using CloudStructures;
-using CloudStructures.Structures;
+using Hive_Auth_Server.DTOs;
 
 namespace Hive_Auth_Server.Controllers
 {
+    [ApiController]
     public class LoginController : Controller
     {
         IConfiguration _configuration;
+        IMemoryDb _memoryDb;
         QueryFactory _queryFactory;
         MySqlConnection _dbConnection;
-        RedisConnection _redisConnection;
-        public LoginController(IConfiguration configuration)
+        
+        public LoginController(IConfiguration configuration, IMemoryDb memoryDb)
         {
             _configuration = configuration;
+            _memoryDb = memoryDb;
 
             var dbConnectString = _configuration.GetConnectionString("HiveDB");
             _dbConnection = new MySqlConnection(dbConnectString);
@@ -26,18 +28,13 @@ namespace Hive_Auth_Server.Controllers
 
             var compiler = new SqlKata.Compilers.MySqlCompiler();
             _queryFactory = new QueryFactory(_dbConnection, compiler);
-
-
-            var redisConnectString = configuration.GetConnectionString("HiveRedis");
-            var redisConfig = new RedisConfig("HiveRedis", redisConnectString!);
-            _redisConnection = new RedisConnection(redisConfig);
         }
 
 
-        /* :: TODO :: id 전달해서, 유저가 id+토큰으로 요청하고, 겜서버가 id 기준으로 redis 뒤지도록 할까? */
+       
         /* :: TODO :: 내부의 기능들 서비스 단위로 분리하기 */
         [HttpPost("login")]
-        public async Task<UserAuthDTO> Login(AccountDTO account)
+        public async Task<ResponseDTO> Login(ReqAccountDTO account)
         {
             //account 정보 비교 with DB
             var password = (await _queryFactory.Query("user_account_data")
@@ -59,8 +56,7 @@ namespace Hive_Auth_Server.Controllers
 
             if(password != hashedPassword)
             {
-                /* :: TODO :: 로그인 실패. 반환 */
-                return new UserAuthDTO();
+                return new ResponseDTO { Result = ErrorCode.LoginFailWrongPassword };
             }
 
             //Token 랜덤 생성.   :: 알고리즘은 추후 수정 ::
@@ -75,18 +71,13 @@ namespace Hive_Auth_Server.Controllers
 
             //Redis에 저장
             int expiry = 1;
-            var query = new RedisString<string>(_redisConnection, account.Email, TimeSpan.FromHours(expiry));
-            await query.SetAsync(token, TimeSpan.FromHours(expiry));
-            var tmpredis = query.GetAsync().Result.Value;
+            ErrorCode result = await _memoryDb.RegistUserAsync(account.Email, token, TimeSpan.FromHours(expiry));
+            if(result != ErrorCode.None)
+            {
+                return new ResponseDTO { Result = result };
+            }
 
-
-            //유저에게 Token 전달
-            UserAuthDTO response = new UserAuthDTO();
-            response.Email = account.Email;
-            response.Token = token;
-
-            // (?) Token만 주면 되는데, 이런식으로 DTO를 주는 게 좋을까? 아님 string만? 아님 따로 ResponseDTO 형태 만들어서?
-            return response;
+            return new ResUserAuthDTO { Result = ErrorCode.None, Token = token };
         }
     }
 }

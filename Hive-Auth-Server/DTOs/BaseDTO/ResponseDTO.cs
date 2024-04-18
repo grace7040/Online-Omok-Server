@@ -2,6 +2,6 @@
 {
     public class ResponseDTO
     {
-        public ResponseDTO() { }
+        public ErrorCode Result { get; set; }
     }
 }

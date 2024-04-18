@@ -9,8 +9,8 @@ namespace Game_API_Server.DTO
         public string Email { get; set; } = "";
 
         public int Level { get; set; }
-        public int exp { get; set; }
-        public int win_count {  get; set; }
-        public int lose_count {  get; set; }
+        public int Exp { get; set; }
+        public int WinCount {  get; set; }
+        public int LoseCount {  get; set; }
     }
 }
