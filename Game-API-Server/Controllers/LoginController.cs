@@ -36,6 +36,7 @@ namespace Game_API_Server.Controllers
             _redisConnection = new RedisConnection(redisConfig);
         }
 
+         /* :: TODO :: 내부 기능들 서비스 단위로 분리하기 */
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserAuthDTO auth)
         {
@@ -62,7 +63,7 @@ namespace Game_API_Server.Controllers
             int expiry = 1; //임시
             var query = new RedisString<string>(_redisConnection, auth.Email, TimeSpan.FromHours(expiry));
             await query.SetAsync(auth.Token, TimeSpan.FromHours(expiry));
-            var tempredis = query.GetAsync().Result.Value;
+            //var tempredis = query.GetAsync().Result.Value;
 
             //접속한 적 있는 유저인지 확인 (유저 정보가 DB에 있는지 확인)
             /* :: TODO? :: 접속기록 체킹 로직 수정이 필요할까? */

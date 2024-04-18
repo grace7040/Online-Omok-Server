@@ -22,7 +22,8 @@ namespace Hive_Auth_Server.Controllers
         }
 
 
-        // (??) 반환형을 어떻게 해야 하는지???? 타이머 설정해야 하니까 숫자로? 아님 DTO 만들어서??
+         /* :: TODO :: 내부 기능들 서비스 단위로 분리하기. */
+         /* :: TODO :: 반환 타입 변경; 타이머 시간도 포함하는 DTO 반환 */
         //GameAPIServer의 LoginController가 참조함
         [HttpPost("checkauth")]
         public IActionResult CheckAuth(UserAuthDTO auth)
