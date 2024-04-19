@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Hive_Auth_Server.DTO
+namespace Hive_Auth_Server.DTOs
 {
     public class ReqAccountDTO : RequestDTO
     {

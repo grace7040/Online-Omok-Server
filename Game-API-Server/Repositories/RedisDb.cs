@@ -11,8 +11,8 @@ namespace Hive_Auth_Server.Repositories
         public RedisDb(IConfiguration configuration) {
             _configuration = configuration;
 
-            var redisConnectString = _configuration.GetConnectionString("HiveRedis");
-            var redisConfig = new RedisConfig("HiveRedis", redisConnectString!);
+            var redisConnectString = _configuration.GetConnectionString("GameRedis");
+            var redisConfig = new RedisConfig("GameRedis", redisConnectString!);
             _redisConnection = new RedisConnection(redisConfig);
         }
         public async Task<ErrorCode> RegistUserAsync(string id, string authToken, TimeSpan expiry)

@@ -2,6 +2,7 @@
 {
     public static class Expiries
     {
-        public readonly static int redisExpiry = 1;
+        static int loginToken = 10;
+        public static TimeSpan LoginToken { get { return TimeSpan.FromMinutes(loginToken); } }
     }
 }

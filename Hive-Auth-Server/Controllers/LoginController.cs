@@ -1,10 +1,6 @@
-﻿using Hive_Auth_Server.DTO;
-using Microsoft.AspNetCore.Mvc;
-using MySqlConnector;
-using SqlKata.Execution;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
-using System;
 using Hive_Auth_Server.DTOs;
 
 namespace Hive_Auth_Server.Controllers
@@ -60,7 +56,7 @@ namespace Hive_Auth_Server.Controllers
 
 
             //Redis에 저장
-            ErrorCode result = await _memoryDb.RegistUserAsync(account.Email, token, Expiries.LoginTToken);
+            ErrorCode result = await _memoryDb.RegistUserAsync(account.Email, token, Expiries.LoginToken);
 
             if(result != ErrorCode.None)
             {

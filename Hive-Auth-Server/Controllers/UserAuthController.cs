@@ -1,11 +1,5 @@
-﻿using Hive_Auth_Server.DTO;
+﻿using Hive_Auth_Server.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using MySqlConnector;
-using SqlKata.Execution;
-using System.Security.Principal;
-using CloudStructures;
-using CloudStructures.Structures;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace Hive_Auth_Server.Controllers
 {

@@ -1,5 +1,4 @@
 using Hive_Auth_Server.Repositories;
-using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
 

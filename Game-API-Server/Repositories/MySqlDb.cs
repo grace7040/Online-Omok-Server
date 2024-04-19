@@ -3,7 +3,7 @@ using SqlKata.Execution;
 
 namespace Hive_Auth_Server.Repositories
 {
-    public class MySqlDb : IHiveDb
+    public class MySqlDb : IGameDb
     {
         IConfiguration _configuration;
         QueryFactory _queryFactory;
@@ -13,14 +13,14 @@ namespace Hive_Auth_Server.Repositories
         {
             _configuration = configuration;
 
-            var dbConnectString = _configuration.GetConnectionString("HiveDB");
+            var dbConnectString = _configuration.GetConnectionString("GameDB");
             _dbConnection = new MySqlConnection(dbConnectString);
             _dbConnection.Open();
 
             var compiler = new SqlKata.Compilers.MySqlCompiler();
             _queryFactory = new QueryFactory(_dbConnection, compiler);
         }
-        public async Task<ErrorCode> InsertAccountAsync(string email, string password)
+        public async Task<ErrorCode> InsertAccountAsync(string email)
         {
             try
             {
@@ -30,8 +30,14 @@ namespace Hive_Auth_Server.Repositories
                     return ErrorCode.CreateAccountFailAlreadyExist;
                 }
 
-                var count = await _queryFactory.Query("user_account_data")
-                                  .InsertAsync(new { email = email, password = password });
+                var count = await _queryFactory.Query("user_game_data")
+                                  .InsertAsync(new { 
+                                      email = email,
+                                      level = 1,
+                                      exp = 0,
+                                      win_count = 0,
+                                      lose_count = 0
+                                  });
 
                 //DB 추가 실패시
                 if (count != 1)
@@ -47,25 +53,12 @@ namespace Hive_Auth_Server.Repositories
             return ErrorCode.None;
         }
 
-        public async Task<string> GetPasswordByEmailAsync(string email)
+        public async Task<bool> IsUserEmailExistAsync(string email)
         {
-            if(await IsUserEmailExistAsync(email))
-            {
-                var password = (await _queryFactory.Query("user_account_data")
-                                         .Select("password").Where("email", email)
-                                         .GetAsync<string>()).FirstOrDefault();
-                return password;
-            }
-            return string.Empty;
-        }
-
-
-        async Task<bool> IsUserEmailExistAsync(string email)
-        {
-            var count = (await _queryFactory.Query("user_account_data")
-                                         .Select("id").Where("email", email)
+            var count = (await _queryFactory.Query("user_game_data")
+                                         .Select("level").Where("email", email)
                                          .GetAsync<int>()).FirstOrDefault();
-            
+
             if (count != 0)
             {
                 return true;

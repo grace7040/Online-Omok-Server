@@ -1,6 +1,8 @@
-﻿namespace Hive_Auth_Server.DTOs
+﻿namespace Game_API_Server.DTOs
 {
     public class RequestDTO
     {
     }
 }
+
+

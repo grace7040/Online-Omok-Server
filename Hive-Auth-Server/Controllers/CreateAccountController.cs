@@ -1,4 +1,4 @@
-﻿using Hive_Auth_Server.DTO;
+﻿using Hive_Auth_Server.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
