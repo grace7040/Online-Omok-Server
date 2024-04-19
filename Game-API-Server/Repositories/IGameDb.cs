@@ -1,4 +1,4 @@
-﻿public interface IGameDb
+﻿public interface IGameDb : IDisposable
 {
     public Task<ErrorCode> InsertAccountAsync(string email);
 

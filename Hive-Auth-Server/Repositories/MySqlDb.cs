@@ -20,6 +20,11 @@ namespace Hive_Auth_Server.Repositories
             var compiler = new SqlKata.Compilers.MySqlCompiler();
             _queryFactory = new QueryFactory(_dbConnection, compiler);
         }
+
+        public void Dispose()
+        {
+            ConnectionClose();
+        }
         public async Task<ErrorCode> InsertAccountAsync(string email, string password)
         {
             try
@@ -73,6 +78,11 @@ namespace Hive_Auth_Server.Repositories
             }
 
             return false;
+        }
+
+        void ConnectionClose()
+        {
+            _dbConnection.Close();
         }
     }
 }

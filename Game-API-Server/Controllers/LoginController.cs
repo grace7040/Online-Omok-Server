@@ -27,6 +27,7 @@ namespace Game_API_Server.Controllers
 
             if (!isAuthedOnHive)
             {
+                _gameDb.Dispose();
                 return new ResponseDTO { Result = ErrorCode.LoginFailOnHive };
             }
 
