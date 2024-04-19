@@ -1,7 +1,7 @@
 ﻿using MySqlConnector;
 using SqlKata.Execution;
 
-namespace Hive_Auth_Server.Repositories
+namespace Game_API_Server.Repositories
 {
     public class MySqlDb : IGameDb
     {

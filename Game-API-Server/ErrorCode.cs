@@ -2,15 +2,19 @@
 {
     None = 0,
 
-    CreateAccountFailInsertAccount,
+    //6001~
+    CreateAccountFailInsertAccount = 6001,
     CreateAccountFailAlreadyExist,
     CreateAccountFailException,
 
-    LoginFailOnHive,
+
+    //7001~
+    LoginFailOnHive = 7001,
     LoginFailRegistRedis,
     LoginFailInsertDB,
 
-    CheckUserAuthFailNotMatch,
+    //8001~
+    CheckUserAuthFailNotMatch = 8001,
     CheckUserAuthFailNotExist,
     CheckUserAuthFailException
 

@@ -44,6 +44,7 @@ namespace Hive_Auth_Server.Repositories
                 return ErrorCode.CreateAccountFailException;
             }
 
+            
             return ErrorCode.None;
         }
 

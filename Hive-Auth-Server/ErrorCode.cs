@@ -2,18 +2,20 @@
 {
     None = 0,
 
-    CreateAccountFailInsertAccount,
+    //1001~
+    CreateAccountFailInsertAccount = 1001,
     CreateAccountFailAlreadyExist,
     CreateAccountFailException,
 
-    LoginFailRegistRedis,
+    //2001~
+    LoginFailRegistRedis=2001,
     LoginFailWrongPassword,
     LoginFailNotExistEmail,
 
-    CheckUserAuthFailNotMatch,
+    //3001~
+    CheckUserAuthFailNotMatch=3001,
     CheckUserAuthFailNotExist,
     CheckUserAuthFailException,
-    
 
 }
 

@@ -5,17 +5,13 @@ namespace Game_API_Server.Middleware
 {
     public class CheckAuthMiddleware
     {
-        IConfiguration _configuration;
         ICheckAuthService _checkAuthService;
         RequestDelegate _next;
         
 
-        //유저 요청시, 유저가 보낸 토큰값과 redis에 저장된 토큰값 비교.
-        //다른 경우 short-cut
-        public CheckAuthMiddleware(RequestDelegate next, IConfiguration configuration, ICheckAuthService checkAuthService)
+        public CheckAuthMiddleware(RequestDelegate next, ICheckAuthService checkAuthService)
         {
             _next = next;
-            _configuration = configuration;
             _checkAuthService = checkAuthService;
         }
 
@@ -41,8 +37,6 @@ namespace Game_API_Server.Middleware
                 await _next(context);
             }
             return;
-
-
         }
     }
 }

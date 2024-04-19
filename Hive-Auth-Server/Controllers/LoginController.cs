@@ -1,19 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Hive_Auth_Server.DTOs;
 using Hive_Auth_Server.Servicies;
+using ZLogger;
 
 namespace Hive_Auth_Server.Controllers
 {
     [ApiController]
     public class LoginController : Controller
     {
+        ILogger<LoginController> _logger;
         IMemoryDb _memoryDb;
         IHiveDb _hiveDb;
         IHasher _hasher;
         ITokenCreator _tokenCreator;
         
-        public LoginController(IMemoryDb memoryDb, IHiveDb hiveDb, IHasher hasher, ITokenCreator tokenCreater)
+        public LoginController(ILogger<LoginController> logger,IMemoryDb memoryDb, IHiveDb hiveDb, IHasher hasher, ITokenCreator tokenCreater)
         {
+            _logger = logger;
             _memoryDb = memoryDb;
             _hiveDb = hiveDb;
             _hasher = hasher;
@@ -37,8 +40,11 @@ namespace Hive_Auth_Server.Controllers
             ErrorCode result = await _memoryDb.RegistUserAsync(account.Email, token, Expiries.LoginToken);
             if(result != ErrorCode.None)
             {
+                _logger.ZLogError($"[Login Failed] {result}, request.email: {account.Email}");
                 return new ResponseDTO { Result = result };
             }
+
+            _logger.ZLogInformation($"[Login Succeed] request.email: {account.Email}");
             return new ResUserAuthDTO { Result = ErrorCode.None, Token = token };
         }
     }

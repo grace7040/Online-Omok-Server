@@ -1,5 +1,6 @@
 ﻿using CloudStructures;
 using CloudStructures.Structures;
+using ZLogger;
 
 namespace Hive_Auth_Server.Repositories
 {
@@ -8,12 +9,14 @@ namespace Hive_Auth_Server.Repositories
     {
         IConfiguration _configuration;
         RedisConnection _redisConnection;
-        public RedisDb(IConfiguration configuration) {
+        public RedisDb(IConfiguration configuration)
+        {
             _configuration = configuration;
 
             var redisConnectString = _configuration.GetConnectionString("HiveRedis");
             var redisConfig = new RedisConfig("HiveRedis", redisConnectString!);
             _redisConnection = new RedisConnection(redisConfig);
+            
         }
         public async Task<ErrorCode> RegistUserAsync(string id, string authToken, TimeSpan expiry)
         {

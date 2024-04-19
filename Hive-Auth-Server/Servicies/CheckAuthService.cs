@@ -1,11 +1,15 @@
-﻿namespace Hive_Auth_Server.Services
+﻿using ZLogger;
+
+namespace Hive_Auth_Server.Services
 {
     public class CheckAuthService : ICheckAuthService
     {
+        ILogger<CheckAuthService> _logger;
         IMemoryDb _memoryDb;
 
-        public CheckAuthService(IMemoryDb memoryDb)
+        public CheckAuthService(ILogger<CheckAuthService> logger, IMemoryDb memoryDb)
         {
+            _logger = logger;
             _memoryDb = memoryDb;
         }
 
@@ -14,7 +18,7 @@
             ErrorCode redisResult = await _memoryDb.CheckUserAuthAsync(email, token);
             if (redisResult != ErrorCode.None)
             {
-                // :: TODO :: 로깅 추가
+                _logger.ZLogError($"[CheckAuthToRedis Fail] {redisResult}, request.email: {email}");
                 return false;
             }
 

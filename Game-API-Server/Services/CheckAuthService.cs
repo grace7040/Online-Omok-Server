@@ -1,6 +1,6 @@
-﻿using Game_API_Server.DTOs;
-using Microsoft.Extensions.Configuration;
-using System.Net;
+﻿using System.Net;
+using ZLogger;
+using Microsoft.Extensions.Logging;
 
 namespace Game_API_Server.Services
 {
@@ -8,10 +8,12 @@ namespace Game_API_Server.Services
     {
         IConfiguration _configuration;
         IMemoryDb _memoryDb;
+        ILogger<CheckAuthService> _logger;
 
-        public CheckAuthService(IConfiguration configuration, IMemoryDb memoryDb)
+        public CheckAuthService(IConfiguration configuration, ILogger<CheckAuthService> logger, IMemoryDb memoryDb)
         {
             _configuration = configuration;
+            _logger = logger;
             _memoryDb = memoryDb;
         }
 
@@ -33,6 +35,7 @@ namespace Game_API_Server.Services
             ErrorCode redisResult = await _memoryDb.CheckUserAuthAsync(email, token);
             if (redisResult != ErrorCode.None)
             {
+                _logger.ZLogInformation($"[CheckAuthToRedis Failed] {redisResult}, request.email: {email}");
                 return false;
             }
 

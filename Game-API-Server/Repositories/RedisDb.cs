@@ -1,7 +1,7 @@
 ﻿using CloudStructures;
 using CloudStructures.Structures;
 
-namespace Hive_Auth_Server.Repositories
+namespace Game_API_Server.Repositories
 {
     
     public class RedisDb : IMemoryDb
