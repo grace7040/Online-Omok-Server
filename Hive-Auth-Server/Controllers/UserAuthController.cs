@@ -1,4 +1,5 @@
 ﻿using Hive_Auth_Server.DTOs;
+using Hive_Auth_Server.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hive_Auth_Server.Controllers
@@ -6,24 +7,21 @@ namespace Hive_Auth_Server.Controllers
     [ApiController]
     public class UserAuthController : Controller
     {
-        IConfiguration _configuration;
-        IMemoryDb _memoryDb;
+        ICheckAuthService _checkAuthService;
 
-        public UserAuthController(IConfiguration configuration, IMemoryDb memoryDb) {
-            _configuration = configuration;
-            _memoryDb = memoryDb;
+        public UserAuthController(IMemoryDb memoryDb, ICheckAuthService checkAuthService) {
+            _checkAuthService = checkAuthService;
         }
 
 
-        //GameAPIServer의 LoginController가 참조함
+        //Get HttpPost Request from GameAPIServer(LoginController)
         [HttpPost("checkuserauth")]
         public async Task<IActionResult> CheckUserAuth(ReqUserAuthDTO auth)
         {
-            ErrorCode result = await _memoryDb.CheckUserAuthAsync(auth.Email, auth.Token);
+            bool isAuthedUser = await _checkAuthService.CheckAuthToMemoryDbAsync(auth.Email, auth.Token);
 
-            if(result != ErrorCode.None)
+            if(!isAuthedUser)
             {
-                // :: TODO :: 로깅 추가
                 return BadRequest();
             }
             return Ok();

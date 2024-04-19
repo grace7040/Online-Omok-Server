@@ -1,21 +1,17 @@
 ﻿using Hive_Auth_Server.DTOs;
 using Hive_Auth_Server.Servicies;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Hive_Auth_Server.Controllers
 {
     [ApiController]
     public class CreateAccountController : Controller
     {
-        IConfiguration _configuration;
         IHiveDb _hiveDb;
         IHasher _hasher;
 
-        public CreateAccountController(IConfiguration configuration, IHiveDb hiveDb, IHasher hasher)
+        public CreateAccountController(IHiveDb hiveDb, IHasher hasher)
         {
-            _configuration = configuration;
             _hiveDb = hiveDb;
             _hasher = hasher;
         }
