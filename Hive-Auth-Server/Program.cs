@@ -5,7 +5,7 @@ using ZLogger;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllers();
 builder.Services.AddSingleton<IMemoryDb, RedisDb>();
 builder.Services.AddScoped<IHiveDb, MySqlDb>();
 builder.Services.AddScoped<IHasher, HasherSHA256>();
