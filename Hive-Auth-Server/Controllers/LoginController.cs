@@ -21,6 +21,7 @@ namespace Hive_Auth_Server.Controllers
             _configuration = configuration;
             _memoryDb = memoryDb;
             _hiveDb = hiveDb;
+            
         }
 
 
@@ -59,9 +60,8 @@ namespace Hive_Auth_Server.Controllers
 
 
             //Redis에 저장
-            /* :: TODO :: expiry 따로 빼서 관리 */
-            int expiry = 1;
-            ErrorCode result = await _memoryDb.RegistUserAsync(account.Email, token, TimeSpan.FromHours(expiry));
+            ErrorCode result = await _memoryDb.RegistUserAsync(account.Email, token, Expiries.LoginTToken);
+
             if(result != ErrorCode.None)
             {
                 return new ResponseDTO { Result = result };
