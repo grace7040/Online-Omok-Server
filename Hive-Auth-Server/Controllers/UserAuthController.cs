@@ -15,7 +15,6 @@ namespace Hive_Auth_Server.Controllers
         }
 
 
-         /* :: TODO :: 내부 기능들 서비스 단위로 분리하기. */
         //GameAPIServer의 LoginController가 참조함
         [HttpPost("checkuserauth")]
         public async Task<IActionResult> CheckUserAuth(ReqUserAuthDTO auth)

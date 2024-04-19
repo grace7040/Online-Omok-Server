@@ -1,4 +1,5 @@
 ﻿using Hive_Auth_Server.DTOs;
+using Hive_Auth_Server.Servicies;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,30 +11,20 @@ namespace Hive_Auth_Server.Controllers
     {
         IConfiguration _configuration;
         IHiveDb _hiveDb;
+        IHasher _hasher;
 
-
-        public CreateAccountController(IConfiguration configuration, IHiveDb hiveDb)
+        public CreateAccountController(IConfiguration configuration, IHiveDb hiveDb, IHasher hasher)
         {
             _configuration = configuration;
             _hiveDb = hiveDb;
+            _hasher = hasher;
         }
 
-        /* :: TODO :: 비동기로 구현 */
-        /* :: TODO :: 내부 기능들 서비스 단위로 분리하기 - 에러처리, 해싱, DB작업 */
         [HttpPost("createaccount")]
         public async Task<ResponseDTO> Create(ReqAccountDTO account)
         {
-            //pw암호화(해싱); logincontroller에서 재사용^^ 분리 ㄱ
-            string hashedPassword;
-            byte[] hashedValue = SHA256.HashData(Encoding.UTF8.GetBytes(account.Password)); //8비트로 인코딩. 너무 큰 값은
-
-            StringBuilder tmp = new StringBuilder();
-            for (int i = 0; i < hashedValue.Length; i++)
-            {
-                tmp.Append(hashedValue[i].ToString("x2"));  //16진법으로 변환 후
-            }
-            hashedPassword = tmp.ToString();
-
+            var hashedPassword = _hasher.GetHashedString(account.Password);
+            
             //DB에 추가
             ErrorCode result = await _hiveDb.InsertAccountAsync(account.Email, hashedPassword);
 
