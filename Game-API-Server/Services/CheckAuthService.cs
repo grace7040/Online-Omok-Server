@@ -20,10 +20,11 @@ namespace Game_API_Server.Services
             string hiveUrl = _configuration.GetConnectionString("HiveServer") + "/checkuserauth";
             HttpClient client = new();
             var hiveResponse = await client.PostAsJsonAsync(hiveUrl, new { Email = email, Token = token });
-            if(hiveResponse.StatusCode != HttpStatusCode.OK)
+            if (hiveResponse.StatusCode != HttpStatusCode.OK)
             {
                 return false;
             }
+
             return true;
         }
 

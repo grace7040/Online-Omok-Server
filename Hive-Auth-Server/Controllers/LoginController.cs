@@ -39,7 +39,6 @@ namespace Hive_Auth_Server.Controllers
             {
                 return new ResponseDTO { Result = result };
             }
-
             return new ResUserAuthDTO { Result = ErrorCode.None, Token = token };
         }
     }
