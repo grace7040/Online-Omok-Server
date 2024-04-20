@@ -16,10 +16,10 @@ sequenceDiagram
     alt 검증 실패
         GameServer-->>User: 로그인 실패 응답
     end
+    GameServer->>GameServer: 토큰을 Redis에 저장
     alt 최초 로그인
         GameServer->>+GameDB: 유저의 인게임 데이터 생성 요청
     end
-    GameServer->>GameServer: 토큰을 Redis에 저장
     GameServer-->>-User: 로그인 성공 응답
 ```
 ---
