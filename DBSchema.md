@@ -1,6 +1,7 @@
 # 유저의 계정 데이터
 ```mermaid
-user_account_data{
+erDiagram
+    user_account_data{
         INT uid PK
         VARCHAR(50) email UK
         VARCHAR(100) password
