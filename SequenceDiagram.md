@@ -25,7 +25,6 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    participant GameServer
     participant HiveServer
     participant HiveDB
 
