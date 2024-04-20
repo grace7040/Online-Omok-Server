@@ -10,7 +10,7 @@ sequenceDiagram
     HiveServer-->>-User: 토큰 전달
     User->>+GameServer: email과 토큰을 통해 로그인 요청
     GameServer->>+HiveServer: email과 토큰의 유효성 검증 요청
-    HiveServer-->>-GameServer: 유효성 검증
+    HiveServer-->>-GameServer: 유효성 검증 결과
     alt 검증 실패
         GameServer-->>User: 로그인 실패 응답
     end
@@ -35,6 +35,5 @@ sequenceDiagram
         HiveServer-->>User: 계정 생성 실패 응답
     end
     HiveServer->>+HiveDB: 유저의 계정 데이터 생성 요청
-    HiveDB-->>-HiveServer: 계정 생성 결과
     HiveServer-->>-User: 계정 생성 성공 응답
 ```
