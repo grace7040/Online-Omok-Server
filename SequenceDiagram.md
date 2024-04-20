@@ -7,6 +7,7 @@ sequenceDiagram
     participant GameDB
 
     User->>+HiveServer: email과 pw을 통해 로그인 요청
+    HiveServer->>HiveServer: 토큰 생성하여 Redis에 저장
     HiveServer-->>-User: 토큰 전달
     User->>+GameServer: email과 토큰을 통해 로그인 요청
     GameServer->>+HiveServer: email과 토큰의 유효성 검증 요청
