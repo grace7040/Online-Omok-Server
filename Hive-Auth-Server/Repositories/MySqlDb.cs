@@ -69,7 +69,7 @@ namespace Hive_Auth_Server.Repositories
         async Task<bool> IsUserEmailExistAsync(string email)
         {
             var count = (await _queryFactory.Query("user_account_data")
-                                         .Select("id").Where("email", email)
+                                         .Select("uid").Where("email", email)
                                          .GetAsync<int>()).FirstOrDefault();
             
             if (count != 0)
