@@ -24,12 +24,12 @@ namespace Hive_Auth_Server.Controllers
         {
             var hashedPassword = _hasher.GetHashedString(account.Password);
             
-            //DB에 추가
+            //DB에 유저 계정 추가
             ErrorCode result = await _hiveDb.InsertAccountAsync(account.Email, hashedPassword);
             
             if(result != ErrorCode.None)
             {
-                _logger.ZLogInformation($"[CreateAccount Failed] {result}, request.email: {account.Email}");
+                _logger.ZLogError($"[CreateAccount Failed] {result}, request.email: {account.Email}");
             }
             else
             {
