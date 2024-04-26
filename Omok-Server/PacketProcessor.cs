@@ -24,7 +24,7 @@ namespace Omok_Server
 
         Dictionary<int, Action<OmokBinaryRequestInfo>> _packetHandlerMap = new Dictionary<int, Action<OmokBinaryRequestInfo>>();
         PKHCommon _commonPacketHandler = new PKHCommon();
-        //PKHRoom _roomPacketHandler = new PKHRoom();
+        PKHRoom _roomPacketHandler = new PKHRoom();
 
         Func<string, byte[], bool> SendFunc;
 
@@ -61,6 +61,10 @@ namespace Omok_Server
 
             _commonPacketHandler.Init(_userMgr);
             _commonPacketHandler.RegistPacketHandler(_packetHandlerMap);
+
+            _roomPacketHandler.Init(_userMgr);
+            _roomPacketHandler.SetRooomList(_roomList);
+            _roomPacketHandler.RegistPacketHandler(_packetHandlerMap);
         }
 
         public void InsertPakcet(OmokBinaryRequestInfo requstPacket)

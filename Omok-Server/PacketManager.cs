@@ -18,10 +18,10 @@ namespace Omok_Server
             OmokBinaryRequestInfo innerPacket = new OmokBinaryRequestInfo();
 
             if (isConnect) {
-                innerPacket.Data = _dataCreater.PacketIdToBinary(PacketId.NTF_CONNECT_CLIENT);
+                innerPacket.Data = _dataCreater.PacketIdToBinary(PacketId.INNTF_CONNECT_CLIENT);
             }
             else {
-                innerPacket.Data = _dataCreater.PacketIdToBinary(PacketId.NTF_DISCONNECT_CLIENT);
+                innerPacket.Data = _dataCreater.PacketIdToBinary(PacketId.INNTF_DISCONNECT_CLIENT);
             }
 
             innerPacket.SessionID = sessionID;
@@ -29,15 +29,25 @@ namespace Omok_Server
             return innerPacket;
         }
 
-        public OmokBinaryRequestInfo MakeInNTFRoomLeavePacket(string sessionID, int roomNum, string iD)
+        public OmokBinaryRequestInfo MakeReqRoomLeavePacket(string sessionID, int roomNumber, string userID)
         {
-            throw new NotImplementedException();
+            var packet = new PKTReqRoomLeave()
+            {
+                RoomNumber = roomNumber,
+                UserID = userID,
+            };
+
+            var sendData = GetBinaryPacketData(packet, PacketId.NTF_IN_ROOM_LEAVE);
+
+            var memoryPakcPacket = new OmokBinaryRequestInfo();
+            memoryPakcPacket.Data = sendData;
+            memoryPakcPacket.SessionID = sessionID;
+            return memoryPakcPacket;
         }
 
-        public byte[] GetBinaryPacketData(PKHeader pkHeader, PacketId packetId)
+        public byte[] GetBinaryPacketData<T>(T pkHeader, PacketId packetId) where T : PKHeader
         {
-            byte[] sendData = [];
-            _dataCreater.PacketDataToBinary(ref sendData, pkHeader, packetId);
+            byte[] sendData = _dataCreater.PacketDataToBinary(pkHeader, packetId);
 
             return sendData;
         }

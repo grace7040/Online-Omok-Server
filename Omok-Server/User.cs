@@ -27,23 +27,18 @@ namespace Omok_Server
 
         //public bool IsConfirm(string netSessionID)
         //{
-        //    return SessionID == netSessionID;
+        //    return _sessionId == netSessionID;
         //}
 
-        //public string ID()
-        //{
-        //    return UserID;
-        //}
+        public void EnteredRoom(int roomNumber)
+        {
+            RoomNumber = roomNumber;
+        }
 
-        //public void EnteredRoom(int roomNumber)
-        //{
-        //    RoomNumber = roomNumber;
-        //}
-
-        //public void LeaveRoom()
-        //{
-        //    RoomNumber = -1;
-        //}
+        public void LeaveRoom()
+        {
+            RoomNumber = -1;
+        }
 
         //public bool IsStateLogin() { return SequenceNumber != 0; }
 

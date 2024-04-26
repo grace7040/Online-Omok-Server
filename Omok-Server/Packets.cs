@@ -42,47 +42,49 @@ namespace Omok_Server
 
 
 
-    //[MemoryPackable]
-    //public partial class PKTReqRoomEnter : PKHeader
-    //{
-    //    public int RoomNumber { get; set; }
-    //}
+    [MemoryPackable]
+    public partial class PKTReqRoomEnter : PKHeader
+    {
+        public int RoomNumber { get; set; }
+    }
 
-    //[MemoryPackable]
-    //public partial class PKTResRoomEnter : PKHeader
-    //{
-    //    public short Result { get; set; }
-    //}
+    [MemoryPackable]
+    public partial class PKTResRoomEnter : PKHeader
+    {
+        public short Result { get; set; }
+    }
 
-    //[MemoryPackable]
-    //public partial class PKTNtfRoomUserList : PKHeader
-    //{
-    //    public List<string> UserIDList { get; set; } = new List<string>();
-    //}
+    [MemoryPackable]
+    public partial class PKTNtfRoomUserList : PKHeader
+    {
+        public List<string> UserIDList { get; set; } = new List<string>();
+    }
 
-    //[MemoryPackable]
-    //public partial class PKTNtfRoomNewUser : PKHeader
-    //{
-    //    public string UserID { get; set; }
-    //}
+    [MemoryPackable]
+    public partial class PKTNtfRoomNewUser : PKHeader
+    {
+        public string UserID { get; set; }
+    }
 
 
-    //[MemoryPackable]
-    //public partial class PKTReqRoomLeave : PKHeader
-    //{
-    //}
+    [MemoryPackable]
+    public partial class PKTReqRoomLeave : PKHeader
+    {
+        public int RoomNumber { get; set; }
+        public string UserID { get; set; }
+    }
 
-    //[MemoryPackable]
-    //public partial class PKTResRoomLeave : PKHeader
-    //{
-    //    public short Result { get; set; }
-    //}
+    [MemoryPackable]
+    public partial class PKTResRoomLeave : PKHeader
+    {
+        public short Result { get; set; }
+    }
 
-    //[MemoryPackable]
-    //public partial class PKTNtfRoomLeaveUser : PKHeader
-    //{
-    //    public string UserID { get; set; }
-    //}
+    [MemoryPackable]
+    public partial class PKTNtfRoomLeaveUser : PKHeader
+    {
+        public string UserID { get; set; }
+    }
 
 
     //[MemoryPackable]

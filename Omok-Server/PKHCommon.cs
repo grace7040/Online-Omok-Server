@@ -8,18 +8,18 @@ namespace Omok_Server
     {
         public void RegistPacketHandler(Dictionary<int, Action<OmokBinaryRequestInfo>> packetHandlerMap)
         {
-            packetHandlerMap.Add((int)PacketId.NTF_CONNECT_CLIENT, NotifyConnectClient);
-            packetHandlerMap.Add((int)PacketId.NTF_DISCONNECT_CLIENT, NotifyDisConnectClient);
+            packetHandlerMap.Add((int)PacketId.INNTF_CONNECT_CLIENT, InNotifyConnectClient);
+            packetHandlerMap.Add((int)PacketId.INNTF_DISCONNECT_CLIENT, InNotifyDisConnectClient);
 
             packetHandlerMap.Add((int)PacketId.REQ_LOGIN, RequestLogin);
         }
 
-        public void NotifyConnectClient(OmokBinaryRequestInfo requestData)
+        public void InNotifyConnectClient(OmokBinaryRequestInfo requestData)
         {
             MainServer.MainLogger.Debug($"{requestData.SessionID} 유저의 접속 성공");
         }
 
-        public void NotifyDisConnectClient(OmokBinaryRequestInfo requestData)
+        public void InNotifyDisConnectClient(OmokBinaryRequestInfo requestData)
         {
             var sessionID = requestData.SessionID;
             var user = _userMgr.GetUser(sessionID);
@@ -29,7 +29,7 @@ namespace Omok_Server
                 // 방에 들어가 있는 상태에서 연결이 끊어진 경우 방에서 나가게 한다.
                 if (user.IsInRoom)
                 {
-                    var internalPacket = _packetMgr.MakeInNTFRoomLeavePacket(sessionID, user.RoomNumber, user.ID);
+                    var internalPacket = _packetMgr.MakeReqRoomLeavePacket(sessionID, user.RoomNumber, user.ID);
                     DIstributePacketAction(internalPacket);
                 }
 

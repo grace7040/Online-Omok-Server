@@ -9,7 +9,7 @@ namespace Omok_Server
 {
     public interface IBinaryPacketDataCreater
     {
-        byte[] PacketDataToBinary<T>(ref byte[] packetData, T pkHeader, PacketId packetId);
+        byte[] PacketDataToBinary<T>(T pkHeader, PacketId packetId);
         byte[] PacketIdToBinary(PacketId packetId);
 
         public T BinaryToPacketData<T>(byte[] binaryPacketData);
@@ -17,9 +17,9 @@ namespace Omok_Server
 
     public class MemoryPackBinaryPacketDataCreater : IBinaryPacketDataCreater
     {
-        public byte[] PacketDataToBinary<T>(ref byte[] packetData, T pkHeader, PacketId packetId)
+        public byte[] PacketDataToBinary<T>(T pkHeader, PacketId packetId)
         {
-            packetData = MemoryPackSerializer.Serialize(pkHeader);
+            var packetData = MemoryPackSerializer.Serialize(pkHeader);
             MemoryPackPacketHeadInfo.Write(packetData, packetId);
             return packetData;
         }
