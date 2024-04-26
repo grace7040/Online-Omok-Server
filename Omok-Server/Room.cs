@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -102,6 +103,19 @@ namespace Omok_Server
             ntfRoomLeaveUser.UserID = userID;
 
             var sendPacket = _packetMgr.GetBinaryPacketData(ntfRoomLeaveUser, PacketId.NTF_ROOM_LEAVE_USER);
+
+            Broadcast("", sendPacket);
+        }
+
+        public void NotifyPacketRoomChat(string userId, string chatMessage)
+        {
+            var notifyPacket = new PKTNtfRoomChat()
+            {
+                UserID = userId,
+                ChatMessage = chatMessage
+            };
+
+            var sendPacket = _packetMgr.GetBinaryPacketData(notifyPacket, PacketId.NTF_ROOM_CHAT);
 
             Broadcast("", sendPacket);
         }

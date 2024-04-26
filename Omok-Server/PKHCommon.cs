@@ -22,7 +22,7 @@ namespace Omok_Server
         public void InNotifyDisConnectClient(OmokBinaryRequestInfo requestData)
         {
             var sessionID = requestData.SessionID;
-            var user = _userMgr.GetUser(sessionID);
+            var user = _userMgr.GetUserBySessionId(sessionID);
 
             if (user != null)
             {
@@ -48,7 +48,7 @@ namespace Omok_Server
 
             try
             {
-                if (_userMgr.GetUser(sessionID) != null)
+                if (_userMgr.GetUserBySessionId(sessionID) != null)
                 {
                     ResponseLoginToClient(ErrorCode.LOGIN_ALREADY_WORKING, packetData.SessionID);
                     return;

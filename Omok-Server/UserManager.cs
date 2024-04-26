@@ -48,7 +48,7 @@ namespace Omok_Server
             return ErrorCode.NONE;
         }
 
-        public User GetUser(string sessionID)
+        public User GetUserBySessionId(string sessionID)
         {
             User user = null;
             _userMap.TryGetValue(sessionID, out user);

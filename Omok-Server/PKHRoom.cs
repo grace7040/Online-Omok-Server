@@ -22,7 +22,7 @@ namespace Omok_Server
         {
             packetHandlerMap.Add((int)PacketId.REQ_ROOM_ENTER, RequestRoomEnter);
             packetHandlerMap.Add((int)PacketId.REQ_ROOM_LEAVE, RequestRoomLeave);
-            //packetHandlerMap.Add((int)PacketId.REQ_ROOM_CHAT, RequestChat);
+            packetHandlerMap.Add((int)PacketId.REQ_ROOM_CHAT, RequestChat);
         }
 
         Room GetRoom(int roomNumber)
@@ -44,7 +44,7 @@ namespace Omok_Server
 
             try
             {
-                var user = _userMgr.GetUser(sessionID);
+                var user = _userMgr.GetUserBySessionId(sessionID);
 
                 if (user == null || !user.IsLogin)
                 {
@@ -68,6 +68,7 @@ namespace Omok_Server
                     return;
                 }
 
+                //유저 추가
                 if (room.AddUser(user.ID, sessionID) == false)
                 {
                     ResponseEnterRoomToClient(ErrorCode.ROOM_ENTER_FAIL_ADD_USER, sessionID);
@@ -108,7 +109,7 @@ namespace Omok_Server
 
             try
             {
-                var user = _userMgr.GetUser(sessionID);
+                var user = _userMgr.GetUserBySessionId(sessionID);
 
                 //유저가 없거나
                 if (user == null)
@@ -167,6 +168,59 @@ namespace Omok_Server
             var sendPacket = _packetMgr.GetBinaryPacketData(resRoomLeave, PacketId.RES_ROOM_LEAVE);
 
             SendFunc(sessionID, sendPacket);
+        }
+
+
+        public void RequestChat(OmokBinaryRequestInfo packetData)
+        {
+            var sessionID = packetData.SessionID;
+            MainServer.MainLogger.Debug("Room RequestChat");
+
+            try
+            {
+                var roomObject = CheckRoomAndRoomUser(sessionID);
+
+                if (roomObject.Item1 == false)
+                {
+                    MainServer.MainLogger.Error("Room RequestChat - CheckRoomAndRoomUserFail");
+                    return;
+                }
+
+                var reqData = _packetMgr.GetPacketData<PKTReqRoomChat>(packetData.Data);
+                roomObject.Item2.NotifyPacketRoomChat(roomObject.Item3.UserID, reqData.ChatMessage);
+                
+                MainServer.MainLogger.Debug("Room RequestChat - Success");
+            }
+            catch (Exception ex)
+            {
+                MainServer.MainLogger.Error(ex.ToString());
+            }
+        }
+
+        (bool, Room, RoomUser) CheckRoomAndRoomUser(string userNetSessionID)
+        {
+            var user = _userMgr.GetUserBySessionId(userNetSessionID);
+            if (user == null)
+            {
+                return (false, null, null);
+            }
+
+            var roomNumber = user.RoomNumber;
+            var room = GetRoom(roomNumber);
+
+            if (room == null)
+            {
+                return (false, null, null);
+            }
+
+            var roomUser = room.GetUserByNetSessionId(userNetSessionID);
+
+            if (roomUser == null)
+            {
+                return (false, room, null);
+            }
+
+            return (true, room, roomUser);
         }
     }
 }

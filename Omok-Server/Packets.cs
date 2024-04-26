@@ -87,19 +87,19 @@ namespace Omok_Server
     }
 
 
-    //[MemoryPackable]
-    //public partial class PKTReqRoomChat : PKHeader
-    //{
-    //    public string ChatMessage { get; set; }
-    //}
+    [MemoryPackable]
+    public partial class PKTReqRoomChat : PKHeader
+    {
+        public string ChatMessage { get; set; }
+    }
 
 
-    //[MemoryPackable]
-    //public partial class PKTNtfRoomChat : PKHeader
-    //{
-    //    public string UserID { get; set; }
+    [MemoryPackable]
+    public partial class PKTNtfRoomChat : PKHeader
+    {
+        public string UserID { get; set; }
 
-    //    public string ChatMessage { get; set; }
-    //}
+        public string ChatMessage { get; set; }
+    }
 
 }
