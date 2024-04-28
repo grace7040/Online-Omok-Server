@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-public enum ErrorCode : UInt16
+public enum ErrorCode : short
 {
     NONE = 0,
     LOGIN_FULL_USER_COUNT = 1,
@@ -15,4 +15,5 @@ public enum ErrorCode : UInt16
     ROOM_ENTER_INVALID_STATE = 6,
     ROOM_ENTER_INVALID_ROOM_NUMBER = 7,
     ROOM_ENTER_FAIL_ADD_USER = 8,
+    PUT_STONE_FAIL_NOT_TURN = 9,
 }

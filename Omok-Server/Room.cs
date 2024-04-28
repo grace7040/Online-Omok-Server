@@ -10,6 +10,10 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Omok_Server
 {
     public enum RoomState { None, GameStart, GameEnd }
+    public enum RoomUserState { None, Ready, Turn, NotTurn, GameEnd }
+    public enum StoneColor { None, Black, White }
+
+
     public class Room
     {
         public const int InvalidRoomNumber = -1;
@@ -17,12 +21,14 @@ namespace Omok_Server
 
         int _maxUserCount = 0;
 
-        RoomState state;
+        RoomState _state;
 
-        public bool IsGameStarted { get { return state != RoomState.None; } }
-        public bool IsGameEnded { get { return state == RoomState.GameEnd; } }
+        public bool IsGameStarted { get { return _state != RoomState.None; } }
+        public bool IsGameEnded { get { return _state == RoomState.GameEnd; } }
 
         List<RoomUser> _userList = new List<RoomUser>();
+
+        StoneColor _curStoneColor;
 
         protected PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
 
@@ -183,7 +189,7 @@ namespace Omok_Server
 
         public void StartGame()
         {
-            state = RoomState.GameStart;
+            _state = RoomState.GameStart;
             SetRandomTurnOnStart();
         }
 
@@ -196,13 +202,14 @@ namespace Omok_Server
             Broadcast("", sendPacket);
         }
 
+        //Set Random Start Turn / Stone Color According to Turn
         public void SetRandomTurnOnStart()
         {
             Random random = new Random();
             var turnIndex = random.Next(0, _userList.Count);
             _userList[turnIndex].State = RoomUserState.Turn;
 
-            NotifyTurnToClient(_userList[turnIndex].NetSessionID);
+            NotifyTurnToClient(_userList[turnIndex].NetSessionID, StoneColor.Black, null);
             MainServer.MainLogger.Debug($"[Room {Number}] SetRandomTurnOnStart. UserID: {_userList[turnIndex].UserID}");
             
             for (int i = 0; i < _userList.Count; i++)
@@ -212,21 +219,48 @@ namespace Omok_Server
                     continue;
                 }
                 _userList[i].State = RoomUserState.NotTurn;
-                
             }
+
+            _curStoneColor = StoneColor.Black;
         }
 
-        void NotifyTurnToClient(string netSessionID)
+        //Notify Turn & Put Other's Stone
+        void NotifyTurnToClient(string netSessionID, StoneColor stoneColor, Tuple<int,int>? position)
         {
-            var notifyTurn = new PKTNtfGameTurn();
+            var notifyTurn = new PKTNtfGameTurn() { 
+                Color = stoneColor,
+                Position = position
+            };
 
             var sendPacket = _packetMgr.GetBinaryPacketData(notifyTurn, PacketId.NTF_GAME_TURN);
 
             SendFunc(netSessionID, sendPacket);
         }
+
+        public bool IsUserTurn(string netSessionID)
+        {
+            var roomUser = GetRoomUserBySessionId(netSessionID);
+            return roomUser.State == RoomUserState.Turn;
+        }
+
+        public void ChangeTurnAndNotifyPutStone(Tuple<int, int>? position)
+        {
+            for (int i = 0; i < _userList.Count; i++)
+            {
+                if (_userList[i].State != RoomUserState.Turn)
+                {
+                    _userList[i].State = RoomUserState.Turn;
+                    NotifyTurnToClient(_userList[i].NetSessionID, _curStoneColor, position);
+                    continue;
+                }
+                _userList[i].State = RoomUserState.NotTurn;
+            }
+
+            _curStoneColor = _curStoneColor == StoneColor.Black ? StoneColor.White : StoneColor.Black;
+        }
     }
     
-    public enum RoomUserState { None, Ready, Turn, NotTurn, GameEnd }
+    
     public class RoomUser
     {
         public string UserID { get; private set; }
@@ -239,4 +273,6 @@ namespace Omok_Server
             NetSessionID = netSessionID;
         }
     }
+
+    
 }

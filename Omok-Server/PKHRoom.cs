@@ -16,7 +16,8 @@
             packetHandlerMap.Add((int)PacketId.REQ_ROOM_ENTER, RequestRoomEnter);
             packetHandlerMap.Add((int)PacketId.REQ_ROOM_LEAVE, RequestRoomLeave);
             packetHandlerMap.Add((int)PacketId.REQ_ROOM_CHAT, RequestChat);
-            packetHandlerMap.Add((int)PacketId.REQ_ROOM_READY, RequestReady);
+            packetHandlerMap.Add((int)PacketId.REQ_GAME_READY, RequestReady);
+            packetHandlerMap.Add((int)PacketId.REQ_PUT_STONE, RequestPutStone);
         }
 
         Room GetRoomByRoomNumber(int roomNumber)
@@ -245,6 +246,36 @@
             };
 
             var sendPacket = _packetMgr.GetBinaryPacketData(resGameReady, PacketId.RES_GAME_READY);
+            SendFunc(sessionId, sendPacket);
+        }
+
+        public void RequestPutStone(OmokBinaryRequestInfo packetData)
+        {
+            var reqData = _packetMgr.GetPacketData<PKTReqPutStone>(packetData.Data);
+            
+            var sessionId = packetData.SessionID;
+            var user = _userMgr.GetUserBySessionId(sessionId);
+            var room = GetRoomByRoomNumber(user.RoomNumber);
+
+            if (room.IsUserTurn(sessionId))
+            {
+                ResponsePutStone(sessionId, ErrorCode.NONE);
+                room.ChangeTurnAndNotifyPutStone(reqData.Position);
+            }
+            else
+            {
+                ResponsePutStone(sessionId, ErrorCode.PUT_STONE_FAIL_NOT_TURN);
+            }
+        }
+
+        void ResponsePutStone(string sessionId, ErrorCode errorCode)
+        {
+            var resPutStone = new PKTResPutStone()
+            {
+                Result = (short)errorCode
+            };
+
+            var sendPacket = _packetMgr.GetBinaryPacketData(resPutStone, PacketId.RES_PUT_STONE);
             SendFunc(sessionId, sendPacket);
         }
     }

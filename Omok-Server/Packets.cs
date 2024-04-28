@@ -122,5 +122,22 @@ namespace Omok_Server
     [MemoryPackable]
     public partial class PKTNtfGameTurn : PKHeader
     {
+        public StoneColor Color { get; set; }
+        public Tuple<int, int>? Position { get; set; }
     }
+
+    [MemoryPackable]
+    public partial class PKTReqPutStone : PKHeader
+    {
+        public Tuple<int, int> Position { get; set; }
+
+    }
+
+    [MemoryPackable]
+    public partial class PKTResPutStone : PKHeader
+    {
+        public short Result;
+
+    }
+
 }
