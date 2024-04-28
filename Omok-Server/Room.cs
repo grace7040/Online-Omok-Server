@@ -18,7 +18,7 @@ namespace Omok_Server
 
         List<RoomUser> _userList = new List<RoomUser>();
 
-        protected PacketManager<MemoryPackBinaryPacketDataCreater> _packetMgr = new();
+        protected PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
 
         static Func<string, byte[], bool> SendFunc;
         public void Init(int number, int maxUserCount)

@@ -9,19 +9,19 @@ using System.Threading.Tasks;
 namespace Omok_Server
 {
     //패킷 직렬화 방식에 따른 패킷 관리자
-    public class PacketManager<TPacketDataCreater> where TPacketDataCreater : IBinaryPacketDataCreater, new()
+    public class PacketManager<TPacketDataCreator> where TPacketDataCreator : IBinaryPacketDataCreator, new()
     {
-        TPacketDataCreater _dataCreater = new TPacketDataCreater();
+        TPacketDataCreator _dataCreator = new TPacketDataCreator();
 
         public OmokBinaryRequestInfo MakeInNTFConnectOrDisConnectClientPacket(bool isConnect, string sessionID)
         {
             OmokBinaryRequestInfo innerPacket = new OmokBinaryRequestInfo();
 
             if (isConnect) {
-                innerPacket.Data = _dataCreater.PacketIdToBinary(PacketId.INNTF_CONNECT_CLIENT);
+                innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.INNTF_CONNECT_CLIENT);
             }
             else {
-                innerPacket.Data = _dataCreater.PacketIdToBinary(PacketId.INNTF_DISCONNECT_CLIENT);
+                innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.INNTF_DISCONNECT_CLIENT);
             }
 
             innerPacket.SessionID = sessionID;
@@ -47,14 +47,14 @@ namespace Omok_Server
 
         public byte[] GetBinaryPacketData<T>(T pkHeader, PacketId packetId) where T : PKHeader
         {
-            byte[] sendData = _dataCreater.PacketDataToBinary(pkHeader, packetId);
+            byte[] sendData = _dataCreator.PacketDataToBinary(pkHeader, packetId);
 
             return sendData;
         }
 
         public T GetPacketData<T>(byte[] binaryPacketData) where T : PKHeader
         {
-            return _dataCreater.BinaryToPacketData<T>(binaryPacketData);
+            return _dataCreator.BinaryToPacketData<T>(binaryPacketData);
         }
     }
 }

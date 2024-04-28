@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Omok_Server
 {
-    public interface IBinaryPacketDataCreater
+    public interface IBinaryPacketDataCreator
     {
         byte[] PacketDataToBinary<T>(T pkHeader, PacketId packetId);
         byte[] PacketIdToBinary(PacketId packetId);
@@ -15,7 +15,7 @@ namespace Omok_Server
         public T BinaryToPacketData<T>(byte[] binaryPacketData);
     }
 
-    public class MemoryPackBinaryPacketDataCreater : IBinaryPacketDataCreater
+    public class MemoryPackBinaryPacketDataCreator : IBinaryPacketDataCreator
     {
         public byte[] PacketDataToBinary<T>(T pkHeader, PacketId packetId)
         {

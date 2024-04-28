@@ -22,7 +22,7 @@ namespace Omok_Server
         public static ILog MainLogger;
 
         PacketProcessor _packetProcessor = new();
-        PacketManager<MemoryPackBinaryPacketDataCreater> _packetMaker = new();
+        PacketManager<MemoryPackBinaryPacketDataCreator> _packetMaker = new();
         RoomManager _roomManager = new();
         
 

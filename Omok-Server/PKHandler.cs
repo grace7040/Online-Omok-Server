@@ -12,7 +12,7 @@ namespace Omok_Server
         public static Action<OmokBinaryRequestInfo> DIstributePacketAction;
 
         protected UserManager _userMgr = null;
-        protected PacketManager<MemoryPackBinaryPacketDataCreater> _packetMgr = new();
+        protected PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
 
         public void Init(UserManager userMgr)
         {
