@@ -1,11 +1,4 @@
-﻿using MemoryPack;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Omok_Server
+﻿namespace Omok_Server
 {
     public class PKHRoom : PKHandler
     {
@@ -23,9 +16,10 @@ namespace Omok_Server
             packetHandlerMap.Add((int)PacketId.REQ_ROOM_ENTER, RequestRoomEnter);
             packetHandlerMap.Add((int)PacketId.REQ_ROOM_LEAVE, RequestRoomLeave);
             packetHandlerMap.Add((int)PacketId.REQ_ROOM_CHAT, RequestChat);
+            packetHandlerMap.Add((int)PacketId.REQ_ROOM_READY, RequestReady);
         }
 
-        Room GetRoom(int roomNumber)
+        Room GetRoomByRoomNumber(int roomNumber)
         {
             var index = roomNumber - _startRoomNumber;
 
@@ -60,7 +54,7 @@ namespace Omok_Server
 
                 var reqData = _packetMgr.GetPacketData<PKTReqRoomEnter>(packetData.Data);
 
-                var room = GetRoom(reqData.RoomNumber);
+                var room = GetRoomByRoomNumber(reqData.RoomNumber);
 
                 if (room == null)
                 {
@@ -78,8 +72,8 @@ namespace Omok_Server
 
                 user.EnteredRoom(reqData.RoomNumber);
 
-                room.NotifyPacketUserListToClient(sessionID);
-                room.NofifyPacketNewUserToClient(sessionID, user.ID);
+                room.NotifyUserListToClient(sessionID);
+                room.NofifyNewUserToClient(sessionID, user.ID);
                 ResponseEnterRoomToClient(ErrorCode.NONE, sessionID);
 
                 MainServer.MainLogger.Debug("RequestEnterInternal - Success");
@@ -140,20 +134,20 @@ namespace Omok_Server
             MainServer.MainLogger.Debug($"LeaveRoomUser. SessionID:{sessionID}");
 
             //해당 룸이 없거나
-            var room = GetRoom(roomNumber);
+            var room = GetRoomByRoomNumber(roomNumber);
             if (room == null)
             {
                 return false;
             }
             //해당 유저가 해당 룸에 없거나
-            var roomUser = room.GetUserByNetSessionId(sessionID);
+            var roomUser = room.GetRoomUserBySessionId(sessionID);
             if (roomUser == null)
             {
                 return false;
             }
             
             room.RemoveUser(roomUser);
-            room.NotifyPacketLeaveUserToClient(roomUser.UserID);
+            room.NotifyLeaveUserToClient(roomUser.UserID);
 
             return true;
         }
@@ -187,7 +181,7 @@ namespace Omok_Server
                 }
 
                 var reqData = _packetMgr.GetPacketData<PKTReqRoomChat>(packetData.Data);
-                roomObject.Item2.NotifyPacketRoomChat(roomObject.Item3.UserID, reqData.ChatMessage);
+                roomObject.Item2.NotifyRoomChat(roomObject.Item3.UserID, reqData.ChatMessage);
                 
                 MainServer.MainLogger.Debug("Room RequestChat - Success");
             }
@@ -206,14 +200,14 @@ namespace Omok_Server
             }
 
             var roomNumber = user.RoomNumber;
-            var room = GetRoom(roomNumber);
+            var room = GetRoomByRoomNumber(roomNumber);
 
             if (room == null)
             {
                 return (false, null, null);
             }
 
-            var roomUser = room.GetUserByNetSessionId(userNetSessionID);
+            var roomUser = room.GetRoomUserBySessionId(userNetSessionID);
 
             if (roomUser == null)
             {
@@ -221,6 +215,37 @@ namespace Omok_Server
             }
 
             return (true, room, roomUser);
+        }
+
+        public void RequestReady(OmokBinaryRequestInfo packetData)
+        {
+            var sessionId = packetData.SessionID;
+            var user = _userMgr.GetUserBySessionId(sessionId);
+            var room = GetRoomByRoomNumber(user.RoomNumber);
+
+            room.SetUserStateReadyOrNone(sessionId);
+            ResponseReadyToClient(sessionId, room.GetUserStateBySessionId(sessionId));
+
+            if (room.IsAllUserReady())
+            {
+                if(room.IsGameStarted)
+                {
+                    return;
+                }
+                room.NotifyGameStartToClient();
+                room.StartGame();
+            }
+        }
+
+        void ResponseReadyToClient(string sessionId, RoomUserState roomUserState)
+        {
+            var resGameReady = new PKTResGameReady()
+            {
+                State = roomUserState
+            };
+
+            var sendPacket = _packetMgr.GetBinaryPacketData(resGameReady, PacketId.RES_GAME_READY);
+            SendFunc(sessionId, sendPacket);
         }
     }
 }

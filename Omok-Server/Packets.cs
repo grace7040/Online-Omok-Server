@@ -102,4 +102,25 @@ namespace Omok_Server
         public string ChatMessage { get; set; }
     }
 
+    [MemoryPackable]
+    public partial class PKTReqGameReady : PKHeader
+    {
+
+    }
+
+    [MemoryPackable]
+    public partial class PKTResGameReady : PKHeader
+    {
+        public RoomUserState State { get; set; }
+    }
+
+    [MemoryPackable]
+    public partial class PKTNtfGameStart : PKHeader
+    {
+    }
+
+    [MemoryPackable]
+    public partial class PKTNtfGameTurn : PKHeader
+    {
+    }
 }
