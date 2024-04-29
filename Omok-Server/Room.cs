@@ -10,8 +10,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace Omok_Server
 {
     public enum RoomState { None, GameStart, GameEnd }
-    public enum RoomUserState { None, Ready, Turn, NotTurn, GameEnd }
-    public enum StoneColor { None, Black, White }
+
 
 
     public class Room

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 public enum PacketId : int
 {
     REQ_RES_TEST_ECHO = 101,
-    
+
 
     // 클라이언트
     CS_BEGIN = 1001,
@@ -50,8 +50,8 @@ public enum PacketId : int
     // 시스템, 서버 - 서버
     SS_START = 8001,
 
-    INNTF_CONNECT_CLIENT = 8011,
-    INNTF_DISCONNECT_CLIENT = 8012,
+    NTF_IN_CONNECT_CLIENT = 8011,
+    NTF_IN_DISCONNECT_CLIENT = 8012,
 
     REQ_SS_SERVERINFO = 8021,
     RES_SS_SERVERINFO = 8023,

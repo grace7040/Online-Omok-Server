@@ -191,9 +191,9 @@ namespace Omok_Server
             return true;
         }
 
-        void Distribute(OmokBinaryRequestInfo requstPacket)
+        void Distribute(OmokBinaryRequestInfo requestPacket)
         {
-            _packetProcessor.InsertPakcet(requstPacket);
+            _packetProcessor.InsertPakcet(requestPacket);
             
         }
 

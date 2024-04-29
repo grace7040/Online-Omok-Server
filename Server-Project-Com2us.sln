@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hive-Auth-Server", "Hive-Au
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Game-API-Server", "Game-API-Server\Game-API-Server.csproj", "{88963CFA-F050-467D-81E7-32357F870D5C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omok-Server", "Omok-Server\Omok-Server.csproj", "{0BE88C16-5D32-4F5C-82BF-A10641247F63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Omok-Server", "Omok-Server\Omok-Server.csproj", "{0BE88C16-5D32-4F5C-82BF-A10641247F63}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Omok-Common-Defines", "Omok-Common-Defines\Omok-Common-Defines.csproj", "{06D8B1F9-D97E-493F-85F7-8F24D99B0433}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{0BE88C16-5D32-4F5C-82BF-A10641247F63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0BE88C16-5D32-4F5C-82BF-A10641247F63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0BE88C16-5D32-4F5C-82BF-A10641247F63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06D8B1F9-D97E-493F-85F7-8F24D99B0433}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06D8B1F9-D97E-493F-85F7-8F24D99B0433}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06D8B1F9-D97E-493F-85F7-8F24D99B0433}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06D8B1F9-D97E-493F-85F7-8F24D99B0433}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

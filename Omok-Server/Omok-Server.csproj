@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Omok-Common-Defines\Omok-Common-Defines.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="SuperSocketLite">
       <HintPath>SuperSocketLite\SuperSocketLite.dll</HintPath>
     </Reference>

@@ -8,9 +8,8 @@ namespace Omok_Server
     {
         public void RegistPacketHandler(Dictionary<int, Action<OmokBinaryRequestInfo>> packetHandlerMap)
         {
-            packetHandlerMap.Add((int)PacketId.INNTF_CONNECT_CLIENT, InNotifyConnectClient);
-            packetHandlerMap.Add((int)PacketId.INNTF_DISCONNECT_CLIENT, InNotifyDisConnectClient);
-
+            packetHandlerMap.Add((int)PacketId.NTF_IN_CONNECT_CLIENT, InNotifyConnectClient);
+            packetHandlerMap.Add((int)PacketId.NTF_IN_DISCONNECT_CLIENT, InNotifyDisConnectClient);
             packetHandlerMap.Add((int)PacketId.REQ_LOGIN, RequestLogin);
         }
 
@@ -29,7 +28,7 @@ namespace Omok_Server
                 // 방에 들어가 있는 상태에서 연결이 끊어진 경우 방에서 나가게 한다.
                 if (user.IsInRoom)
                 {
-                    var internalPacket = _packetMgr.MakeReqRoomLeavePacket(sessionID, user.RoomNumber, user.ID);
+                    var internalPacket = _packetMgr.MakeInNTFRoomLeavePacket(sessionID, user.RoomNumber, user.ID);
                     DIstributePacketAction(internalPacket);
                 }
 

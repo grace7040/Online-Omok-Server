@@ -18,10 +18,10 @@ namespace Omok_Server
             OmokBinaryRequestInfo innerPacket = new OmokBinaryRequestInfo();
 
             if (isConnect) {
-                innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.INNTF_CONNECT_CLIENT);
+                innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.NTF_IN_CONNECT_CLIENT);
             }
             else {
-                innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.INNTF_DISCONNECT_CLIENT);
+                innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.NTF_IN_DISCONNECT_CLIENT);
             }
 
             innerPacket.SessionID = sessionID;
@@ -29,7 +29,7 @@ namespace Omok_Server
             return innerPacket;
         }
 
-        public OmokBinaryRequestInfo MakeReqRoomLeavePacket(string sessionID, int roomNumber, string userID)
+        public OmokBinaryRequestInfo MakeInNTFRoomLeavePacket(string sessionID, int roomNumber, string userID)
         {
             var packet = new PKTReqRoomLeave()
             {
