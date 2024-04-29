@@ -33,11 +33,6 @@ namespace Omok_Server
         {
             OmokBinaryRequestInfo packet = new();
 
-            if (!BitConverter.IsLittleEndian)
-            {
-                Array.Reverse(header.Array, 0, OmokBinaryRequestInfo.HEADERE_SIZE);
-            }
-
             // body 데이터가 있는 경우
             if (length > 0)
             {

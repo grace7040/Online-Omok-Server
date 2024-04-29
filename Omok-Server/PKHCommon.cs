@@ -13,10 +13,12 @@ namespace Omok_Server
             packetHandlerMap.Add((int)PacketId.REQ_LOGIN, RequestLogin);
         }
 
+
         public void InNotifyConnectClient(OmokBinaryRequestInfo requestData)
         {
             MainServer.MainLogger.Debug($"{requestData.SessionID} 유저의 접속 성공");
         }
+
 
         public void InNotifyDisConnectClient(OmokBinaryRequestInfo requestData)
         {
@@ -45,63 +47,8 @@ namespace Omok_Server
             var sessionID = packetData.SessionID;
             MainServer.MainLogger.Debug("로그인 요청 받음");
 
-            try
-            {
-                if (_userMgr.GetUserBySessionId(sessionID) != null)
-                {
-                    ResponseLoginToClient(ErrorCode.LOGIN_ALREADY_WORKING, packetData.SessionID);
-                    return;
-                }
-
-                var reqData = _packetMgr.GetPacketData<PKTReqLogin>(packetData.Data);
-                var errorCode = _userMgr.AddUser(reqData.UserID, sessionID);
-                if (errorCode != ErrorCode.NONE)
-                {
-                    ResponseLoginToClient(errorCode, packetData.SessionID);
-
-                    if (errorCode == ErrorCode.LOGIN_FULL_USER_COUNT)
-                    {
-                        NotifyMustCloseToClient(ErrorCode.LOGIN_FULL_USER_COUNT, packetData.SessionID);
-                    }
-
-                    return;
-                }
-
-                ResponseLoginToClient(errorCode, packetData.SessionID);
-
-                MainServer.MainLogger.Debug($"로그인 결과. UserID:{reqData.UserID}, PW: {reqData.AuthToken}, ERROR: {errorCode}");
-
-            }
-            catch (Exception ex)
-            {
-                MainServer.MainLogger.Debug(ex.ToString());
-            }
+            var reqData = _packetMgr.GetPacketData<PKTReqLogin>(packetData.Data);
+            _userMgr.CheckLoginState(sessionID, reqData);
         }
-
-        public void ResponseLoginToClient(ErrorCode errorCode, string sessionID)
-        {
-            var resLogin = new PKTResLogin()
-            {
-                Result = (short)errorCode
-            };
-
-            var sendData = _packetMgr.GetBinaryPacketData(resLogin, PacketId.RES_LOGIN);
-
-            SendFunc(sessionID, sendData);
-        }
-
-        public void NotifyMustCloseToClient(ErrorCode errorCode, string sessionID)
-        {
-            var resLogin = new PKNtfMustClose()
-            {
-                Result = (short)errorCode
-            };
-
-            var sendData = _packetMgr.GetBinaryPacketData(resLogin, PacketId.NTF_MUST_CLOSE);
-
-            SendFunc(sessionID, sendData);
-        }
-
-
     }
 }

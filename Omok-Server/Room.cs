@@ -31,18 +31,18 @@ namespace Omok_Server
 
         protected PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
 
-        static Func<string, byte[], bool> SendFunc;
+        Func<string, byte[], bool> SendFunc;
         public void Init(int number, int maxUserCount)
         {
             Number = number;
             _maxUserCount = maxUserCount;
         }
-        public static void SetSendFunc(Func<string, byte[], bool> func)
+        public void SetSendFunc(Func<string, byte[], bool> func)
         {
             SendFunc = func;
         }
 
-        public bool AddUser(string userID, string netSessionID)
+        public bool AddUser(string userID, string sessionID)
         {
             if (GetRoomUserByUserId(userID) != null)
             {
@@ -50,15 +50,15 @@ namespace Omok_Server
             }
 
             var roomUser = new RoomUser();
-            roomUser.Set(userID, netSessionID);
+            roomUser.Set(userID, sessionID);
             _userList.Add(roomUser);
 
             return true;
         }
 
-        public void RemoveUser(string netSessionID)
+        public void RemoveUser(string sessionID)
         {
-            var index = _userList.FindIndex(x => x.NetSessionID == netSessionID);
+            var index = _userList.FindIndex(x => x.SessionID == sessionID);
             _userList.RemoveAt(index);
         }
 
@@ -72,9 +72,9 @@ namespace Omok_Server
             return _userList.Find(x => x.UserID == userID);
         }
 
-        public RoomUser GetRoomUserBySessionId(string netSessionID)
+        public RoomUser GetRoomUserBySessionId(string sessionID)
         {
-            return _userList.Find(x => x.NetSessionID == netSessionID);
+            return _userList.Find(x => x.SessionID == sessionID);
         }
 
         public int CurrentUserCount()
@@ -82,7 +82,7 @@ namespace Omok_Server
             return _userList.Count();
         }
 
-        public void NotifyUserListToClient(string userNetSessionID)
+        public void NotifyUserListToClient(string sessionID)
         {
             var ntfRoomUserList = new PKTNtfRoomUserList();
             foreach (var user in _userList)
@@ -91,10 +91,10 @@ namespace Omok_Server
             }
 
             var sendPacket = _packetMgr.GetBinaryPacketData(ntfRoomUserList, PacketId.NTF_ROOM_USER_LIST);
-            SendFunc(userNetSessionID, sendPacket);
+            SendFunc(sessionID, sendPacket);
         }
 
-        public void NofifyNewUserToClient(string newUserNetSessionID, string newUserID)
+        public void NofifyNewUserToClient(string newUserSessionID, string newUserID)
         {
             var ntfRoomNewUser = new PKTNtfRoomNewUser()
             {
@@ -103,9 +103,10 @@ namespace Omok_Server
 
             var sendPacket = _packetMgr.GetBinaryPacketData(ntfRoomNewUser, PacketId.NTF_ROOM_NEW_USER);
 
-            Broadcast(newUserNetSessionID, sendPacket);
+            Broadcast(newUserSessionID, sendPacket);
         }
-        public void NotifyLeaveUserToClient(string userID)
+
+        public void NotifyLeaveRoomUserToClient(string userID)
         {
             if (CurrentUserCount() == 0)
             {
@@ -135,22 +136,22 @@ namespace Omok_Server
             Broadcast("", sendPacket);
         }
 
-        public void Broadcast(string excludeNetSessionID, byte[] sendPacket)
+        public void Broadcast(string excludeSessionID, byte[] sendPacket)
         {
             foreach (var user in _userList)
             {
-                if (user.NetSessionID == excludeNetSessionID)
+                if (user.SessionID == excludeSessionID)
                 {
                     continue;
                 }
 
-                SendFunc(user.NetSessionID, sendPacket);
+                SendFunc(user.SessionID, sendPacket);
             }
         }
 
-        public void SetUserStateReadyOrNone(string netSessionId)
+        public void SetUserStateReadyOrNone(string sessionID)
         {
-            var roomUser = GetRoomUserBySessionId(netSessionId);
+            var roomUser = GetRoomUserBySessionId(sessionID);
 
             if(roomUser.State == RoomUserState.None)
             {
@@ -160,12 +161,36 @@ namespace Omok_Server
             {
                 roomUser.State = RoomUserState.None;
             }
-
+            ResponseReadyToClient(sessionID, GetUserStateBySessionId(sessionID));
         }
 
-        public RoomUserState GetUserStateBySessionId(string netSessionId)
+        void ResponseReadyToClient(string sessionId, RoomUserState roomUserState)
         {
-            var roomUser = GetRoomUserBySessionId(netSessionId);
+            var resGameReady = new PKTResGameReady()
+            {
+                State = roomUserState
+            };
+
+            var sendPacket = _packetMgr.GetBinaryPacketData(resGameReady, PacketId.RES_GAME_READY);
+            SendFunc(sessionId, sendPacket);
+        }
+
+        public void StartGameOnAllUserReady()
+        {
+            if (IsAllUserReady())
+            {
+                if (IsGameStarted)
+                {
+                    return;
+                }
+                NotifyGameStartToClient();
+                StartGame();
+            }
+        }
+
+        public RoomUserState GetUserStateBySessionId(string sessionId)
+        {
+            var roomUser = GetRoomUserBySessionId(sessionId);
             return roomUser.State;
         }
 
@@ -208,7 +233,7 @@ namespace Omok_Server
             var turnIndex = random.Next(0, _userList.Count);
             _userList[turnIndex].State = RoomUserState.Turn;
 
-            NotifyTurnToClient(_userList[turnIndex].NetSessionID, StoneColor.Black, null);
+            NotifyTurnToClient(_userList[turnIndex].SessionID, StoneColor.Black, null);
             MainServer.MainLogger.Debug($"[Room {Number}] SetRandomTurnOnStart. UserID: {_userList[turnIndex].UserID}");
             
             for (int i = 0; i < _userList.Count; i++)
@@ -224,7 +249,7 @@ namespace Omok_Server
         }
 
         //Notify Turn & Put Other's Stone
-        void NotifyTurnToClient(string netSessionID, StoneColor stoneColor, Tuple<int,int>? position)
+        void NotifyTurnToClient(string sessionID, StoneColor stoneColor, Tuple<int,int>? position)
         {
             var notifyTurn = new PKTNtfGameTurn() { 
                 Color = stoneColor,
@@ -233,12 +258,36 @@ namespace Omok_Server
 
             var sendPacket = _packetMgr.GetBinaryPacketData(notifyTurn, PacketId.NTF_GAME_TURN);
 
-            SendFunc(netSessionID, sendPacket);
+            SendFunc(sessionID, sendPacket);
         }
 
-        public bool IsUserTurn(string netSessionID)
+        public void CheckUserTurnAndPutStone(string sessionID, PKTReqPutStone reqData)
         {
-            var roomUser = GetRoomUserBySessionId(netSessionID);
+            if (IsUserTurn(sessionID))
+            {
+                
+                ResponsePutStone(sessionID, ErrorCode.NONE);
+                ChangeTurnAndNotifyPutStone(reqData.Position);
+            }
+            else
+            {
+                ResponsePutStone(sessionID, ErrorCode.PUT_STONE_FAIL_NOT_TURN);
+            }
+        }
+
+        void ResponsePutStone(string sessionID, ErrorCode errorCode)
+        {
+            var resPutStone = new PKTResPutStone()
+            {
+                Result = (short)errorCode
+            };
+
+            var sendPacket = _packetMgr.GetBinaryPacketData(resPutStone, PacketId.RES_PUT_STONE);
+            SendFunc(sessionID, sendPacket);
+        }
+        public bool IsUserTurn(string sessionID)
+        {
+            var roomUser = GetRoomUserBySessionId(sessionID);
             return roomUser.State == RoomUserState.Turn;
         }
 
@@ -249,7 +298,7 @@ namespace Omok_Server
                 if (_userList[i].State != RoomUserState.Turn)
                 {
                     _userList[i].State = RoomUserState.Turn;
-                    NotifyTurnToClient(_userList[i].NetSessionID, _curStoneColor, position);
+                    NotifyTurnToClient(_userList[i].SessionID, _curStoneColor, position);
                     continue;
                 }
                 _userList[i].State = RoomUserState.NotTurn;
@@ -257,19 +306,55 @@ namespace Omok_Server
 
             _curStoneColor = _curStoneColor == StoneColor.Black ? StoneColor.White : StoneColor.Black;
         }
+
+        public void LeaveRoomUser(string sessionID, User user)
+        {
+            //유저가 없거나
+            if (user == null)
+            {
+                return;
+            }
+
+            //해당 유저가 해당 룸에 없거나
+            var roomUser = GetRoomUserBySessionId(sessionID);
+            if (roomUser == null)
+            {
+                return;
+            }
+
+            user.LeaveRoom();
+            RemoveUser(roomUser);
+            NotifyLeaveRoomUserToClient(roomUser.UserID);
+            ResponseLeaveRoomToClient(sessionID);
+
+            MainServer.MainLogger.Debug("Room RequestLeave - Success");
+        }
+
+
+        void ResponseLeaveRoomToClient(string sessionID)
+        {
+            var resRoomLeave = new PKTResRoomLeave()
+            {
+                Result = (short)ErrorCode.NONE
+            };
+
+            var sendPacket = _packetMgr.GetBinaryPacketData(resRoomLeave, PacketId.RES_ROOM_LEAVE);
+
+            SendFunc(sessionID, sendPacket);
+        }
     }
     
     
     public class RoomUser
     {
         public string UserID { get; private set; }
-        public string NetSessionID { get; private set; }
+        public string SessionID { get; private set; }
 
         public RoomUserState State { get; set; }
-        public void Set(string userID, string netSessionID)
+        public void Set(string userID, string sessionID)
         {
             UserID = userID;
-            NetSessionID = netSessionID;
+            SessionID = sessionID;
         }
     }
 

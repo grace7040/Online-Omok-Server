@@ -19,8 +19,8 @@ namespace Omok_Server
 
         BufferBlock<OmokBinaryRequestInfo> _pktBuffer = new BufferBlock<OmokBinaryRequestInfo>();
 
-        UserManager _userMgr = new UserManager();
-        List<Room> _roomList = new List<Room>();
+        UserManager _userMgr;
+        RoomManager _roomMgr;
 
         Dictionary<int, Action<OmokBinaryRequestInfo>> _packetHandlerMap = new Dictionary<int, Action<OmokBinaryRequestInfo>>();
         PKHCommon _commonPacketHandler = new PKHCommon();
@@ -33,17 +33,10 @@ namespace Omok_Server
             SendFunc = func;
         }
 
-        public void SetRoomList(List<Room> roomList)
+        public void InitAndStartProcssing(ServerOption serverOpt, UserManager userMgr, RoomManager roomMgr)
         {
-            _roomList = roomList;
-            var minRoomNum = _roomList[0].Number;
-            var maxRoomNum = _roomList[0].Number + _roomList.Count() - 1;
-        }
-
-
-        //roomList는 어따쓸려고? 아..핸들러 등록할때 쓰는구나.
-        public void InitAndStartProcssing(ServerOption serverOpt)
-        {
+            _userMgr = userMgr;
+            _roomMgr = roomMgr;
             var maxUserCount = serverOpt.RoomMaxCount * serverOpt.RoomMaxUserCount;
             _userMgr.Init(maxUserCount);
 
@@ -59,11 +52,10 @@ namespace Omok_Server
             PKHandler.SendFunc = SendFunc;
             PKHandler.DIstributePacketAction = InsertPakcet;
 
-            _commonPacketHandler.Init(_userMgr);
+            _commonPacketHandler.Init(_userMgr, _roomMgr);
             _commonPacketHandler.RegistPacketHandler(_packetHandlerMap);
 
-            _roomPacketHandler.Init(_userMgr);
-            _roomPacketHandler.SetRooomList(_roomList);
+            _roomPacketHandler.Init(_userMgr, _roomMgr);
             _roomPacketHandler.RegistPacketHandler(_packetHandlerMap);
         }
 

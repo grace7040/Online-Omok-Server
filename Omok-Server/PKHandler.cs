@@ -11,12 +11,14 @@ namespace Omok_Server
         public static Func<string, byte[], bool> SendFunc;
         public static Action<OmokBinaryRequestInfo> DIstributePacketAction;
 
-        protected UserManager _userMgr = null;
+        protected UserManager _userMgr;
         protected PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
+        protected RoomManager _roomMgr;
 
-        public void Init(UserManager userMgr)
+        public void Init(UserManager userMgr, RoomManager roomMgr)
         {
             this._userMgr = userMgr;
+            this._roomMgr = roomMgr;
         }
 
     }

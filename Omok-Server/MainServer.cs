@@ -18,12 +18,12 @@ namespace Omok_Server
     //네트워크 I/O 처리를 위한 서버 클래스 (비동기 처리)
     public class MainServer : AppServer<NetworkSession, OmokBinaryRequestInfo>, IHostedService
     {
-        //<<찔문>> 보통 로거같은 경우에 이렇게 static으로 해놓고 쓰는 경우가 많은가?
         public static ILog MainLogger;
 
         PacketProcessor _packetProcessor = new();
         PacketManager<MemoryPackBinaryPacketDataCreator> _packetMaker = new();
-        RoomManager _roomManager = new();
+        RoomManager _roomMgr = new();
+        UserManager _userMgr = new();
         
 
         ServerOption _serverOption;
@@ -42,11 +42,6 @@ namespace Omok_Server
             NewRequestReceived += new RequestHandler<NetworkSession, OmokBinaryRequestInfo>(OnPacketReceived);
 
         }
-
-
-        //룸 매니저, 패킷프로세서 미리 생성
-        //패킷 프로세서에 패킷 던져줌
-        //룸 매니저 CreateRooms
 
         // 호스팅 서비스 시작 시 호출
         public Task StartAsync(CancellationToken cancellationToken)
@@ -80,8 +75,6 @@ namespace Omok_Server
         void OnConnected(NetworkSession session)
         {
             MainLogger.Info($"OnConnected(): {session.SessionID} 접속 요청");
-            //<<질문>> 여러번 접속요청 하는 경우 여러번 로그가 찍히던데, 그럴때마다 세션번호가 계속 바뀌어도 되나?
-            //세션번호는 어떤때 쓰는지, 유저아이디와 머가 다른지 확인해보자.
             var innerPacket = _packetMaker.MakeInNTFConnectOrDisConnectClientPacket(true, session.SessionID);
             Distribute(innerPacket);
         }
@@ -157,13 +150,13 @@ namespace Omok_Server
 
         void CreateAndInitComponents()
         {
-            Room.SetSendFunc(this.SendData);
+            _userMgr.SetSendFunc(this.SendData);
 
-            _roomManager.CreateRooms(_serverOption);
+            _roomMgr.SetSendFunc(this.SendData);
+            _roomMgr.CreateRooms(_serverOption);
 
             _packetProcessor.SetSendFunc(this.SendData);
-            _packetProcessor.SetRoomList(_roomManager.GetRoomsList());
-            _packetProcessor.InitAndStartProcssing(_serverOption);
+            _packetProcessor.InitAndStartProcssing(_serverOption, _userMgr, _roomMgr);
 
         }
 
