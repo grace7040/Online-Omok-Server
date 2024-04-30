@@ -14,10 +14,16 @@ namespace Omok_Server
         PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new PacketManager<MemoryPackBinaryPacketDataCreator>();
 
         Func<string, byte[], bool> SendFunc;
+        Action<OmokBinaryRequestInfo> DistributeAction;
 
         public void SetSendFunc(Func<string, byte[], bool> func)
         {
             SendFunc = func;
+        }
+
+        public void SetDistributeAction(Action<OmokBinaryRequestInfo> action)
+        {
+            DistributeAction = action;
         }
         public void CreateRooms(ServerOption serverOpt)
         {
@@ -31,6 +37,7 @@ namespace Omok_Server
                 var room = new Room();
                 room.Init(roomNumber, maxUserCount);
                 room.SetSendFunc(SendFunc);
+                room.SetDistributeAction(DistributeAction);
                 _roomList.Add(room);
             }
 

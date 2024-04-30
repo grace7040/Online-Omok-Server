@@ -17,13 +17,18 @@ namespace Omok_Server
         public bool IsGameEnd { get; private set; } = false;
         public bool isDoubleThree { get; private set; } = false;
 
-        public int previousX { get; private set; } = -1;
-        public int previousY { get; private set; } = -1;
+        public int _previousX { get; private set; } = -1;
+        public int _previousY { get; private set; } = -1;
 
-        public int currentX { get; private set; } = -1;
-        public int currentY { get; private set; } = -1;
+        public int _currentX { get; private set; } = -1;
+        public int _currentY { get; private set; } = -1;
 
-        StoneColor currStoneColor;
+        StoneColor _currStoneColor;
+
+        Timer _timer;
+
+        int _turnOverCnt;
+        const int _turnOverTime = 6000;
 
         Action<StoneColor> GameEndAction;
 
@@ -46,14 +51,16 @@ namespace Omok_Server
         {
             Array.Clear(OmokBoard, 0, boardSize * boardSize);
 
-            previousX = previousY = -1;
-            currentX = currentY = -1;
+            _previousX = _previousY = -1;
+            _currentX = _currentY = -1;
+            _currStoneColor = StoneColor.Black;
+            _turnOverCnt = 0;
             isDoubleThree = false;
-            currStoneColor = StoneColor.Black;
             IsGameEnd = false;
 
             string firstTurnPlayer = GetSessionByStoneColor(StoneColor.Black);
             NotifyPutStoneToClient(firstTurnPlayer, null);
+            StartTimer();
         }
 
         string GetSessionByStoneColor(StoneColor stoneColor)
@@ -71,78 +78,84 @@ namespace Omok_Server
             CheckDoubleThree(x, y);
             if (isDoubleThree)
             {
-                ResponsePutStone(GetSessionByStoneColor(currStoneColor), ErrorCode.PUT_STONE_FAIL_INVALID_POSITION);
+                ResponsePutStone(GetSessionByStoneColor(_currStoneColor), ErrorCode.PUT_STONE_FAIL_INVALID_POSITION);
                 isDoubleThree = false;
                 return;
             }
             if (OmokBoard[x, y] != (int)StoneColor.None)
             {
-                ResponsePutStone(GetSessionByStoneColor(currStoneColor), ErrorCode.PUT_STONE_FAIL_INVALID_POSITION);
+                ResponsePutStone(GetSessionByStoneColor(_currStoneColor), ErrorCode.PUT_STONE_FAIL_INVALID_POSITION);
                 return;
             }
 
-            OmokBoard[x, y] = (int)currStoneColor;
+            OmokBoard[x, y] = (int)_currStoneColor;
+            _turnOverCnt = 0;
 
-            previousX = currentX;
-            previousY = currentY;
+            _previousX = _currentX;
+            _previousY = _currentY;
 
-            currentX = x;
-            currentY = y;
+            _currentX = x;
+            _currentY = y;
 
-            ResponsePutStone(GetSessionByStoneColor(currStoneColor), ErrorCode.NONE);
+            ResponsePutStone(GetSessionByStoneColor(_currStoneColor), ErrorCode.NONE);
             ChangeTurn();
             오목확인(x, y);
+            
         }
 
         void ChangeTurn()
         {
-            if (currStoneColor == StoneColor.Black)
-                currStoneColor = StoneColor.White;
-            else if (currStoneColor == StoneColor.White)
-                currStoneColor = StoneColor.Black;
+            if (IsGameEnd) return;
 
-            NotifyPutStoneToClient(GetSessionByStoneColor(currStoneColor), new Tuple<int,int> (currentX, currentY));
+            if (_currStoneColor == StoneColor.Black)
+                _currStoneColor = StoneColor.White;
+            else if (_currStoneColor == StoneColor.White)
+                _currStoneColor = StoneColor.Black;
+
+            NotifyPutStoneToClient(GetSessionByStoneColor(_currStoneColor), new Tuple<int,int> (_currentX, _currentY));
+            StartTimer();
         }
 
         public bool IsUserTurn(string sessionId)
         {
-            return currStoneColor == _userStoneColorDict[sessionId];
+            return _currStoneColor == _userStoneColorDict[sessionId];
         }
 
         public void 오목확인(int x, int y)
         {
+            bool omokComplete = false;
             if (가로확인(x, y) == 5)        // 같은 돌 개수가 5개면 (6목이상이면 게임 계속) 
             {
                 //승리효과음.Play();
                 //MessageBox.Show((StoneColor)OmokBoard[x, y] + " 승");
-                IsGameEnd = true;
+                omokComplete = true;
             }
 
             else if (세로확인(x, y) == 5)
             {
                 //승리효과음.Play();
                 //MessageBox.Show((StoneColor)OmokBoard[x, y] + " 승");
-                IsGameEnd = true;
+                omokComplete = true;
             }
 
             else if (사선확인(x, y) == 5)
             {
                 //승리효과음.Play();
                 //MessageBox.Show((StoneColor)OmokBoard[x, y] + " 승");
-                IsGameEnd = true;
+                omokComplete = true;
             }
 
             else if (역사선확인(x, y) == 5)
             {
                 //승리효과음.Play();
                 //MessageBox.Show((StoneColor)OmokBoard[x, y] + " 승");
-                IsGameEnd = true;
+                omokComplete = true;
             }
 
-            if (IsGameEnd)
+            if (omokComplete)
             {
                 //승자 돌 색깔: OmokBoard[x,y]
-                GameEndAction((StoneColor)OmokBoard[x, y]);
+                EndGame((StoneColor)OmokBoard[x, y]);
             }
 
         }
@@ -171,12 +184,39 @@ namespace Omok_Server
         }
 
 
+        async void StartTimer()
+        {
+            if (IsGameEnd) return;
+
+            int x = _currentX;
+            int y = _currentY;
+            await Task.Delay(_turnOverTime);
+
+            
+            if(x == _currentX && y == _currentY && !IsGameEnd)
+            {
+                NotifyTurnOver(GetSessionByStoneColor(_currStoneColor));
+                if(++_turnOverCnt >= 6)
+                {
+                    //게임 종료
+                    EndGame(StoneColor.None);
+                }
+            }
+        }
+
+        void EndGame(StoneColor stoneColor)
+        {
+            IsGameEnd = true;
+            GameEndAction(stoneColor);
+        }
+
         void NotifyTurnOver(string sessionID)
         {
-            //돌 놓을 때 턴 확인하도록
-            //이 패킷 받은 경우 턴 = false
-            //NotifyPutStone 패킷 받은 경우 턴 = true
-            //이 함수는 서버에서 타이머 종료시 호출한다.
+            var notifyTurnOver = new PKTNtfTurnOver();
+            var sendPacket = _packetMgr.GetBinaryPacketData(notifyTurnOver, PacketId.NTF_TURN_OVER);
+            SendFunc(sessionID, sendPacket);
+
+            ChangeTurn();
         }
 
         int 가로확인(int x, int y)      // ㅡ 확인

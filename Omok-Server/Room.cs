@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Schema;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Omok_Server
@@ -22,18 +23,17 @@ namespace Omok_Server
 
         RoomState _state;
 
-        public bool IsGameStarted { get { return _state != RoomState.None; } }
+        public bool IsGameStarted { get { return _state == RoomState.GameStart; } }
         public bool IsGameEnded { get { return _state == RoomState.GameEnd; } }
 
         List<RoomUser> _userList = new List<RoomUser>();
-
-        //StoneColor _curStoneColor;
 
         OmokGame _game;
 
         protected PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
 
         Func<string, byte[], bool> SendFunc;
+        Action<OmokBinaryRequestInfo> DistributeAction;
         public void Init(int number, int maxUserCount)
         {
             Number = number;
@@ -42,6 +42,11 @@ namespace Omok_Server
         public void SetSendFunc(Func<string, byte[], bool> func)
         {
             SendFunc = func;
+        }
+
+        public void SetDistributeAction(Action<OmokBinaryRequestInfo> action)
+        {
+            DistributeAction = action;
         }
 
         public bool AddUser(string userID, string sessionID)
@@ -185,7 +190,6 @@ namespace Omok_Server
                 {
                     return;
                 }
-                NotifyGameStartToClient();
                 StartGame();
             }
         }
@@ -219,13 +223,12 @@ namespace Omok_Server
             SetRandomTurnAndStart();
         }
 
-        public void NotifyGameStartToClient()
+        public void NotifyGameStartToClient(string sessionID, StoneColor stoneColor)
         {
-            var notifyGameStart = new PKTNtfGameStart();
+            var notifyGameStart = new PKTNtfGameStart() { MyStoneColor = stoneColor};
 
             var sendPacket = _packetMgr.GetBinaryPacketData(notifyGameStart, PacketId.NTF_GAME_START);
-
-            Broadcast("", sendPacket);
+            SendFunc(sessionID, sendPacket);
         }
 
         //Set Random Start Turn / Stone Color According to Turn
@@ -236,6 +239,8 @@ namespace Omok_Server
             var turnIndex = random.Next(0, _userList.Count);
 
             userStoneColorDict.Add(_userList[turnIndex].SessionID, StoneColor.Black);
+            NotifyGameStartToClient(_userList[turnIndex].SessionID, StoneColor.Black);
+
             for (int i = 0; i < _userList.Count; i++)
             {
                 if(i == turnIndex)
@@ -243,12 +248,12 @@ namespace Omok_Server
                     continue;
                 }
                 userStoneColorDict.Add(_userList[i].SessionID, StoneColor.White);
+                NotifyGameStartToClient(_userList[i].SessionID, StoneColor.White);
             }
             _game = new OmokGame(userStoneColorDict, SendFunc, GameEnd);
 
             MainServer.MainLogger.Debug($"[Room {Number}] SetRandomTurnAndStart. UserID: {_userList[turnIndex].UserID}");
         }
-        
 
         public void CheckUserTurnAndPutStone(string sessionID, PKTReqPutStone reqData)
         {
@@ -302,6 +307,7 @@ namespace Omok_Server
         void GameEnd(StoneColor winnerColor)
         {
             MainServer.MainLogger.Debug($"[GameEnd] WINNER: {winnerColor}");
+            _state = RoomState.GameEnd;
 
             var ntfGameEnd = new PKTNtfGameEnd()
             {
@@ -310,7 +316,17 @@ namespace Omok_Server
 
             var sendPacket = _packetMgr.GetBinaryPacketData(ntfGameEnd, PacketId.NTF_GAME_END);
             Broadcast("", sendPacket);
-            // ::TODO:: 결과 보여주고, 방 나가기 처리
+            LeaveRoomAllUsers();
+        }
+
+        void LeaveRoomAllUsers()
+        {
+            for (int i = 0; i < _userList.Count; i++)
+            {
+                var innerPacket = _packetMgr.MakeInNTFRoomLeavePacket(_userList[i].SessionID, Number, _userList[i].UserID);
+                
+                DistributeAction(innerPacket);
+            }
         }
     }
     
