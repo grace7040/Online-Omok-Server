@@ -109,6 +109,7 @@ public partial class PKTResGameReady : PKHeader
 [MemoryPackable]
 public partial class PKTNtfGameStart : PKHeader
 {
+    public StoneColor MyStoneColor { get; set; }
 }
 
 [MemoryPackable]

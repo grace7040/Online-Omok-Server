@@ -37,7 +37,7 @@ namespace Omok_Server
                 UserID = userID,
             };
 
-            var sendData = GetBinaryPacketData(packet, PacketId.NTF_IN_ROOM_LEAVE);
+            var sendData = GetBinaryPacketData(packet, PacketId.REQ_ROOM_LEAVE);
 
             var memoryPakcPacket = new OmokBinaryRequestInfo();
             memoryPakcPacket.Data = sendData;
