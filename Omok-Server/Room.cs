@@ -27,7 +27,9 @@ namespace Omok_Server
 
         List<RoomUser> _userList = new List<RoomUser>();
 
-        StoneColor _curStoneColor;
+        //StoneColor _curStoneColor;
+
+        OmokGame _game;
 
         protected PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
 
@@ -214,7 +216,7 @@ namespace Omok_Server
         public void StartGame()
         {
             _state = RoomState.GameStart;
-            SetRandomTurnOnStart();
+            SetRandomTurnAndStart();
         }
 
         public void NotifyGameStartToClient()
@@ -227,85 +229,39 @@ namespace Omok_Server
         }
 
         //Set Random Start Turn / Stone Color According to Turn
-        public void SetRandomTurnOnStart()
+        public void SetRandomTurnAndStart()
         {
+            Dictionary<string, StoneColor> userStoneColorDict = new Dictionary<string, StoneColor>();
             Random random = new Random();
             var turnIndex = random.Next(0, _userList.Count);
-            _userList[turnIndex].State = RoomUserState.Turn;
 
-            NotifyTurnToClient(_userList[turnIndex].SessionID, StoneColor.Black, null);
-            MainServer.MainLogger.Debug($"[Room {Number}] SetRandomTurnOnStart. UserID: {_userList[turnIndex].UserID}");
-            
+            userStoneColorDict.Add(_userList[turnIndex].SessionID, StoneColor.Black);
             for (int i = 0; i < _userList.Count; i++)
             {
                 if(i == turnIndex)
                 {
                     continue;
                 }
-                _userList[i].State = RoomUserState.NotTurn;
+                userStoneColorDict.Add(_userList[i].SessionID, StoneColor.White);
             }
+            _game = new OmokGame(userStoneColorDict, SendFunc, GameEnd);
 
-            _curStoneColor = StoneColor.Black;
+            MainServer.MainLogger.Debug($"[Room {Number}] SetRandomTurnAndStart. UserID: {_userList[turnIndex].UserID}");
         }
-
-        //Notify Turn & Put Other's Stone
-        void NotifyTurnToClient(string sessionID, StoneColor stoneColor, Tuple<int,int>? position)
-        {
-            var notifyTurn = new PKTNtfGameTurn() { 
-                Color = stoneColor,
-                Position = position
-            };
-
-            var sendPacket = _packetMgr.GetBinaryPacketData(notifyTurn, PacketId.NTF_GAME_TURN);
-
-            SendFunc(sessionID, sendPacket);
-        }
+        
 
         public void CheckUserTurnAndPutStone(string sessionID, PKTReqPutStone reqData)
         {
-            if (IsUserTurn(sessionID))
+            if (!_game.IsUserTurn(sessionID))
             {
-                
-                ResponsePutStone(sessionID, ErrorCode.NONE);
-                ChangeTurnAndNotifyPutStone(reqData.Position);
-            }
-            else
-            {
-                ResponsePutStone(sessionID, ErrorCode.PUT_STONE_FAIL_NOT_TURN);
-            }
-        }
-
-        void ResponsePutStone(string sessionID, ErrorCode errorCode)
-        {
-            var resPutStone = new PKTResPutStone()
-            {
-                Result = (short)errorCode
-            };
-
-            var sendPacket = _packetMgr.GetBinaryPacketData(resPutStone, PacketId.RES_PUT_STONE);
-            SendFunc(sessionID, sendPacket);
-        }
-        public bool IsUserTurn(string sessionID)
-        {
-            var roomUser = GetRoomUserBySessionId(sessionID);
-            return roomUser.State == RoomUserState.Turn;
-        }
-
-        public void ChangeTurnAndNotifyPutStone(Tuple<int, int>? position)
-        {
-            for (int i = 0; i < _userList.Count; i++)
-            {
-                if (_userList[i].State != RoomUserState.Turn)
-                {
-                    _userList[i].State = RoomUserState.Turn;
-                    NotifyTurnToClient(_userList[i].SessionID, _curStoneColor, position);
-                    continue;
-                }
-                _userList[i].State = RoomUserState.NotTurn;
+                _game.ResponsePutStone(sessionID, ErrorCode.PUT_STONE_FAIL_NOT_TURN);
+                return;
             }
 
-            _curStoneColor = _curStoneColor == StoneColor.Black ? StoneColor.White : StoneColor.Black;
+            _game.PutStone(reqData.Position.Item1, reqData.Position.Item2);
         }
+
+        
 
         public void LeaveRoomUser(string sessionID, User user)
         {
@@ -341,6 +297,20 @@ namespace Omok_Server
             var sendPacket = _packetMgr.GetBinaryPacketData(resRoomLeave, PacketId.RES_ROOM_LEAVE);
 
             SendFunc(sessionID, sendPacket);
+        }
+
+        void GameEnd(StoneColor winnerColor)
+        {
+            MainServer.MainLogger.Debug($"[GameEnd] WINNER: {winnerColor}");
+
+            var ntfGameEnd = new PKTNtfGameEnd()
+            {
+                WinnerColor = winnerColor
+            };
+
+            var sendPacket = _packetMgr.GetBinaryPacketData(ntfGameEnd, PacketId.NTF_GAME_END);
+            Broadcast("", sendPacket);
+            // ::TODO:: 결과 보여주고, 방 나가기 처리
         }
     }
     

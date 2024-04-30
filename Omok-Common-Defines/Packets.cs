@@ -112,9 +112,8 @@ public partial class PKTNtfGameStart : PKHeader
 }
 
 [MemoryPackable]
-public partial class PKTNtfGameTurn : PKHeader
+public partial class PKTNtfPutStone : PKHeader
 {
-    public StoneColor Color { get; set; }
     public Tuple<int, int>? Position { get; set; }
 }
 
@@ -129,5 +128,18 @@ public partial class PKTReqPutStone : PKHeader
 public partial class PKTResPutStone : PKHeader
 {
     public short Result;
+
+}
+
+[MemoryPackable]
+public partial class PKTNtfTurnOver : PKHeader
+{
+
+}
+
+[MemoryPackable]
+public partial class PKTNtfGameEnd : PKHeader
+{
+    public StoneColor WinnerColor { get; set; }
 
 }
