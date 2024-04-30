@@ -26,7 +26,7 @@ namespace Omok_Server
         UserManager _userMgr = new();
         
 
-        ServerOption _serverOption;
+        ServerOption _serverOption;     //appsettings의 서버 설정
         IServerConfig _networkConfig;   //SuperSocket의 서버 설정
 
         private readonly IHostApplicationLifetime _appLifetime;
@@ -69,7 +69,6 @@ namespace Omok_Server
         void OnAppStopped()
         {
             base.Stop();
-            //<<질문>> 패킷프로세서 삭제? 어차피 패킷 더 안넘겨줄건데 굳이? 해야하나?
         }
 
         void OnConnected(NetworkSession session)

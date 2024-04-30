@@ -27,7 +27,7 @@ namespace Omok_Server
             SendFunc = func;
         }
 
-        //로그인 시
+        //로그인 시 유저 맵에 추가
         public ErrorCode AddUser(string userID, string sessionID)
         {
             if (IsFullUserCount())
@@ -92,7 +92,7 @@ namespace Omok_Server
                 return;
             }
 
-            //성공
+            //로그인 성공
             ResponseLoginToClient(errorCode, sessionID);
 
             MainServer.MainLogger.Debug($"로그인 결과. UserID:{reqData.UserID}, PW: {reqData.AuthToken}, ERROR: {errorCode}");

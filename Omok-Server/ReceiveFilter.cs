@@ -27,13 +27,10 @@ namespace Omok_Server
             return totalSize - OmokBinaryRequestInfo.HEADERE_SIZE;
         }
 
-        // offset: header 데이터까지 있는 readBuffer 에서 body가 시작되는 위치를 가리킨다
-        // length: body 데이터의 크기 
         protected override OmokBinaryRequestInfo ResolveRequestInfo(ArraySegment<byte> header, byte[] readBuffer, int offset, int length)
         {
             OmokBinaryRequestInfo packet = new();
 
-            // body 데이터가 있는 경우
             if (length > 0)
             {
                 if (offset >= OmokBinaryRequestInfo.HEADERE_SIZE)
@@ -46,7 +43,7 @@ namespace Omok_Server
                 }
                 else
                 {
-                    //offset 이 헤더 크기보다 작으므로 헤더와 보디를 직접 합쳐야 한다.
+                    //offset이 헤더보다 작으므로 헤더와 보디를 직접 합쳐야 한다. (버퍼 한바퀴 돌아서 처음으로 간 것)
                     var packetData = new Byte[length + OmokBinaryRequestInfo.HEADERE_SIZE];
                     header.CopyTo(packetData, 0);
                     Array.Copy(readBuffer, offset, packetData, OmokBinaryRequestInfo.HEADERE_SIZE, length);
@@ -56,7 +53,6 @@ namespace Omok_Server
                 }
             }
 
-            // body 데이터가 없는 경우
             packet.SetPacketData(header.CloneRange(header.Offset, header.Count));
             return packet;
         }

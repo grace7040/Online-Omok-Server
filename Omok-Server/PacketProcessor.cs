@@ -68,7 +68,6 @@ namespace Omok_Server
         {
             while (_isThreadRunning)
             {
-                //System.Threading.Thread.Sleep(64); //테스트 용
                 try
                 {
                     var packet = _pktBuffer.Receive();
@@ -80,10 +79,6 @@ namespace Omok_Server
                     {
                         _packetHandlerMap[header.Id](packet);
                     }
-                    /*else
-                    {
-                        System.Diagnostics.Debug.WriteLine("세션 번호 {0}, PacketID {1}, 받은 데이터 크기: {2}", packet.SessionID, packet.PacketID, packet.BodyData.Length);
-                    }*/
                 }
                 catch (Exception ex)
                 {

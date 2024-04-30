@@ -16,7 +16,6 @@ class Program
             .ConfigureAppConfiguration((hostingContext, config) =>
             {
                 var env = hostingContext.HostingEnvironment;
-                //config.SetBasePath(Directory.GetCurrentDirectory());
                 config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
             })
             .ConfigureLogging(logging =>
@@ -29,7 +28,7 @@ class Program
             {
                 //서비스 구성
                 services.Configure<ServerOption>(hostContext.Configuration.GetSection("ServerOption"));
-                services.AddHostedService<MainServer>();    //호스팅 서비스로 등록. StartAsync, StopAsync를 구현해야함.
+                services.AddHostedService<MainServer>();    
             })
             .Build();
 

@@ -25,11 +25,6 @@ namespace Omok_Server
             _userID = userID;
         }
 
-        //public bool IsConfirm(string netSessionID)
-        //{
-        //    return _sessionId == netSessionID;
-        //}
-
         public void EnteredRoom(int roomNumber)
         {
             RoomNumber = roomNumber;
@@ -39,9 +34,5 @@ namespace Omok_Server
         {
             RoomNumber = -1;
         }
-
-        //public bool IsStateLogin() { return SequenceNumber != 0; }
-
-        //public bool IsStateRoom() { return RoomNumber != -1; }
     }
 }

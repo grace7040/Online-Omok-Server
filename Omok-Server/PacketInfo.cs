@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 
 namespace Omok_Server
 {
-
-
     public class OmokBinaryRequestInfo : BinaryRequestInfo
     {
         public string SessionID { get; set; } = "";
