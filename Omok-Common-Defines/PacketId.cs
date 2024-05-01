@@ -9,6 +9,8 @@ public enum PacketId : int
 {
     ReqResTestEcho = 101,
 
+    ReqHeartBeat = 102,
+    ResHeartBeat = 103,
 
     // 클라이언트
     CsBegin = 1001,
@@ -47,7 +49,6 @@ public enum PacketId : int
     ResRoomDevAllRoomEndGame = 1094,
 
     CsEnd = 1100,
-
 
     // 시스템, 서버 - 서버
     SsStart = 8001,

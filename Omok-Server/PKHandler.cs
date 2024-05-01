@@ -12,8 +12,8 @@ namespace Omok_Server
         public static Action<OmokBinaryRequestInfo> DIstributePacketAction;
 
         protected UserManager _userMgr;
-        protected PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
         protected RoomManager _roomMgr;
+        protected PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
 
         public void Init(UserManager userMgr, RoomManager roomMgr)
         {

@@ -24,6 +24,7 @@ namespace Omok_Server
         PacketManager<MemoryPackBinaryPacketDataCreator> _packetMaker = new();
         RoomManager _roomMgr = new();
         UserManager _userMgr = new();
+        HeartBeatManager _heartBeatMgr = new();
         
 
         ServerOption _serverOption;     //appsettings의 서버 설정
@@ -87,7 +88,7 @@ namespace Omok_Server
 
         void OnPacketReceived(NetworkSession session, OmokBinaryRequestInfo requestPacket)
         {
-            MainLogger.Info($"OnPacketReceived(): {session.SessionID} Sent Packet. Packet Body Length: {requestPacket.Data.Length}");
+            //MainLogger.Info($"OnPacketReceived(): {session.SessionID} Sent Packet. Packet Body Length: {requestPacket.Data.Length}");
             requestPacket.SessionID = session.SessionID;
             /* ::TODO:: 외부에서 받은 패킷인지, 내부 패킷인지 체크. PACKET ID를 외부 범위, 내부 범위 분리. */
 
@@ -155,8 +156,11 @@ namespace Omok_Server
             _roomMgr.SetDistributeAction(this.Distribute);
             _roomMgr.CreateRooms(_serverOption);
 
+            _heartBeatMgr.SetSendFunc(this.SendData);
+            _heartBeatMgr.SetDistributeAction(this.Distribute);
+
             _packetProcessor.SetSendFunc(this.SendData);
-            _packetProcessor.InitAndStartProcssing(_serverOption, _userMgr, _roomMgr);
+            _packetProcessor.InitAndStartProcssing(_serverOption, _userMgr, _roomMgr, _heartBeatMgr);
 
         }
 
