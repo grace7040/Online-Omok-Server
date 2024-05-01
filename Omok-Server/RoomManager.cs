@@ -65,29 +65,29 @@ namespace Omok_Server
         public void CheckRoom(PKTReqRoomEnter reqData, string sessionID, User user)
         {
             var room = GetRoomByRoomNumber(reqData.RoomNumber);
-            ErrorCode errorCode = ErrorCode.NONE;
+            ErrorCode errorCode = ErrorCode.None;
 
             if (user == null || !user.IsLogin)
             {
-                errorCode = ErrorCode.ROOM_ENTER_INVALID_USER;
+                errorCode = ErrorCode.RoomEnterFailInvalidUser;
             }
             else if (user.IsInRoom)
             {
-                errorCode = ErrorCode.ROOM_ENTER_INVALID_STATE;
+                errorCode = ErrorCode.RoomEnterFailInvalidState;
             }
             else if(room == null)
             {
-                errorCode = ErrorCode.ROOM_ENTER_INVALID_ROOM_NUMBER;
+                errorCode = ErrorCode.RoomEnterFailInvalidRoomNumber;
             }
             //유저 추가
             else if (room.AddUser(user.ID, sessionID) == false)
             {
-                errorCode = ErrorCode.ROOM_ENTER_FAIL_ADD_USER;
+                errorCode = ErrorCode.RoomEnterFailAddUser;
             }
 
             ResponseEnterRoomToClient(errorCode, sessionID);
 
-            if(errorCode != ErrorCode.NONE)
+            if(errorCode != ErrorCode.None)
             {
                 return;
             }
@@ -108,7 +108,7 @@ namespace Omok_Server
                 Result = (short)errorCode
             };
 
-            var sendPacket = _packetMgr.GetBinaryPacketData(resRoomEnter, PacketId.RES_ROOM_ENTER);
+            var sendPacket = _packetMgr.GetBinaryPacketData(resRoomEnter, PacketId.ResRoomEnter);
 
             SendFunc(sessionID, sendPacket);
         }

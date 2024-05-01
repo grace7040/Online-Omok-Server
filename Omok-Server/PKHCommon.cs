@@ -8,9 +8,9 @@ namespace Omok_Server
     {
         public void RegistPacketHandler(Dictionary<int, Action<OmokBinaryRequestInfo>> packetHandlerMap)
         {
-            packetHandlerMap.Add((int)PacketId.NTF_IN_CONNECT_CLIENT, InNotifyConnectClient);
-            packetHandlerMap.Add((int)PacketId.NTF_IN_DISCONNECT_CLIENT, InNotifyDisConnectClient);
-            packetHandlerMap.Add((int)PacketId.REQ_LOGIN, RequestLogin);
+            packetHandlerMap.Add((int)PacketId.NtfInConnectClient, InNotifyConnectClient);
+            packetHandlerMap.Add((int)PacketId.NtfInDisconnectClient, InNotifyDisConnectClient);
+            packetHandlerMap.Add((int)PacketId.ReqLogin, RequestLogin);
         }
 
 
