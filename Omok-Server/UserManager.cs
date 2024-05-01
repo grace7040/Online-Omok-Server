@@ -74,7 +74,7 @@ namespace Omok_Server
             //이미 로그인되어 있는 경우
             if (GetUserBySessionId(sessionID) != null)
             {
-                ResponseLoginToClient(ErrorCode.LOGIN_ALREADY_WORKING, sessionID);
+                ResponseLogin(ErrorCode.LOGIN_ALREADY_WORKING, sessionID);
                 return;
             }
             
@@ -82,7 +82,7 @@ namespace Omok_Server
             var errorCode = AddUser(reqData.UserID, sessionID);
             if (errorCode != ErrorCode.NONE)
             {
-                ResponseLoginToClient(errorCode, sessionID );
+                ResponseLogin(errorCode, sessionID );
 
                 if (errorCode == ErrorCode.LOGIN_FULL_USER_COUNT)
                 {
@@ -93,13 +93,13 @@ namespace Omok_Server
             }
 
             //로그인 성공
-            ResponseLoginToClient(errorCode, sessionID);
+            ResponseLogin(errorCode, sessionID);
 
             MainServer.MainLogger.Debug($"로그인 결과. UserID:{reqData.UserID}, PW: {reqData.AuthToken}, ERROR: {errorCode}");
         }
         
 
-        public void ResponseLoginToClient(ErrorCode errorCode, string sessionID)
+        public void ResponseLogin(ErrorCode errorCode, string sessionID)
         {
             var resLogin = new PKTResLogin()
             {
