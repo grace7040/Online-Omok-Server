@@ -110,7 +110,7 @@
             var roomObject = CheckRoomAndRoomUser(sessionID);
             if (roomObject.Item1 == false)
             {
-                MainServer.MainLogger.Error("Room RequestChat - CheckRoomAndRoomUserFail");
+                MainServer.MainLogger.Error("Room RequestGameReady - CheckRoomAndRoomUserFail");
                 return;
             }
 
@@ -129,7 +129,7 @@
             var roomObject = CheckRoomAndRoomUser(sessionID);
             if (roomObject.Item1 == false)
             {
-                MainServer.MainLogger.Error("Room RequestChat - CheckRoomAndRoomUserFail");
+                MainServer.MainLogger.Error("Room RequestPutStone - CheckRoomAndRoomUserFail");
                 return;
             }
 

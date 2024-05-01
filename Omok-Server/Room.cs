@@ -316,6 +316,9 @@ namespace Omok_Server
 
             var sendPacket = _packetMgr.GetBinaryPacketData(ntfGameEnd, PacketId.NTF_GAME_END);
             Broadcast("", sendPacket);
+
+            /* ::TODO:: 게임 데이터 저장 및 n초 대기 */
+
             LeaveRoomAllUsers();
         }
 
