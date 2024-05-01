@@ -4,11 +4,11 @@
     {
         public void RegistPacketHandler(Dictionary<int, Action<OmokBinaryRequestInfo>> packetHandlerMap)
         {
-            packetHandlerMap.Add((int)PacketId.REQ_ROOM_ENTER, RequestRoomEnter);
-            packetHandlerMap.Add((int)PacketId.REQ_ROOM_LEAVE, RequestRoomLeave);
-            packetHandlerMap.Add((int)PacketId.REQ_ROOM_CHAT, RequestChat);
-            packetHandlerMap.Add((int)PacketId.REQ_GAME_READY, RequestGameReady);
-            packetHandlerMap.Add((int)PacketId.REQ_PUT_STONE, RequestPutStone);
+            packetHandlerMap.Add((int)PacketId.ReqRoomEnter, RequestRoomEnter);
+            packetHandlerMap.Add((int)PacketId.ReqRoomLeave, RequestRoomLeave);
+            packetHandlerMap.Add((int)PacketId.ReqRoomChat, RequestChat);
+            packetHandlerMap.Add((int)PacketId.ReqGameReady, RequestGameReady);
+            packetHandlerMap.Add((int)PacketId.ReqPutStone, RequestPutStone);
         }
 
 

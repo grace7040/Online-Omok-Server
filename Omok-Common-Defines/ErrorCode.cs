@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 public enum ErrorCode : short
 {
-    NONE = 0,
-    LOGIN_FULL_USER_COUNT = 1,
-    ADD_USER_DUPLICATION = 2,
-    REMOVE_USER_SEARCH_FAILURE_USER_ID = 3,
-    LOGIN_ALREADY_WORKING = 4,
-    ROOM_ENTER_INVALID_USER = 5,
-    ROOM_ENTER_INVALID_STATE = 6,
-    ROOM_ENTER_INVALID_ROOM_NUMBER = 7,
-    ROOM_ENTER_FAIL_ADD_USER = 8,
-    PUT_STONE_FAIL_NOT_TURN = 9,
-    PUT_STONE_FAIL_INVALID_POSITION = 10,
+    None = 0,
+    LoginFailFullUserCount = 1,
+    AddUserDuplication = 2,
+    RemoveUserSearchFailUserId = 3,
+    LoginFailAlreadyLogined = 4,
+    RoomEnterFailInvalidUser = 5,
+    RoomEnterFailInvalidState = 6,
+    RoomEnterFailInvalidRoomNumber = 7,
+    RoomEnterFailAddUser = 8,
+    PutStoneFailNotTurn = 9,
+    PutStoneFailInvalidPosition = 10,
 }

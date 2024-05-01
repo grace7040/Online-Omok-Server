@@ -97,7 +97,7 @@ namespace Omok_Server
                 ntfRoomUserList.UserIDList.Add(user.UserID);
             }
 
-            var sendPacket = _packetMgr.GetBinaryPacketData(ntfRoomUserList, PacketId.NTF_ROOM_USER_LIST);
+            var sendPacket = _packetMgr.GetBinaryPacketData(ntfRoomUserList, PacketId.NtfRoomUserList);
             SendFunc(sessionID, sendPacket);
         }
 
@@ -108,7 +108,7 @@ namespace Omok_Server
                 UserID = newUserID
             };
 
-            var sendPacket = _packetMgr.GetBinaryPacketData(ntfRoomNewUser, PacketId.NTF_ROOM_NEW_USER);
+            var sendPacket = _packetMgr.GetBinaryPacketData(ntfRoomNewUser, PacketId.NtfRoomNewUser);
 
             Broadcast(newUserSessionID, sendPacket);
         }
@@ -125,7 +125,7 @@ namespace Omok_Server
                 UserID = userID
             };
 
-            var sendPacket = _packetMgr.GetBinaryPacketData(ntfRoomLeaveUser, PacketId.NTF_ROOM_LEAVE_USER);
+            var sendPacket = _packetMgr.GetBinaryPacketData(ntfRoomLeaveUser, PacketId.NtfRoomLeaveUser);
 
             Broadcast("", sendPacket);
         }
@@ -138,7 +138,7 @@ namespace Omok_Server
                 ChatMessage = chatMessage
             };
 
-            var sendPacket = _packetMgr.GetBinaryPacketData(notifyRoomChat, PacketId.NTF_ROOM_CHAT);
+            var sendPacket = _packetMgr.GetBinaryPacketData(notifyRoomChat, PacketId.NtfRoomChat);
 
             Broadcast("", sendPacket);
         }
@@ -178,7 +178,7 @@ namespace Omok_Server
                 State = roomUserState
             };
 
-            var sendPacket = _packetMgr.GetBinaryPacketData(resGameReady, PacketId.RES_GAME_READY);
+            var sendPacket = _packetMgr.GetBinaryPacketData(resGameReady, PacketId.ResGameReady);
             SendFunc(sessionId, sendPacket);
         }
 
@@ -227,7 +227,7 @@ namespace Omok_Server
         {
             var notifyGameStart = new PKTNtfGameStart() { MyStoneColor = stoneColor};
 
-            var sendPacket = _packetMgr.GetBinaryPacketData(notifyGameStart, PacketId.NTF_GAME_START);
+            var sendPacket = _packetMgr.GetBinaryPacketData(notifyGameStart, PacketId.NtfGameStart);
             SendFunc(sessionID, sendPacket);
         }
 
@@ -259,7 +259,7 @@ namespace Omok_Server
         {
             if (!_game.IsUserTurn(sessionID))
             {
-                _game.ResponsePutStone(sessionID, ErrorCode.PUT_STONE_FAIL_NOT_TURN);
+                _game.ResponsePutStone(sessionID, ErrorCode.PutStoneFailNotTurn);
                 return;
             }
 
@@ -296,10 +296,10 @@ namespace Omok_Server
         {
             var resRoomLeave = new PKTResRoomLeave()
             {
-                Result = (short)ErrorCode.NONE
+                Result = (short)ErrorCode.None
             };
 
-            var sendPacket = _packetMgr.GetBinaryPacketData(resRoomLeave, PacketId.RES_ROOM_LEAVE);
+            var sendPacket = _packetMgr.GetBinaryPacketData(resRoomLeave, PacketId.ResRoomLeave);
 
             SendFunc(sessionID, sendPacket);
         }
@@ -314,7 +314,7 @@ namespace Omok_Server
                 WinnerColor = winnerColor
             };
 
-            var sendPacket = _packetMgr.GetBinaryPacketData(ntfGameEnd, PacketId.NTF_GAME_END);
+            var sendPacket = _packetMgr.GetBinaryPacketData(ntfGameEnd, PacketId.NtfGameENd);
             Broadcast("", sendPacket);
 
             /* ::TODO:: 게임 데이터 저장 및 n초 대기 */

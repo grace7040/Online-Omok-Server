@@ -32,29 +32,29 @@ namespace Omok_Server
         {
             if (IsFullUserCount())
             {
-                return ErrorCode.LOGIN_FULL_USER_COUNT;
+                return ErrorCode.LoginFailFullUserCount;
             }
 
             if (_userMap.ContainsKey(sessionID))
             {
-                return ErrorCode.ADD_USER_DUPLICATION;
+                return ErrorCode.AddUserDuplication;
             }
 
             var user = new User();
             user.Set(true, sessionID, userID);
             _userMap.Add(sessionID, user);
 
-            return ErrorCode.NONE;
+            return ErrorCode.None;
         }
 
         public ErrorCode RemoveUser(string sessionID)
         {
             if (_userMap.Remove(sessionID) == false)
             {
-                return ErrorCode.REMOVE_USER_SEARCH_FAILURE_USER_ID;
+                return ErrorCode.RemoveUserSearchFailUserId;
             }
 
-            return ErrorCode.NONE;
+            return ErrorCode.None;
         }
 
         public User GetUserBySessionId(string sessionID)
@@ -74,19 +74,19 @@ namespace Omok_Server
             //이미 로그인되어 있는 경우
             if (GetUserBySessionId(sessionID) != null)
             {
-                ResponseLogin(ErrorCode.LOGIN_ALREADY_WORKING, sessionID);
+                ResponseLogin(ErrorCode.LoginFailAlreadyLogined, sessionID);
                 return;
             }
             
             
             var errorCode = AddUser(reqData.UserID, sessionID);
-            if (errorCode != ErrorCode.NONE)
+            if (errorCode != ErrorCode.None)
             {
                 ResponseLogin(errorCode, sessionID );
 
-                if (errorCode == ErrorCode.LOGIN_FULL_USER_COUNT)
+                if (errorCode == ErrorCode.LoginFailFullUserCount)
                 {
-                    NotifyMustCloseToClient(ErrorCode.LOGIN_FULL_USER_COUNT, sessionID);
+                    NotifyMustCloseToClient(ErrorCode.LoginFailFullUserCount, sessionID);
                 }
 
                 return;
@@ -106,7 +106,7 @@ namespace Omok_Server
                 Result = (short)errorCode
             };
 
-            var sendData = _packetMgr.GetBinaryPacketData(resLogin, PacketId.RES_LOGIN);
+            var sendData = _packetMgr.GetBinaryPacketData(resLogin, PacketId.ResLogin);
 
             SendFunc(sessionID, sendData);
         }
@@ -118,7 +118,7 @@ namespace Omok_Server
                 Result = (short)errorCode
             };
 
-            var sendData = _packetMgr.GetBinaryPacketData(resLogin, PacketId.NTF_MUST_CLOSE);
+            var sendData = _packetMgr.GetBinaryPacketData(resLogin, PacketId.NtfMustClose);
 
             SendFunc(sessionID, sendData);
         }

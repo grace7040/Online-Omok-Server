@@ -69,13 +69,13 @@ namespace Omok_Server
             CheckDoubleThree(x, y);
             if (IsDoubleThree)
             {
-                ResponsePutStone(GetSessionByStoneColor(_currStoneColor), ErrorCode.PUT_STONE_FAIL_INVALID_POSITION);
+                ResponsePutStone(GetSessionByStoneColor(_currStoneColor), ErrorCode.PutStoneFailInvalidPosition);
                 IsDoubleThree = false;
                 return;
             }
             if (_omokBoard[x, y] != (int)StoneColor.None)
             {
-                ResponsePutStone(GetSessionByStoneColor(_currStoneColor), ErrorCode.PUT_STONE_FAIL_INVALID_POSITION);
+                ResponsePutStone(GetSessionByStoneColor(_currStoneColor), ErrorCode.PutStoneFailInvalidPosition);
                 return;
             }
 
@@ -88,7 +88,7 @@ namespace Omok_Server
             _currentX = x;
             _currentY = y;
 
-            ResponsePutStone(GetSessionByStoneColor(_currStoneColor), ErrorCode.NONE);
+            ResponsePutStone(GetSessionByStoneColor(_currStoneColor), ErrorCode.None);
             ChangeTurn();
             CheckOmokComplete(x, y);
             
@@ -149,7 +149,7 @@ namespace Omok_Server
                 Position = position
             };
 
-            var sendPacket = _packetMgr.GetBinaryPacketData(notifyPutStone, PacketId.NTF_PUT_STONE);
+            var sendPacket = _packetMgr.GetBinaryPacketData(notifyPutStone, PacketId.NtfPutStone);
 
             SendFunc(sessionID, sendPacket);
         }
@@ -161,7 +161,7 @@ namespace Omok_Server
                 Result = (short)errorCode
             };
 
-            var sendPacket = _packetMgr.GetBinaryPacketData(resPutStone, PacketId.RES_PUT_STONE);
+            var sendPacket = _packetMgr.GetBinaryPacketData(resPutStone, PacketId.ResPutStone);
             SendFunc(sessionID, sendPacket);
         }
 
@@ -195,7 +195,7 @@ namespace Omok_Server
         void NotifyTurnOver(string sessionID)
         {
             var notifyTurnOver = new PKTNtfTurnOver();
-            var sendPacket = _packetMgr.GetBinaryPacketData(notifyTurnOver, PacketId.NTF_TURN_OVER);
+            var sendPacket = _packetMgr.GetBinaryPacketData(notifyTurnOver, PacketId.NtfTurnOver);
             SendFunc(sessionID, sendPacket);
 
             ChangeTurn();
