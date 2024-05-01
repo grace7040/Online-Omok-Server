@@ -10,9 +10,9 @@ namespace Omok_Server
     {
         int _maxUserCount;
 
-        Dictionary<string, User> _userMap = new Dictionary<string, User>();
+        Dictionary<string, User> _userMap = new();
 
-        PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new PacketManager<MemoryPackBinaryPacketDataCreator>();
+        PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
 
         Func<string, byte[], bool> SendFunc;
        

@@ -144,3 +144,15 @@ public partial class PKTNtfGameEnd : PKHeader
     public StoneColor WinnerColor { get; set; }
 
 }
+
+[MemoryPackable]
+public partial class PKTReqHeartBeat : PKHeader
+{
+
+}
+
+[MemoryPackable]
+public partial class PKTResHeartBeat : PKHeader
+{
+
+}

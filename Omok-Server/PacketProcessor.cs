@@ -17,14 +17,15 @@ namespace Omok_Server
         bool _isThreadRunning = false;
         System.Threading.Thread _processThread = null;
 
-        BufferBlock<OmokBinaryRequestInfo> _pktBuffer = new BufferBlock<OmokBinaryRequestInfo>();
+        BufferBlock<OmokBinaryRequestInfo> _pktBuffer = new();
 
         UserManager _userMgr;
         RoomManager _roomMgr;
+        HeartBeatManager _heartBeatMgr;
 
-        Dictionary<int, Action<OmokBinaryRequestInfo>> _packetHandlerMap = new Dictionary<int, Action<OmokBinaryRequestInfo>>();
-        PKHCommon _commonPacketHandler = new PKHCommon();
-        PKHRoom _roomPacketHandler = new PKHRoom();
+        Dictionary<int, Action<OmokBinaryRequestInfo>> _packetHandlerMap = new();
+        PKHCommon _commonPacketHandler = new();
+        PKHRoom _roomPacketHandler = new();
 
         Func<string, byte[], bool> SendFunc;
 
@@ -33,10 +34,12 @@ namespace Omok_Server
             SendFunc = func;
         }
 
-        public void InitAndStartProcssing(ServerOption serverOpt, UserManager userMgr, RoomManager roomMgr)
+        public void InitAndStartProcssing(ServerOption serverOpt, UserManager userMgr, RoomManager roomMgr, HeartBeatManager heartBeatMgr)
         {
             _userMgr = userMgr;
             _roomMgr = roomMgr;
+            _heartBeatMgr = heartBeatMgr;
+
             var maxUserCount = serverOpt.RoomMaxCount * serverOpt.RoomMaxUserCount;
             _userMgr.Init(maxUserCount);
 
@@ -54,6 +57,8 @@ namespace Omok_Server
 
             _commonPacketHandler.Init(_userMgr, _roomMgr);
             _commonPacketHandler.RegistPacketHandler(_packetHandlerMap);
+            _commonPacketHandler._heartBeatMgr = _heartBeatMgr;
+            _heartBeatMgr.StartTimer();
 
             _roomPacketHandler.Init(_userMgr, _roomMgr);
             _roomPacketHandler.RegistPacketHandler(_packetHandlerMap);

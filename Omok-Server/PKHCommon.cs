@@ -6,16 +6,18 @@ namespace Omok_Server
 {
     public class PKHCommon : PKHandler
     {
+        public HeartBeatManager _heartBeatMgr;
         public void RegistPacketHandler(Dictionary<int, Action<OmokBinaryRequestInfo>> packetHandlerMap)
         {
             packetHandlerMap.Add((int)PacketId.NtfInConnectClient, InNotifyConnectClient);
             packetHandlerMap.Add((int)PacketId.NtfInDisconnectClient, InNotifyDisConnectClient);
             packetHandlerMap.Add((int)PacketId.ReqLogin, RequestLogin);
+            packetHandlerMap.Add((int)PacketId.ResHeartBeat, InResponseHeartBeat);
         }
-
 
         public void InNotifyConnectClient(OmokBinaryRequestInfo requestData)
         {
+            _heartBeatMgr.AddSession(requestData.SessionID);
             MainServer.MainLogger.Debug($"{requestData.SessionID} 유저의 접속 성공");
         }
 
@@ -35,10 +37,12 @@ namespace Omok_Server
                 }
 
                 _userMgr.RemoveUser(sessionID);
+                
 
                 MainServer.MainLogger.Debug($"{requestData.SessionID} 유저의 접속 해제. (IsInRoom: {user.IsInRoom})");
             }
 
+            _heartBeatMgr.RemoveSession(sessionID);
         }
 
 
@@ -49,6 +53,12 @@ namespace Omok_Server
 
             var reqData = _packetMgr.GetPacketData<PKTReqLogin>(packetData.Data);
             _userMgr.CheckLoginState(sessionID, reqData);
+        }
+
+        public void InResponseHeartBeat(OmokBinaryRequestInfo packetData)
+        {
+            var sessionID = packetData.SessionID;
+            _heartBeatMgr.ClearSessionHeartBeat(sessionID);
         }
     }
 }

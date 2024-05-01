@@ -11,7 +11,7 @@ namespace Omok_Server
         List<Room> _roomList = new List<Room>();
         int _startRoomNumber;
 
-        PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new PacketManager<MemoryPackBinaryPacketDataCreator>();
+        PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
 
         Func<string, byte[], bool> SendFunc;
         Action<OmokBinaryRequestInfo> DistributeAction;

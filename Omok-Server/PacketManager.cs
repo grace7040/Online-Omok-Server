@@ -11,7 +11,7 @@ namespace Omok_Server
     //패킷 직렬화 방식에 따른 패킷 관리자
     public class PacketManager<TPacketDataCreator> where TPacketDataCreator : IBinaryPacketDataCreator, new()
     {
-        TPacketDataCreator _dataCreator = new TPacketDataCreator();
+        TPacketDataCreator _dataCreator = new();
 
         public OmokBinaryRequestInfo MakeInNTFConnectOrDisConnectClientPacket(bool isConnect, string sessionID)
         {
