@@ -85,7 +85,7 @@ namespace Omok_Server
 
             //Redis에 확인
             //Redis 스레드로 sessionID, userID, Auth를 보낸다. (DbReqLogin)
-            //Redis 스레드에서 검증 완료하면 DbResLogin 패킷을 DistributeDB한다
+            //Redis 스레드에서 검증 완료하면 DbResLogin 패킷을 Distribute한다
             //DbResLogin 패킷을 받으면 Login처리를 한다.
             Login(reqData.UserID, sessionID);
         }

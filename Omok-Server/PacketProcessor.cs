@@ -55,7 +55,7 @@ namespace Omok_Server
             _commonPacketHandler.Init(_userMgr, _roomMgr, _mainLogger);
             _commonPacketHandler.RegistPacketHandler(_packetHandlerMap);
             _commonPacketHandler._heartBeatMgr = _heartBeatMgr;
-            _heartBeatMgr.StartTimer();
+            //_heartBeatMgr.StartTimer();
 
             _roomPacketHandler.Init(_userMgr, _roomMgr, _mainLogger);
             _roomPacketHandler.RegistPacketHandler(_packetHandlerMap);

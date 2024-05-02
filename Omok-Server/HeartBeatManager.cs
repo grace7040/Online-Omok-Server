@@ -24,18 +24,23 @@ namespace Omok_Server
         int _interval = 250;
         int _index = 0;
 
+        OmokBinaryRequestInfo _innerPacket;
+
         public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger)
         {
             SendFunc = func;
             DistributeAction = action;
             _mainLogger = logger;
+            _innerPacket = _packetMgr.MakeInReqHeartBeatPacket();
+            _timer = new System.Threading.Timer(StartTimer, null, 0, _interval);
+            
         }
-        public void StartTimer()
+        public void StartTimer(object timerState)
         {
-            _timer = new System.Threading.Timer(HeartBeatTask, null, 0, _interval);
+            DistributeAction(_innerPacket);
         }
 
-        public void HeartBeatTask(object timerState)
+        public void HeartBeatTask()
         {
             if(_sessionList.Count == 0)
             {
@@ -46,8 +51,7 @@ namespace Omok_Server
             {
                 _index = (_index+1)%_sessionList.Count;
                 var sessionID = _sessionList.GetKeyAtIndex(_index);
-                var innerPacket = _packetMgr.MakeInReqHeartBeatPacket(sessionID);
-                DistributeAction(innerPacket);
+                CheckHeartBeat(sessionID);
                 //_mainLogger.Debug($"{_index}");
             }
         }

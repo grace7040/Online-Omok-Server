@@ -64,7 +64,7 @@ namespace Omok_Server
 
         public void InRequestHeartBeat(OmokBinaryRequestInfo packetData)
         {
-            _heartBeatMgr.CheckHeartBeat(packetData.SessionID);
+            _heartBeatMgr.HeartBeatTask();
         }
     }
 }
