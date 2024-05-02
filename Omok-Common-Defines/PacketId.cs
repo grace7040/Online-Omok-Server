@@ -54,7 +54,8 @@ public enum PacketId : int
     SsStart = 8001,
 
     NtfInConnectClient = 8011,
-    NtfInDisconnectClient = 8012,
+    NtfInDisConnectClient = 8012,
+    ReqInDisConnectUser = 8013,
 
     ReqSsServerInfo = 8021,
     ResSsServerInfo = 8023,
@@ -63,6 +64,10 @@ public enum PacketId : int
     ResInRoomEnter = 8032,
 
     NtfInRoomLeave = 8036,
+
+    ReqInHeartBeat = 8041,
+
+    
 
 
     // DB 8101 ~ 9000

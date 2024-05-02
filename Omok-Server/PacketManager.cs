@@ -21,7 +21,7 @@ namespace Omok_Server
                 innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.NtfInConnectClient);
             }
             else {
-                innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.NtfInDisconnectClient);
+                innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.NtfInDisConnectClient);
             }
 
             innerPacket.SessionID = sessionID;
@@ -42,6 +42,26 @@ namespace Omok_Server
             var innerPacket = new OmokBinaryRequestInfo();
             innerPacket.Data = sendData;
             innerPacket.SessionID = sessionID;
+            return innerPacket;
+        }
+
+        public OmokBinaryRequestInfo MakeInReqHeartBeatPacket()
+        {
+            var packet = new PKTReqInHeartBeat();
+            var sendData = GetBinaryPacketData(packet, PacketId.ReqInHeartBeat);
+
+            var innerPacket = new OmokBinaryRequestInfo();
+            innerPacket.Data = sendData;
+            return innerPacket;
+        }
+
+        public OmokBinaryRequestInfo MakeInReqDisConnectUser()
+        {
+            var packet = new PKTReqInDisConnectUser();
+            var sendData = GetBinaryPacketData(packet, PacketId.ReqInDisConnectUser);
+
+            var innerPacket = new OmokBinaryRequestInfo();
+            innerPacket.Data = sendData;
             return innerPacket;
         }
 

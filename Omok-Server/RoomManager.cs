@@ -89,7 +89,7 @@ namespace Omok_Server
                 return;
             }
 
-            user.EnteredRoom(reqData.RoomNumber);
+            user.EnterRoom(reqData.RoomNumber);
 
             room.NotifyUserListToClient(sessionID);
             room.NofifyNewUserToClient(sessionID, user.ID);

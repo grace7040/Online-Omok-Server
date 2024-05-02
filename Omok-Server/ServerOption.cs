@@ -14,6 +14,8 @@ namespace Omok_Server
 
         public int MaxConnectionNumber { get; set; }
 
+        public int CheckUserCount { get; set; }
+
         public int Port { get; set; }
 
         public int MaxRequestLength { get; set; }

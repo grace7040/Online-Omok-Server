@@ -9,7 +9,7 @@ public enum ErrorCode : short
     None = 0,
     LoginFailFullUserCount = 1,
     AddUserDuplication = 2,
-    RemoveUserSearchFailUserId = 3,
+    RemoveUserFailInvalidSessionID = 3,
     LoginFailAlreadyLogined = 4,
     RoomEnterFailInvalidUser = 5,
     RoomEnterFailInvalidState = 6,
@@ -17,4 +17,6 @@ public enum ErrorCode : short
     RoomEnterFailAddUser = 8,
     PutStoneFailNotTurn = 9,
     PutStoneFailInvalidPosition = 10,
+    AddUserFailFullUserCount = 11,
+    LoginFailInvalidSessionID = 12,
 }

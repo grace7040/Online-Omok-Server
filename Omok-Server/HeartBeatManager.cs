@@ -15,44 +15,59 @@ namespace Omok_Server
         ILog _mainLogger;
 
         PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
-        SortedList<string, int> _sessionList = new();
+        UserManager _userMgr;
 
         Func<string, byte[], bool> SendFunc;
         Action<OmokBinaryRequestInfo> DistributeAction;
 
         Timer _timer;
         int _interval = 250;
-        int _index = 0;
+        int _checkStartIndex = 0;
+        int _checkUserCount;
+        int _maxUserCount;
+        
+        OmokBinaryRequestInfo _innerPacket;
 
-        public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger)
+        public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger, UserManager userManager, int checkUserCount, int maxUserCount)
         {
             SendFunc = func;
             DistributeAction = action;
             _mainLogger = logger;
+            _userMgr = userManager;
+            _checkUserCount = checkUserCount;
+            _maxUserCount = maxUserCount;
         }
         public void StartTimer()
         {
-            _timer = new System.Threading.Timer(HeartBeatTask, null, 0, _interval);
+            _innerPacket = _packetMgr.MakeInReqHeartBeatPacket();
+            _timer = new System.Threading.Timer(SendHeartBeat, null, 0, _interval);
         }
 
-        public void HeartBeatTask(object timerState)
+        void SendHeartBeat(object timerState)
         {
-            if(_sessionList.Count == 0)
+            DistributeAction(_innerPacket);
+        }
+
+        public void HeartBeatTask()
+        {
+            //_mainLogger.Debug($"{_checkStartIndex}");
+            for (int i = _checkStartIndex; i < _checkStartIndex+_checkUserCount; i++)
             {
-                return;
+                if (!_userMgr.UserList[i].IsUsing)
+                {
+                    continue;
+                }
+
+                CheckHeartBeat(i);
             }
 
-            for(int i = 0; i < _sessionList.Count/4; i++)
-            {
-                _index = (_index+1)%_sessionList.Count;
-                var sessionID = _sessionList.GetKeyAtIndex(_index);
-                CheckHeartBeat(sessionID);
-                //_mainLogger.Debug($"{_index}");
-            }
+            _checkStartIndex = (_checkStartIndex + _checkUserCount) % _maxUserCount;
         }
-        void CheckHeartBeat(string sessionID)
+        public void CheckHeartBeat(int userIdx)
         {
-            if(++_sessionList[sessionID] >= 3)
+            var sessionID = _userMgr.UserList[userIdx].SessionID;
+
+            if (++_userMgr.UserList[userIdx].HeartBeatCnt >= 3)
             {
                 var innerPacket = _packetMgr.MakeInNTFConnectOrDisConnectClientPacket(false, sessionID);
                 DistributeAction(innerPacket);
@@ -72,17 +87,13 @@ namespace Omok_Server
 
         public void ClearSessionHeartBeat(string sessionID)
         {
-            _sessionList[sessionID] = 0;
-        }
+            var user = _userMgr.GetUserBySessionId(sessionID);
+            if(user == null)
+            {
+                return;
+            }
 
-        public void AddSession(string sessionID)
-        {
-            _sessionList.Add(sessionID, 0);
-        }
-
-        public void RemoveSession(string sessionID)
-        {
-            _sessionList.Remove(sessionID);
+            user.HeartBeatCnt = 0;
         }
     }
 

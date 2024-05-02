@@ -8,24 +8,49 @@ namespace Omok_Server
 {
     public class User
     {
+        bool _isUsing = false;
         bool _isLogin = false;
-        string _sessionId = "";
+        string _sessionID = "";
         string _userID = "";
+        int _heartBeatCnt = 0;
 
         public string ID { get { return _userID; } }
+        public string SessionID { get { return _sessionID; } }
         public int RoomNumber { get; private set; } = -1;
+
+        public bool IsUsing { get { return _isUsing; } }
         public bool IsLogin { get { return _isLogin; } }
         public bool IsInRoom { get { return RoomNumber != Room.InvalidRoomNumber; } }   //룸입장시 시 RoomNumber 설정. 룸퇴장시  RoomNumber을 -1로 설정
         
+        public int HeartBeatCnt { get { return _heartBeatCnt; } set { _heartBeatCnt = value; } }
 
-        public void Set(bool isLogin, string sessionID, string userID)
+        public void Use(string sessionID)
         {
-            _isLogin = isLogin;
-            _sessionId = sessionID;
+            _sessionID = sessionID;
+            _isUsing = true;
+            _isLogin = false;
+            _heartBeatCnt = 0;
+        }
+
+        public void Free()
+        {
+            _isUsing = false;
+            _heartBeatCnt = 0;
+        }
+
+        public void Login(string userID)
+        {
+            _isLogin = true;
             _userID = userID;
         }
 
-        public void EnteredRoom(int roomNumber)
+        public void Logout()
+        {
+            _isLogin = false;
+            LeaveRoom();
+        }
+
+        public void EnterRoom(int roomNumber)
         {
             RoomNumber = roomNumber;
         }
@@ -34,5 +59,6 @@ namespace Omok_Server
         {
             RoomNumber = -1;
         }
+        
     }
 }
