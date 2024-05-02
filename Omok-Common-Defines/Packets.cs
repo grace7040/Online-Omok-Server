@@ -162,3 +162,9 @@ public partial class PKTReqInHeartBeat : PKHeader
 {
 
 }
+
+[MemoryPackable]
+public partial class PKTReqInDisConnectUser : PKHeader
+{
+
+}

@@ -10,15 +10,16 @@ namespace Omok_Server
         public void RegistPacketHandler(Dictionary<int, Action<OmokBinaryRequestInfo>> packetHandlerMap)
         {
             packetHandlerMap.Add((int)PacketId.NtfInConnectClient, InNotifyConnectClient);
-            packetHandlerMap.Add((int)PacketId.NtfInDisconnectClient, InNotifyDisConnectClient);
+            packetHandlerMap.Add((int)PacketId.NtfInDisConnectClient, InNotifyDisConnectClient);
             packetHandlerMap.Add((int)PacketId.ReqLogin, RequestLogin);
             packetHandlerMap.Add((int)PacketId.ResHeartBeat, ResponseHeartBeat);
             packetHandlerMap.Add((int)PacketId.ReqInHeartBeat, InRequestHeartBeat);
+            packetHandlerMap.Add((int)PacketId.ReqInDisConnectUser, InReqDisConnectUser);
         }
 
         public void InNotifyConnectClient(OmokBinaryRequestInfo requestData)
         {
-            _heartBeatMgr.AddSession(requestData.SessionID);
+            _userMgr.AddUser(requestData.SessionID);
             _mainLogger.Debug($"{requestData.SessionID} 유저의 접속 성공");
         }
 
@@ -33,17 +34,21 @@ namespace Omok_Server
                 // 방에 들어가 있는 상태에서 연결이 끊어진 경우 방에서 나가게 한다.
                 if (user.IsInRoom)
                 {
-                    var internalPacket = _packetMgr.MakeInNTFRoomLeavePacket(sessionID, user.RoomNumber, user.ID);
-                    DIstributePacketAction(internalPacket);
+                    var internalPacketRoomLeave = _packetMgr.MakeInNTFRoomLeavePacket(sessionID, user.RoomNumber, user.ID);
+                    DIstributePacketAction(internalPacketRoomLeave);
                 }
 
-                _userMgr.RemoveUser(sessionID);
-                
-
+                var internalPacketDisconnect = _packetMgr.MakeInReqDisConnectUser();
+                DIstributePacketAction(internalPacketDisconnect);
+                //_userMgr.DisConnectUser(sessionID);
                 _mainLogger.Debug($"{requestData.SessionID} 유저의 접속 해제. (IsInRoom: {user.IsInRoom})");
             }
+        }
 
-            _heartBeatMgr.RemoveSession(sessionID);
+        public void InReqDisConnectUser(OmokBinaryRequestInfo requestData)
+        {
+            var sessionID = requestData.SessionID;
+            _userMgr.DisConnectUser(sessionID);
         }
 
 

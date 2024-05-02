@@ -152,11 +152,13 @@ namespace Omok_Server
         {
             var maxUserCount = _serverOption.RoomMaxCount * _serverOption.RoomMaxUserCount;
             _userMgr.Init(maxUserCount, this.SendData, this.DistributeDBWork, MainLogger);
+            _userMgr.CreateUsers();
 
             _roomMgr.Init(this.SendData, this.Distribute, MainLogger);
             _roomMgr.CreateRooms(_serverOption);
 
-            _heartBeatMgr.Init(this.SendData, this.Distribute, MainLogger);
+            _heartBeatMgr.Init(this.SendData, this.Distribute, MainLogger, _userMgr, _serverOption.CheckUserCount,maxUserCount);
+            _heartBeatMgr.StartTimer();
 
             _packetProcessor.InitAndStartProcessing(_serverOption, _userMgr, _roomMgr, _heartBeatMgr, this.SendData, MainLogger);
             _dbProcessor.InitAndStartProcessing(_serverOption.DBThreadCount, _serverOption.RedisConnectionString, this.Distribute, MainLogger);
