@@ -18,7 +18,7 @@ namespace Omok_Server
     //네트워크 I/O 처리를 위한 서버 클래스 (비동기 처리)
     public class MainServer : AppServer<NetworkSession, OmokBinaryRequestInfo>, IHostedService
     {
-        public static ILog MainLogger;
+        public ILog MainLogger;
 
         PacketProcessor _packetProcessor = new();
         PacketManager<MemoryPackBinaryPacketDataCreator> _packetManager = new();
@@ -150,18 +150,16 @@ namespace Omok_Server
 
         void CreateAndInitComponents()
         {
-            _userMgr.SetSendFunc(this.SendData);
-            _userMgr.SetDistributeDBWorkAction(this.DistributeDBWork);
+            var maxUserCount = _serverOption.RoomMaxCount * _serverOption.RoomMaxUserCount;
+            _userMgr.Init(maxUserCount, this.SendData, this.DistributeDBWork, MainLogger);
 
-            _roomMgr.SetSendFunc(this.SendData);
-            _roomMgr.SetDistributeAction(this.Distribute);
+            _roomMgr.Init(this.SendData, this.Distribute, MainLogger);
             _roomMgr.CreateRooms(_serverOption);
 
-            _heartBeatMgr.SetSendFunc(this.SendData);
-            _heartBeatMgr.SetDistributeAction(this.Distribute);
+            _heartBeatMgr.Init(this.SendData, this.Distribute, MainLogger);
 
-            _packetProcessor.InitAndStartProcessing(_serverOption, _userMgr, _roomMgr, _heartBeatMgr, this.SendData);
-            _dbProcessor.InitAndStartProcessing(_serverOption.DBThreadCount, _serverOption.RedisConnectionString, this.Distribute);
+            _packetProcessor.InitAndStartProcessing(_serverOption, _userMgr, _roomMgr, _heartBeatMgr, this.SendData, MainLogger);
+            _dbProcessor.InitAndStartProcessing(_serverOption.DBThreadCount, _serverOption.RedisConnectionString, this.Distribute, MainLogger);
 
         }
 

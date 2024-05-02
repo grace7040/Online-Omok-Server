@@ -1,4 +1,5 @@
 ﻿using MemoryPack;
+using SuperSocket.SocketBase.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,8 @@ namespace Omok_Server
 
     public class Room
     {
+        ILog _mainLogger;
+
         public const int InvalidRoomNumber = -1;
         public int Number { get; private set; }
 
@@ -34,19 +37,13 @@ namespace Omok_Server
 
         Func<string, byte[], bool> SendFunc;
         Action<OmokBinaryRequestInfo> DistributeAction;
-        public void Init(int number, int maxUserCount)
+        public void Init(int number, int maxUserCount, Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger)
         {
             Number = number;
             _maxUserCount = maxUserCount;
-        }
-        public void SetSendFunc(Func<string, byte[], bool> func)
-        {
             SendFunc = func;
-        }
-
-        public void SetDistributeAction(Action<OmokBinaryRequestInfo> action)
-        {
             DistributeAction = action;
+            _mainLogger = logger;
         }
 
         public bool AddUser(string userID, string sessionID)
@@ -252,7 +249,7 @@ namespace Omok_Server
             }
             _game = new OmokGame(userStoneColorDict, SendFunc, GameEnd);
 
-            MainServer.MainLogger.Debug($"[Room {Number}] SetRandomTurnAndStart. UserID: {_userList[turnIndex].UserID}");
+            _mainLogger.Debug($"[Room {Number}] SetRandomTurnAndStart. UserID: {_userList[turnIndex].UserID}");
         }
 
         public void CheckUserTurnAndPutStone(string sessionID, PKTReqPutStone reqData)
@@ -288,7 +285,7 @@ namespace Omok_Server
             NotifyLeaveRoomUserToClient(roomUser.UserID);
             ResponseLeaveRoomToClient(sessionID);
 
-            MainServer.MainLogger.Debug("Room RequestLeave - Success");
+            _mainLogger.Debug("Room RequestLeave - Success");
         }
 
 
@@ -306,7 +303,7 @@ namespace Omok_Server
 
         void GameEnd(StoneColor winnerColor)
         {
-            MainServer.MainLogger.Debug($"[GameEnd] WINNER: {winnerColor}");
+            _mainLogger.Debug($"[GameEnd] WINNER: {winnerColor}");
             _state = RoomState.GameEnd;
 
             var ntfGameEnd = new PKTNtfGameEnd()

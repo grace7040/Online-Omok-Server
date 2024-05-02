@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SuperSocket.SocketBase.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -11,6 +12,8 @@ namespace Omok_Server
 {
     public class HeartBeatManager
     {
+        ILog _mainLogger;
+
         PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
         SortedList<string, int> _sessionList = new();
 
@@ -20,16 +23,13 @@ namespace Omok_Server
         Timer _timer;
         int _interval = 250;
         int _index = 0;
-        public void SetSendFunc(Func<string, byte[], bool> func)
+
+        public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger)
         {
             SendFunc = func;
+            DistributeAction = action;
+            _mainLogger = logger;
         }
-
-        public void SetDistributeAction(Action<OmokBinaryRequestInfo> action)
-        {
-            DistributeAction = action;  
-        }
-
         public void StartTimer()
         {
             _timer = new System.Threading.Timer(HeartBeatTask, null, 0, _interval);
@@ -47,7 +47,7 @@ namespace Omok_Server
                 _index = (_index+1)%_sessionList.Count;
                 var sessionID = _sessionList.GetKeyAtIndex(_index);
                 CheckHeartBeat(sessionID);
-                //MainServer.MainLogger.Debug($"{_index}");
+                //_mainLogger.Debug($"{_index}");
             }
         }
         void CheckHeartBeat(string sessionID)
@@ -56,7 +56,7 @@ namespace Omok_Server
             {
                 var innerPacket = _packetMgr.MakeInNTFConnectOrDisConnectClientPacket(false, sessionID);
                 DistributeAction(innerPacket);
-                MainServer.MainLogger.Debug("::HeartBeat 응답 없음 - 연결 해제 - sessionID : " + sessionID);
+                _mainLogger.Debug("::HeartBeat 응답 없음 - 연결 해제 - sessionID : " + sessionID);
                 return;
             }
 

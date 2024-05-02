@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MemoryPack;
+using SuperSocket.SocketBase.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +10,8 @@ namespace Omok_Server
 {
     public class UserManager
     {
+        ILog _mainLogger;
+
         int _maxUserCount;
 
         Dictionary<string, User> _userMap = new();
@@ -15,16 +19,17 @@ namespace Omok_Server
         PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
 
         Func<string, byte[], bool> SendFunc;
+
+        Action<OmokBinaryRequestInfo> DistributeDBWorkAction;
+        
        
         
-        public void Init(int maxUserCount)
+        public void Init(int maxUserCount, Func<string, byte[], bool> sendFunc, Action<OmokBinaryRequestInfo> distributeDBaction, ILog logger)
         {
             _maxUserCount = maxUserCount;
-        }
-
-        public void SetSendFunc(Func<string, byte[], bool> func)
-        {
-            SendFunc = func;
+            SendFunc = sendFunc;
+            DistributeDBWorkAction = distributeDBaction;
+            _mainLogger = logger;
         }
 
         //로그인 시 유저 맵에 추가
@@ -77,12 +82,20 @@ namespace Omok_Server
                 ResponseLogin(ErrorCode.LoginFailAlreadyLogined, sessionID);
                 return;
             }
-            
-            
-            var errorCode = AddUser(reqData.UserID, sessionID);
+
+            //Redis에 확인
+            //Redis 스레드로 sessionID, userID, Auth를 보낸다. (DbReqLogin)
+            //Redis 스레드에서 검증 완료하면 DbResLogin 패킷을 DistributeDB한다
+            //DbResLogin 패킷을 받으면 Login처리를 한다.
+            Login(reqData.UserID, sessionID);
+        }
+
+        public void Login(string userID, string sessionID)
+        {
+            var errorCode = AddUser(userID, sessionID);
             if (errorCode != ErrorCode.None)
             {
-                ResponseLogin(errorCode, sessionID );
+                ResponseLogin(errorCode, sessionID);
 
                 if (errorCode == ErrorCode.LoginFailFullUserCount)
                 {
@@ -95,7 +108,7 @@ namespace Omok_Server
             //로그인 성공
             ResponseLogin(errorCode, sessionID);
 
-            MainServer.MainLogger.Debug($"로그인 결과. UserID:{reqData.UserID}, PW: {reqData.AuthToken}, ERROR: {errorCode}");
+            _mainLogger.Debug($"로그인 결과. UserID:{userID}, ERROR: {errorCode}");
         }
         
 

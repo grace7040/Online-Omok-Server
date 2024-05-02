@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SuperSocket.SocketBase.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace Omok_Server
 {
     public class RoomManager
     {
+        ILog _mainLogger;
         List<Room> _roomList = new List<Room>();
         int _startRoomNumber;
 
@@ -16,14 +18,11 @@ namespace Omok_Server
         Func<string, byte[], bool> SendFunc;
         Action<OmokBinaryRequestInfo> DistributeAction;
 
-        public void SetSendFunc(Func<string, byte[], bool> func)
+        public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger)
         {
             SendFunc = func;
-        }
-
-        public void SetDistributeAction(Action<OmokBinaryRequestInfo> action)
-        {
             DistributeAction = action;
+            _mainLogger = logger;
         }
         public void CreateRooms(ServerOption serverOpt)
         {
@@ -35,9 +34,7 @@ namespace Omok_Server
             {
                 var roomNumber = (startNumber + i);
                 var room = new Room();
-                room.Init(roomNumber, maxUserCount);
-                room.SetSendFunc(SendFunc);
-                room.SetDistributeAction(DistributeAction);
+                room.Init(roomNumber, maxUserCount, SendFunc, DistributeAction, _mainLogger);
                 _roomList.Add(room);
             }
 
@@ -98,7 +95,7 @@ namespace Omok_Server
             room.NofifyNewUserToClient(sessionID, user.ID);
             
 
-            MainServer.MainLogger.Debug("RequestEnterInternal - Success");
+            _mainLogger.Debug("RequestEnterInternal - Success");
         }
 
         void ResponseEnterRoomToClient(ErrorCode errorCode, string sessionID)
