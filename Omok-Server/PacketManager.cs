@@ -39,10 +39,10 @@ namespace Omok_Server
 
             var sendData = GetBinaryPacketData(packet, PacketId.ReqRoomLeave);
 
-            var memoryPakcPacket = new OmokBinaryRequestInfo();
-            memoryPakcPacket.Data = sendData;
-            memoryPakcPacket.SessionID = sessionID;
-            return memoryPakcPacket;
+            var innerPacket = new OmokBinaryRequestInfo();
+            innerPacket.Data = sendData;
+            innerPacket.SessionID = sessionID;
+            return innerPacket;
         }
 
         public byte[] GetBinaryPacketData<T>(T pkHeader, PacketId packetId) where T : PKHeader

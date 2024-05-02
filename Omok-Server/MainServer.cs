@@ -21,7 +21,8 @@ namespace Omok_Server
         public static ILog MainLogger;
 
         PacketProcessor _packetProcessor = new();
-        PacketManager<MemoryPackBinaryPacketDataCreator> _packetMaker = new();
+        PacketManager<MemoryPackBinaryPacketDataCreator> _packetManager = new();
+        DBProcessor _dbProcessor = new();
         RoomManager _roomMgr = new();
         UserManager _userMgr = new();
         HeartBeatManager _heartBeatMgr = new();
@@ -75,14 +76,14 @@ namespace Omok_Server
         void OnConnected(NetworkSession session)
         {
             MainLogger.Info($"OnConnected(): {session.SessionID} 접속 요청");
-            var innerPacket = _packetMaker.MakeInNTFConnectOrDisConnectClientPacket(true, session.SessionID);
+            var innerPacket = _packetManager.MakeInNTFConnectOrDisConnectClientPacket(true, session.SessionID);
             Distribute(innerPacket);
         }
 
         void OnClosed(NetworkSession session, CloseReason closeReason)
         {
             MainLogger.Info($"OnClosed(): {session.SessionID} 접속 해제");
-            var innerPacket = _packetMaker.MakeInNTFConnectOrDisConnectClientPacket(false, session.SessionID);
+            var innerPacket = _packetManager.MakeInNTFConnectOrDisConnectClientPacket(false, session.SessionID);
             Distribute(innerPacket);
         }
 
@@ -90,7 +91,6 @@ namespace Omok_Server
         {
             //MainLogger.Info($"OnPacketReceived(): {session.SessionID} Sent Packet. Packet Body Length: {requestPacket.Data.Length}");
             requestPacket.SessionID = session.SessionID;
-            /* ::TODO:: 외부에서 받은 패킷인지, 내부 패킷인지 체크. PACKET ID를 외부 범위, 내부 범위 분리. */
 
             Distribute(requestPacket);
         }
@@ -151,6 +151,7 @@ namespace Omok_Server
         void CreateAndInitComponents()
         {
             _userMgr.SetSendFunc(this.SendData);
+            _userMgr.SetDistributeDBWorkAction(this.DistributeDBWork);
 
             _roomMgr.SetSendFunc(this.SendData);
             _roomMgr.SetDistributeAction(this.Distribute);
@@ -159,8 +160,8 @@ namespace Omok_Server
             _heartBeatMgr.SetSendFunc(this.SendData);
             _heartBeatMgr.SetDistributeAction(this.Distribute);
 
-            _packetProcessor.SetSendFunc(this.SendData);
-            _packetProcessor.InitAndStartProcssing(_serverOption, _userMgr, _roomMgr, _heartBeatMgr);
+            _packetProcessor.InitAndStartProcessing(_serverOption, _userMgr, _roomMgr, _heartBeatMgr, this.SendData);
+            _dbProcessor.InitAndStartProcessing(_serverOption.DBThreadCount, _serverOption.RedisConnectionString, this.Distribute);
 
         }
 
@@ -192,6 +193,11 @@ namespace Omok_Server
         {
             _packetProcessor.InsertPakcet(requestPacket);
             
+        }
+
+        void DistributeDBWork(OmokBinaryRequestInfo requestPacket)
+        {
+            _dbProcessor.InsertPakcet(requestPacket);
         }
 
     }

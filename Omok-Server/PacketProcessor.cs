@@ -29,25 +29,21 @@ namespace Omok_Server
 
         Func<string, byte[], bool> SendFunc;
 
-        public void SetSendFunc(Func<string, byte[], bool> func)
-        {
-            SendFunc = func;
-        }
-
-        public void InitAndStartProcssing(ServerOption serverOpt, UserManager userMgr, RoomManager roomMgr, HeartBeatManager heartBeatMgr)
+        public void InitAndStartProcessing(ServerOption serverOpt, UserManager userMgr, RoomManager roomMgr, HeartBeatManager heartBeatMgr, Func<string, byte[], bool> sendFunc)
         {
             _userMgr = userMgr;
             _roomMgr = roomMgr;
             _heartBeatMgr = heartBeatMgr;
+            SendFunc = sendFunc;
 
             var maxUserCount = serverOpt.RoomMaxCount * serverOpt.RoomMaxUserCount;
             _userMgr.Init(maxUserCount);
 
-            RegistPacketHandler();
-
             _isThreadRunning = true;
             _processThread = new System.Threading.Thread(this.Process);
             _processThread.Start();
+
+            RegistPacketHandler();
         }
 
         void RegistPacketHandler()
