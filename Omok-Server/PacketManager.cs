@@ -45,6 +45,17 @@ namespace Omok_Server
             return innerPacket;
         }
 
+        public OmokBinaryRequestInfo MakeInReqHeartBeatPacket(string sessionID)
+        {
+            var packet = new PKTReqInHeartBeat();
+            var sendData = GetBinaryPacketData(packet, PacketId.ReqInHeartBeat);
+
+            var innerPacket = new OmokBinaryRequestInfo();
+            innerPacket.Data = sendData;
+            innerPacket.SessionID = sessionID;
+            return innerPacket;
+        }
+
         public byte[] GetBinaryPacketData<T>(T pkHeader, PacketId packetId) where T : PKHeader
         {
             byte[] sendData = _dataCreator.PacketDataToBinary(pkHeader, packetId);

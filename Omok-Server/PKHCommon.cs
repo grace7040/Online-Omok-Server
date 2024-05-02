@@ -13,6 +13,7 @@ namespace Omok_Server
             packetHandlerMap.Add((int)PacketId.NtfInDisconnectClient, InNotifyDisConnectClient);
             packetHandlerMap.Add((int)PacketId.ReqLogin, RequestLogin);
             packetHandlerMap.Add((int)PacketId.ResHeartBeat, ResponseHeartBeat);
+            packetHandlerMap.Add((int)PacketId.ReqInHeartBeat, InRequestHeartBeat);
         }
 
         public void InNotifyConnectClient(OmokBinaryRequestInfo requestData)
@@ -59,6 +60,11 @@ namespace Omok_Server
         {
             var sessionID = packetData.SessionID;
             _heartBeatMgr.ClearSessionHeartBeat(sessionID);
+        }
+
+        public void InRequestHeartBeat(OmokBinaryRequestInfo packetData)
+        {
+            _heartBeatMgr.CheckHeartBeat(packetData.SessionID);
         }
     }
 }

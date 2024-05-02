@@ -64,6 +64,8 @@ public enum PacketId : int
 
     NtfInRoomLeave = 8036,
 
+    ReqInHeartBeat = 8041,
+
 
     // DB 8101 ~ 9000
     ReqDbLogin = 8101,

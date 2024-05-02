@@ -46,12 +46,18 @@ namespace Omok_Server
             {
                 _index = (_index+1)%_sessionList.Count;
                 var sessionID = _sessionList.GetKeyAtIndex(_index);
-                CheckHeartBeat(sessionID);
+                var innerPacket = _packetMgr.MakeInReqHeartBeatPacket(sessionID);
+                DistributeAction(innerPacket);
                 //_mainLogger.Debug($"{_index}");
             }
         }
-        void CheckHeartBeat(string sessionID)
+        public void CheckHeartBeat(string sessionID)
         {
+            if(_sessionList.ContainsKey(sessionID) == false)
+            {
+                return;
+            }
+
             if(++_sessionList[sessionID] >= 3)
             {
                 var innerPacket = _packetMgr.MakeInNTFConnectOrDisConnectClientPacket(false, sessionID);
