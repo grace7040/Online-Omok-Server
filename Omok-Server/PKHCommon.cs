@@ -12,13 +12,13 @@ namespace Omok_Server
             packetHandlerMap.Add((int)PacketId.NtfInConnectClient, InNotifyConnectClient);
             packetHandlerMap.Add((int)PacketId.NtfInDisconnectClient, InNotifyDisConnectClient);
             packetHandlerMap.Add((int)PacketId.ReqLogin, RequestLogin);
-            packetHandlerMap.Add((int)PacketId.ResHeartBeat, InResponseHeartBeat);
+            packetHandlerMap.Add((int)PacketId.ResHeartBeat, ResponseHeartBeat);
         }
 
         public void InNotifyConnectClient(OmokBinaryRequestInfo requestData)
         {
             _heartBeatMgr.AddSession(requestData.SessionID);
-            MainServer.MainLogger.Debug($"{requestData.SessionID} 유저의 접속 성공");
+            _mainLogger.Debug($"{requestData.SessionID} 유저의 접속 성공");
         }
 
 
@@ -39,7 +39,7 @@ namespace Omok_Server
                 _userMgr.RemoveUser(sessionID);
                 
 
-                MainServer.MainLogger.Debug($"{requestData.SessionID} 유저의 접속 해제. (IsInRoom: {user.IsInRoom})");
+                _mainLogger.Debug($"{requestData.SessionID} 유저의 접속 해제. (IsInRoom: {user.IsInRoom})");
             }
 
             _heartBeatMgr.RemoveSession(sessionID);
@@ -49,13 +49,13 @@ namespace Omok_Server
         public void RequestLogin(OmokBinaryRequestInfo packetData)
         {
             var sessionID = packetData.SessionID;
-            MainServer.MainLogger.Debug("로그인 요청 받음");
+            _mainLogger.Debug("로그인 요청 받음");
 
             var reqData = _packetMgr.GetPacketData<PKTReqLogin>(packetData.Data);
             _userMgr.CheckLoginState(sessionID, reqData);
         }
 
-        public void InResponseHeartBeat(OmokBinaryRequestInfo packetData)
+        public void ResponseHeartBeat(OmokBinaryRequestInfo packetData)
         {
             var sessionID = packetData.SessionID;
             _heartBeatMgr.ClearSessionHeartBeat(sessionID);

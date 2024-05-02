@@ -15,7 +15,7 @@
         public void RequestRoomEnter(OmokBinaryRequestInfo packetData)
         {
             var sessionID = packetData.SessionID;
-            MainServer.MainLogger.Debug("RequestRoomEnter");
+            _mainLogger.Debug("RequestRoomEnter");
 
             try
             {
@@ -25,7 +25,7 @@
             }
             catch (Exception ex)
             {
-                MainServer.MainLogger.Error(ex.ToString());
+                _mainLogger.Error(ex.ToString());
             }
         }
 
@@ -33,7 +33,7 @@
         public void RequestRoomLeave(OmokBinaryRequestInfo packetData)
         {
             var sessionID = packetData.SessionID;
-            MainServer.MainLogger.Debug("방나가기 요청 받음");
+            _mainLogger.Debug("방나가기 요청 받음");
 
             try
             {
@@ -43,7 +43,7 @@
             }
             catch (Exception ex)
             {
-                MainServer.MainLogger.Error(ex.ToString());
+                _mainLogger.Error(ex.ToString());
             }
         }
 
@@ -76,7 +76,7 @@
             }
             catch (Exception ex)
             {
-                MainServer.MainLogger.Error(ex.ToString());
+                _mainLogger.Error(ex.ToString());
             }
 
 
@@ -86,19 +86,19 @@
         public void RequestChat(OmokBinaryRequestInfo packetData)
         {
             var sessionID = packetData.SessionID;
-            MainServer.MainLogger.Debug("Room RequestChat");
+            _mainLogger.Debug("Room RequestChat");
 
             var roomObject = CheckRoomAndRoomUser(sessionID);
             if (roomObject.Item1 == false)
             {
-                MainServer.MainLogger.Error("Room RequestChat - CheckRoomAndRoomUserFail");
+                _mainLogger.Error("Room RequestChat - CheckRoomAndRoomUserFail");
                 return;
             }
 
             var reqData = _packetMgr.GetPacketData<PKTReqRoomChat>(packetData.Data);
             roomObject.Item2.NotifyRoomChat(roomObject.Item3.UserID, reqData.ChatMessage);
 
-            MainServer.MainLogger.Debug("Room RequestChat - Success");
+            _mainLogger.Debug("Room RequestChat - Success");
 
         }
 
@@ -110,7 +110,7 @@
             var roomObject = CheckRoomAndRoomUser(sessionID);
             if (roomObject.Item1 == false)
             {
-                MainServer.MainLogger.Error("Room RequestGameReady - CheckRoomAndRoomUserFail");
+                _mainLogger.Error("Room RequestGameReady - CheckRoomAndRoomUserFail");
                 return;
             }
 
@@ -129,7 +129,7 @@
             var roomObject = CheckRoomAndRoomUser(sessionID);
             if (roomObject.Item1 == false)
             {
-                MainServer.MainLogger.Error("Room RequestPutStone - CheckRoomAndRoomUserFail");
+                _mainLogger.Error("Room RequestPutStone - CheckRoomAndRoomUserFail");
                 return;
             }
 

@@ -28,5 +28,11 @@ namespace Omok_Server
 
         public int RoomStartNumber { get; set; } = 0;
 
+        public int DBThreadCount { get; set; }
+
+        public string RedisConnectionString { get; set; }
+
+        public string DBConnectionString { get; set; }
+
     }
 }
