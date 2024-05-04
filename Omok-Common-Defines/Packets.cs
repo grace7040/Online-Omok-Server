@@ -18,9 +18,25 @@ public partial class PKTReqLogin : PKHeader
 }
 
 [MemoryPackable]
+public partial class PKTReqInLogin : PKHeader
+{
+    public string UserID { get; set; }
+    public string AuthToken { get; set; }
+}
+
+
+[MemoryPackable]
 public partial class PKTResLogin : PKHeader
 {
     public short Result { get; set; }
+}
+
+[MemoryPackable]
+public partial class PKTResInLogin : PKHeader
+{
+    public short Result { get; set; }
+
+    public string UserID { get; set; }
 }
 
 
@@ -168,3 +184,10 @@ public partial class PKTReqInDisConnectUser : PKHeader
 {
 
 }
+
+[MemoryPackable]
+public partial class PKTReqInRoomCheck : PKHeader
+{
+
+}
+

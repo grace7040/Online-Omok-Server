@@ -115,7 +115,7 @@ namespace Omok_Server
                 errorCode = ErrorCode.RoomEnterFailInvalidRoomNumber;
             }
             //유저 추가
-            else if (room.AddUser(user.ID, sessionID) == false)
+            if (room.AddUser(user.ID, sessionID) == false)
             {
                 errorCode = ErrorCode.RoomEnterFailAddUser;
             }

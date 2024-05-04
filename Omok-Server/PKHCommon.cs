@@ -15,18 +15,19 @@ namespace Omok_Server
             packetHandlerMap.Add((int)PacketId.ResHeartBeat, ResponseHeartBeat);
             packetHandlerMap.Add((int)PacketId.ReqInHeartBeat, InRequestHeartBeat);
             packetHandlerMap.Add((int)PacketId.ReqInDisConnectUser, InReqDisConnectUser);
+            packetHandlerMap.Add((int)PacketId.ResDbLogin, InResponseDbLogin);
         }
 
-        public void InNotifyConnectClient(OmokBinaryRequestInfo requestData)
+        public void InNotifyConnectClient(OmokBinaryRequestInfo packetData)
         {
-            _userMgr.AddUser(requestData.SessionID);
-            _mainLogger.Debug($"{requestData.SessionID} 유저의 접속 성공");
+            _userMgr.AddUser(packetData.SessionID);
+            _mainLogger.Debug($"{packetData.SessionID} 유저의 접속 성공");
         }
 
 
-        public void InNotifyDisConnectClient(OmokBinaryRequestInfo requestData)
+        public void InNotifyDisConnectClient(OmokBinaryRequestInfo packetData)
         {
-            var sessionID = requestData.SessionID;
+            var sessionID = packetData.SessionID;
             var user = _userMgr.GetUserBySessionId(sessionID);
 
             if (user != null)
@@ -40,14 +41,13 @@ namespace Omok_Server
 
                 var internalPacketDisconnect = _packetMgr.MakeInReqDisConnectUserPacket();
                 DIstributePacketAction(internalPacketDisconnect);
-                //_userMgr.DisConnectUser(sessionID);
-                _mainLogger.Debug($"{requestData.SessionID} 유저의 접속 해제. (IsInRoom: {user.IsInRoom})");
+                _mainLogger.Debug($"{packetData.SessionID} 유저의 접속 해제. (IsInRoom: {user.IsInRoom})");
             }
         }
 
-        public void InReqDisConnectUser(OmokBinaryRequestInfo requestData)
+        public void InReqDisConnectUser(OmokBinaryRequestInfo packetData)
         {
-            var sessionID = requestData.SessionID;
+            var sessionID = packetData.SessionID;
             _userMgr.DisConnectUser(sessionID);
         }
 
@@ -70,6 +70,19 @@ namespace Omok_Server
         public void InRequestHeartBeat(OmokBinaryRequestInfo packetData)
         {
             _heartBeatMgr.HeartBeatTask();
+        }
+
+        public void InResponseDbLogin(OmokBinaryRequestInfo packetData)
+        {
+            var resData = _packetMgr.GetPacketData<PKTResInLogin>(packetData.Data);
+
+            if(resData.Result != (short)ErrorCode.None)
+            {
+                _mainLogger.Debug($"로그인 실패: {resData.Result}");
+                _userMgr.ResponseLogin((ErrorCode)resData.Result, packetData.SessionID);
+                return;
+            }
+            _userMgr.Login(resData.UserID, packetData.SessionID);
         }
     }
 }

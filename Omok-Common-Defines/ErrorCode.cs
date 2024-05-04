@@ -19,4 +19,7 @@ public enum ErrorCode : short
     PutStoneFailInvalidPosition = 10,
     AddUserFailFullUserCount = 11,
     LoginFailInvalidSessionID = 12,
+    CheckUserAuthFailNotExist = 13,
+    CheckUserAuthFailNotMatch = 14,
+    CheckUserAuthFailException = 15,
 }

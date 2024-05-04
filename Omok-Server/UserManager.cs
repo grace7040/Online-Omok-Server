@@ -22,7 +22,7 @@ namespace Omok_Server
 
         Func<string, byte[], bool> SendFunc;
 
-        Action<OmokBinaryRequestInfo> DistributeDBWorkAction;
+        Action<OmokBinaryRequestInfo> DistributeRedisDBWorkAction;
 
         public List<User> UserList { get { return _userList; } }
         public Dictionary<string, int> SessionIndexDict { get { return _sessionIndexDict; } }
@@ -31,7 +31,7 @@ namespace Omok_Server
         {
             _maxUserCount = maxUserCount;
             SendFunc = sendFunc;
-            DistributeDBWorkAction = distributeDBaction;
+            DistributeRedisDBWorkAction = distributeDBaction;
             _mainLogger = logger;
         }
 
@@ -189,8 +189,13 @@ namespace Omok_Server
             //Redis 스레드로 sessionID, userID, Auth를 보낸다. (DbReqLogin)
             //Redis 스레드에서 검증 완료하면 DbResLogin 패킷을 Distribute한다
             //DbResLogin 패킷 ErrorCode == None이면 Login처리를 한다.
-            Login(reqData.UserID, sessionID);
+            //Login(reqData.UserID, sessionID);
+
+            //pkt매니저에서 pkt id req db login을 만들고 distribute한다.
+            var innerPacket = _packetMgr.MakeInReqDbLoginPacket(sessionID, reqData.UserID, reqData.AuthToken);
+            DistributeRedisDBWorkAction(innerPacket);
         }
+
 
         public void NotifyMustCloseToClient(ErrorCode errorCode, string sessionID)
         {

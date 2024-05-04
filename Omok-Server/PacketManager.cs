@@ -67,11 +67,39 @@ namespace Omok_Server
 
         public OmokBinaryRequestInfo MakeInReqRoomCheckPacket()
         {
-            var packet = new PKTReqInDisConnectUser();
+            var packet = new PKTReqInRoomCheck();
             var sendData = GetBinaryPacketData(packet, PacketId.ReqInRoomCheck);
 
             var innerPacket = new OmokBinaryRequestInfo();
             innerPacket.Data = sendData;
+            return innerPacket;
+        }
+
+        public OmokBinaryRequestInfo MakeInReqDbLoginPacket(string sessionId, string userId, string authToken)
+        {
+            var responseLogin = new PKTReqInLogin()
+            {
+                UserID = userId,
+                AuthToken = authToken
+            };
+            var sendData = GetBinaryPacketData(responseLogin, PacketId.ReqDbLogin);
+            var innerPacket = new OmokBinaryRequestInfo();
+            innerPacket.Data = sendData;
+            innerPacket.SessionID = sessionId;
+            return innerPacket;
+        }
+
+        public OmokBinaryRequestInfo MakeInResDbLoginPacket(string sessionId, string userId, ErrorCode result)
+        {
+            var responseLogin = new PKTResInLogin()
+            {
+                Result = (short)result,
+                UserID = userId,
+            };
+            var sendData = GetBinaryPacketData(responseLogin, PacketId.ResDbLogin);
+            var innerPacket = new OmokBinaryRequestInfo();
+            innerPacket.Data = sendData;
+            innerPacket.SessionID = sessionId;
             return innerPacket;
         }
 
