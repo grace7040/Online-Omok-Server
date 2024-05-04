@@ -1,6 +1,7 @@
 ﻿using SuperSocket.SocketBase.Logging;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,17 +14,54 @@ namespace Omok_Server
         List<Room> _roomList = new List<Room>();
         int _startRoomNumber;
 
+        Timer _timer;
+        int _interval;
+        int _checkStartIndex = 0;
+        int _checkRoomCount;
+        OmokBinaryRequestInfo _innerPacket;
+        ServerOption _serverOption;
+
         PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
 
         Func<string, byte[], bool> SendFunc;
         Action<OmokBinaryRequestInfo> DistributeAction;
 
-        public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger)
+        public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger, ServerOption serverOption)
         {
             SendFunc = func;
             DistributeAction = action;
             _mainLogger = logger;
+            _serverOption = serverOption;
+            _interval = serverOption.RoomCheckInterval;
+            _checkRoomCount = serverOption.CheckRoomCount;
+            StartTimer();
         }
+
+        public void StartTimer()
+        {
+            _innerPacket = _packetMgr.MakeInReqRoomCheckPacket();
+            _timer = new System.Threading.Timer(SendRoomCheckPkt, null, 0, _interval);
+        }
+        void SendRoomCheckPkt(object timerState)
+        {
+            DistributeAction(_innerPacket);
+        }
+        public void RoomCheckTask()
+        {
+            //_mainLogger.Debug($"{_checkStartIndex}");
+            for (int i = _checkStartIndex; i < _checkStartIndex+_checkRoomCount; i++)
+            {
+                if (_roomList[i].GetCurrentUserCount() == 0)
+                {
+                    continue;
+                }
+                _roomList[i].CheckRoomState();
+            }
+
+            _checkStartIndex = (_checkStartIndex + _checkRoomCount) % _roomList.Count;
+        }
+
+
         public void CreateRooms(ServerOption serverOpt)
         {
             var maxRoomCount = serverOpt.RoomMaxCount;
@@ -34,7 +72,7 @@ namespace Omok_Server
             {
                 var roomNumber = (startNumber + i);
                 var room = new Room();
-                room.Init(roomNumber, maxUserCount, SendFunc, DistributeAction, _mainLogger);
+                room.Init(roomNumber, maxUserCount, SendFunc, DistributeAction, _mainLogger, _serverOption.MaxGameTime, _serverOption.TurnTimeOut, _serverOption.MaxTurnOverCnt);
                 _roomList.Add(room);
             }
 
@@ -59,7 +97,7 @@ namespace Omok_Server
             return _roomList[index];
         }
 
-        public void CheckRoom(PKTReqRoomEnter reqData, string sessionID, User user)
+        public void EnterRoomUser(PKTReqRoomEnter reqData, string sessionID, User user)
         {
             var room = GetRoomByRoomNumber(reqData.RoomNumber);
             ErrorCode errorCode = ErrorCode.None;

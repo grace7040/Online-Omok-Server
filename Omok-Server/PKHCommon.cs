@@ -38,7 +38,7 @@ namespace Omok_Server
                     DIstributePacketAction(internalPacketRoomLeave);
                 }
 
-                var internalPacketDisconnect = _packetMgr.MakeInReqDisConnectUser();
+                var internalPacketDisconnect = _packetMgr.MakeInReqDisConnectUserPacket();
                 DIstributePacketAction(internalPacketDisconnect);
                 //_userMgr.DisConnectUser(sessionID);
                 _mainLogger.Debug($"{requestData.SessionID} 유저의 접속 해제. (IsInRoom: {user.IsInRoom})");

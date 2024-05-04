@@ -154,10 +154,10 @@ namespace Omok_Server
             _userMgr.Init(maxUserCount, this.SendData, this.DistributeDBWork, MainLogger);
             _userMgr.CreateUsers();
 
-            _roomMgr.Init(this.SendData, this.Distribute, MainLogger);
+            _roomMgr.Init(this.SendData, this.Distribute, MainLogger, _serverOption);
             _roomMgr.CreateRooms(_serverOption);
 
-            _heartBeatMgr.Init(this.SendData, this.Distribute, MainLogger, _userMgr, _serverOption.CheckUserCount,maxUserCount);
+            _heartBeatMgr.Init(this.SendData, this.Distribute, MainLogger, _userMgr, _serverOption.CheckUserCount, maxUserCount, _serverOption.HeartBeatInterval);
             _heartBeatMgr.StartTimer();
 
             _packetProcessor.InitAndStartProcessing(_serverOption, _userMgr, _roomMgr, _heartBeatMgr, this.SendData, MainLogger);

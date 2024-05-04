@@ -36,5 +36,10 @@ namespace Omok_Server
 
         public string DBConnectionString { get; set; }
         public int HeartBeatInterval { get; set; }
+        public int RoomCheckInterval { get;  set; }
+        public int CheckRoomCount { get;  set; }
+        public int TurnTimeOut { get;  set; }
+        public int MaxGameTime { get; set; }
+        public int MaxTurnOverCnt { get; set; }
     }
 }

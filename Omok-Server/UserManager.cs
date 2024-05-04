@@ -66,7 +66,6 @@ namespace Omok_Server
             {
                 return ErrorCode.RemoveUserFailInvalidSessionID;
             }
-            user.Free();
             _sessionIndexDict.Remove(sessionID);
             return ErrorCode.None;
         }
@@ -154,8 +153,10 @@ namespace Omok_Server
                 return;
             }
 
+            user.Free();
             RemoveUser(sessionID);
             LogoutUser(sessionID);
+            
         }
 
         public void LogoutUser(string sessionID)
