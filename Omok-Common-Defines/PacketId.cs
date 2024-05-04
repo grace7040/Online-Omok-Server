@@ -67,6 +67,8 @@ public enum PacketId : int
 
     ReqInHeartBeat = 8041,
 
+    ReqInRoomCheck = 8046,
+
     
 
 

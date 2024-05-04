@@ -13,7 +13,7 @@ namespace Omok_Server
 {
     public enum RoomState { None, GameStart, GameEnd }
 
-
+    
 
     public class Room
     {
@@ -23,8 +23,14 @@ namespace Omok_Server
         public int Number { get; private set; }
 
         int _maxUserCount = 0;
+        int _maxGameTime;   //hour
+        int _turnTimeOut;   //sec
+        int _maxTurnOverCnt;
 
         RoomState _state;
+
+        DateTime _gameStartTime;
+        DateTime _recentTurnChangedTime;
 
         public bool IsGameStarted { get { return _state == RoomState.GameStart; } }
         public bool IsGameEnded { get { return _state == RoomState.GameEnd; } }
@@ -37,13 +43,17 @@ namespace Omok_Server
 
         Func<string, byte[], bool> SendFunc;
         Action<OmokBinaryRequestInfo> DistributeAction;
-        public void Init(int number, int maxUserCount, Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger)
+
+        public void Init(int number, int maxUserCount, Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger, int maxGameTime, int turnTimeOut, int maxTurnOverCnt)
         {
             Number = number;
             _maxUserCount = maxUserCount;
             SendFunc = func;
             DistributeAction = action;
             _mainLogger = logger;
+            _maxGameTime = maxGameTime;
+            _turnTimeOut = turnTimeOut;
+            _maxTurnOverCnt = maxTurnOverCnt;
         }
 
         public bool AddUser(string userID, string sessionID)
@@ -81,7 +91,7 @@ namespace Omok_Server
             return _userList.Find(x => x.SessionID == sessionID);
         }
 
-        public int CurrentUserCount()
+        public int GetCurrentUserCount()
         {
             return _userList.Count();
         }
@@ -112,7 +122,7 @@ namespace Omok_Server
 
         public void NotifyLeaveRoomUserToClient(string userID)
         {
-            if (CurrentUserCount() == 0)
+            if (GetCurrentUserCount() == 0)
             {
                 return;
             }
@@ -191,11 +201,7 @@ namespace Omok_Server
             }
         }
 
-        public RoomUserState GetUserStateBySessionId(string sessionId)
-        {
-            var roomUser = GetRoomUserBySessionId(sessionId);
-            return roomUser.State;
-        }
+        
 
         public bool IsAllUserReady()
         {
@@ -217,9 +223,16 @@ namespace Omok_Server
         public void StartGame()
         {
             _state = RoomState.GameStart;
+            _gameStartTime = DateTime.Now;
+            _recentTurnChangedTime = DateTime.Now;
             SetRandomTurnAndStart();
         }
 
+        public RoomUserState GetUserStateBySessionId(string sessionId)
+        {
+            var roomUser = GetRoomUserBySessionId(sessionId);
+            return roomUser.State;
+        }
         public void NotifyGameStartToClient(string sessionID, StoneColor stoneColor)
         {
             var notifyGameStart = new PKTNtfGameStart() { MyStoneColor = stoneColor};
@@ -247,7 +260,7 @@ namespace Omok_Server
                 userStoneColorDict.Add(_userList[i].SessionID, StoneColor.White);
                 NotifyGameStartToClient(_userList[i].SessionID, StoneColor.White);
             }
-            _game = new OmokGame(userStoneColorDict, SendFunc, GameEnd);
+            _game = new OmokGame(userStoneColorDict, SendFunc, SetTurnChangedTime, GameEnd, _maxTurnOverCnt);
 
             _mainLogger.Debug($"[Room {Number}] SetRandomTurnAndStart. UserID: {_userList[turnIndex].UserID}");
         }
@@ -327,6 +340,46 @@ namespace Omok_Server
                 
                 DistributeAction(innerPacket);
             }
+        }
+
+        public void CheckRoomState()
+        {
+            if(_state != RoomState.GameStart)
+            {
+                return;
+            }
+
+            CheckGameStartTime();
+            CheckTurnChangedTime();
+        }
+
+        void CheckGameStartTime()
+        {
+            int timeSpaneHour = (DateTime.Now - _gameStartTime).Hours;
+            if(timeSpaneHour >= _maxGameTime)
+            {
+                _game.EndGame(StoneColor.None);
+                _mainLogger.Info($"[{Number}]방 게임 종료. (사유: 시간 초과)");
+            }
+        }
+
+        void CheckTurnChangedTime()
+        {
+            int timeSpanSec = (DateTime.Now - _recentTurnChangedTime).Seconds;
+            if(timeSpanSec>= _turnTimeOut)
+            {
+                _game.ForceChangeTurn();
+            }
+        }
+
+        void SetTurnChangedTime()
+        {
+            _recentTurnChangedTime = DateTime.Now;
+        }
+
+        internal void Init(int roomNumber, int maxUserCount, Func<string, byte[], bool> sendFunc, Action<OmokBinaryRequestInfo> distributeAction, ILog mainLogger, object maxGameTime, object turnTimeOut)
+        {
+            throw new NotImplementedException();
         }
     }
     

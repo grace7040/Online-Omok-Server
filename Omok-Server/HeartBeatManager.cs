@@ -25,7 +25,6 @@ namespace Omok_Server
         int _checkStartIndex = 0;
         int _checkUserCount;
         int _maxUserCount;
-        
         OmokBinaryRequestInfo _innerPacket;
 
         public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger, UserManager userManager, int checkUserCount, int maxUserCount, int hartBeatInterval)
@@ -41,10 +40,10 @@ namespace Omok_Server
         public void StartTimer()
         {
             _innerPacket = _packetMgr.MakeInReqHeartBeatPacket();
-            _timer = new System.Threading.Timer(SendHeartBeat, null, 0, _interval);
+            _timer = new System.Threading.Timer(SendHeartBeatPkt, null, 0, _interval);
         }
 
-        void SendHeartBeat(object timerState)
+        void SendHeartBeatPkt(object timerState)
         {
             DistributeAction(_innerPacket);
         }

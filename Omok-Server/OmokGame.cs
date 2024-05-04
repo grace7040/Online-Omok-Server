@@ -11,8 +11,6 @@ namespace Omok_Server
     {
         const int _boardSize = 19;
 
-        const int _turnOverTime = 6000;
-
         PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
         Dictionary<string, StoneColor> _userStoneColorDict;
 
@@ -26,18 +24,22 @@ namespace Omok_Server
         StoneColor _currStoneColor;
 
         int _turnOverCnt;
+        int _maxTurnOverCnt;
 
         public bool IsGameEnd { get; private set; } = false;
         public bool IsDoubleThree { get; private set; } = false;
 
         Action<StoneColor> GameEndAction;
+        Action SetTurnChangedTimeAction;
         Func<string, byte[], bool> SendFunc;
 
-        public OmokGame(Dictionary<string, StoneColor> userStoneColorDict, Func<string, byte[], bool> sendFunc, Action<StoneColor> gameEndAction)
+        public OmokGame(Dictionary<string, StoneColor> userStoneColorDict, Func<string, byte[], bool> sendFunc, Action setRecentPutStoneTimeAction, Action<StoneColor> gameEndAction, int maxTurnOverCnt)
         {
             _userStoneColorDict = userStoneColorDict;
             SendFunc = sendFunc;
             GameEndAction = gameEndAction;
+            SetTurnChangedTimeAction = setRecentPutStoneTimeAction;
+            _maxTurnOverCnt = maxTurnOverCnt;
 
             StartGame();
         }
@@ -55,7 +57,7 @@ namespace Omok_Server
 
             string firstTurnPlayer = GetSessionByStoneColor(StoneColor.Black);
             NotifyPutStoneToClient(firstTurnPlayer, null);
-            StartTimer();
+            //StartTimer();
         }
 
         string GetSessionByStoneColor(StoneColor stoneColor)
@@ -104,7 +106,20 @@ namespace Omok_Server
                 _currStoneColor = StoneColor.Black;
 
             NotifyPutStoneToClient(GetSessionByStoneColor(_currStoneColor), new Tuple<int,int> (_currentX, _currentY));
-            StartTimer();
+            SetTurnChangedTimeAction();
+        }
+
+        public void ForceChangeTurn()
+        {
+            NotifyTurnOver(GetSessionByStoneColor(_currStoneColor));
+            ChangeTurn();
+            
+
+            if (++_turnOverCnt >= _maxTurnOverCnt)
+            {
+                //게임 종료
+                EndGame(StoneColor.None);
+            }
         }
 
         public bool IsUserTurn(string sessionId)
@@ -165,29 +180,10 @@ namespace Omok_Server
             SendFunc(sessionID, sendPacket);
         }
 
-
-        async void StartTimer()
+        public void EndGame(StoneColor stoneColor)
         {
             if (IsGameEnd) return;
 
-            int x = _currentX;
-            int y = _currentY;
-            await Task.Delay(_turnOverTime);
-
-            
-            if(x == _currentX && y == _currentY && !IsGameEnd)
-            {
-                NotifyTurnOver(GetSessionByStoneColor(_currStoneColor));
-                if(++_turnOverCnt >= 6)
-                {
-                    //게임 종료
-                    EndGame(StoneColor.None);
-                }
-            }
-        }
-
-        void EndGame(StoneColor stoneColor)
-        {
             IsGameEnd = true;
             GameEndAction(stoneColor);
         }
@@ -197,8 +193,6 @@ namespace Omok_Server
             var notifyTurnOver = new PKTNtfTurnOver();
             var sendPacket = _packetMgr.GetBinaryPacketData(notifyTurnOver, PacketId.NtfTurnOver);
             SendFunc(sessionID, sendPacket);
-
-            ChangeTurn();
         }
 
         int CheckOmokHorizontal(int x, int y)      // ㅡ 확인

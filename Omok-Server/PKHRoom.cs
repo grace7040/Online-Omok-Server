@@ -9,6 +9,7 @@
             packetHandlerMap.Add((int)PacketId.ReqRoomChat, RequestChat);
             packetHandlerMap.Add((int)PacketId.ReqGameReady, RequestGameReady);
             packetHandlerMap.Add((int)PacketId.ReqPutStone, RequestPutStone);
+            packetHandlerMap.Add((int)PacketId.ReqInRoomCheck, RequestInRoomCheck);
         }
 
 
@@ -21,7 +22,7 @@
             {
                 var user = _userMgr.GetUserBySessionId(sessionID);
                 var reqData = _packetMgr.GetPacketData<PKTReqRoomEnter>(packetData.Data);
-                _roomMgr.CheckRoom(reqData, sessionID, user);
+                _roomMgr.EnterRoomUser(reqData, sessionID, user);
             }
             catch (Exception ex)
             {
@@ -38,6 +39,11 @@
             try
             {
                 var user = _userMgr.GetUserBySessionId(sessionID);
+                if(user.IsInRoom == false)
+                {
+                    _mainLogger.Error("RequestRoomLeave - UserIsNotInRoom");
+                    return;
+                }
                 var room = _roomMgr.GetRoomByRoomNumber(user.RoomNumber);
                 room.LeaveRoomUser(sessionID, user);
             }
@@ -138,6 +144,11 @@
             room.CheckUserTurnAndPutStone(sessionID, reqData);
             
         }
+
+        public void RequestInRoomCheck(OmokBinaryRequestInfo packetData)
+        {
+            _roomMgr.RoomCheckTask();
+        }   
         
     }
 }

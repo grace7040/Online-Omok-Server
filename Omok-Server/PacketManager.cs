@@ -55,10 +55,20 @@ namespace Omok_Server
             return innerPacket;
         }
 
-        public OmokBinaryRequestInfo MakeInReqDisConnectUser()
+        public OmokBinaryRequestInfo MakeInReqDisConnectUserPacket()
         {
             var packet = new PKTReqInDisConnectUser();
             var sendData = GetBinaryPacketData(packet, PacketId.ReqInDisConnectUser);
+
+            var innerPacket = new OmokBinaryRequestInfo();
+            innerPacket.Data = sendData;
+            return innerPacket;
+        }
+
+        public OmokBinaryRequestInfo MakeInReqRoomCheckPacket()
+        {
+            var packet = new PKTReqInDisConnectUser();
+            var sendData = GetBinaryPacketData(packet, PacketId.ReqInRoomCheck);
 
             var innerPacket = new OmokBinaryRequestInfo();
             innerPacket.Data = sendData;
