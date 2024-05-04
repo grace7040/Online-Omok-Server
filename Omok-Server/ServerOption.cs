@@ -35,6 +35,6 @@ namespace Omok_Server
         public string RedisConnectionString { get; set; }
 
         public string DBConnectionString { get; set; }
-
+        public int HeartBeatInterval { get; set; }
     }
 }

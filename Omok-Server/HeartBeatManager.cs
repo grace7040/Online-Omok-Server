@@ -21,14 +21,14 @@ namespace Omok_Server
         Action<OmokBinaryRequestInfo> DistributeAction;
 
         Timer _timer;
-        int _interval = 250;
+        int _interval;
         int _checkStartIndex = 0;
         int _checkUserCount;
         int _maxUserCount;
         
         OmokBinaryRequestInfo _innerPacket;
 
-        public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger, UserManager userManager, int checkUserCount, int maxUserCount)
+        public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger, UserManager userManager, int checkUserCount, int maxUserCount, int hartBeatInterval)
         {
             SendFunc = func;
             DistributeAction = action;
@@ -36,6 +36,7 @@ namespace Omok_Server
             _userMgr = userManager;
             _checkUserCount = checkUserCount;
             _maxUserCount = maxUserCount;
+            _interval = hartBeatInterval;
         }
         public void StartTimer()
         {
