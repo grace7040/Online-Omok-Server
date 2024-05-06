@@ -77,7 +77,10 @@ public enum PacketId : int
     // DB 8101 ~ 9000
     ReqDbLogin = 8101,
     ResDbLogin = 8102,
-    ReqDbLoadUserGameData = 8103,
-    ReqDbSaveUserGameData = 8104,
-    ResDbLoadUserGameData = 8105,
+
+    ReqDbLoadUserGameData = 8106,
+    ResDbLoadUserGameData = 8107,
+    
+    ReqDbSaveUserGameData = 8110,
+    ResDbSaveUserGameData = 8111,
 }

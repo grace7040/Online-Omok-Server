@@ -1,4 +1,6 @@
-﻿namespace Omok_Server
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace Omok_Server
 {
     public class PKHRoom : PKHandler
     {
@@ -10,6 +12,7 @@
             packetHandlerMap.Add((int)PacketId.ReqGameReady, RequestGameReady);
             packetHandlerMap.Add((int)PacketId.ReqPutStone, RequestPutStone);
             packetHandlerMap.Add((int)PacketId.ReqInRoomCheck, RequestInRoomCheck);
+            packetHandlerMap.Add((int)PacketId.ResDbSaveUserGameData, ResponseInDbSaveUserGameData);
         }
 
 
@@ -21,6 +24,10 @@
             try
             {
                 var user = _userMgr.GetUserBySessionId(sessionID);
+                if (!user.IsLogin) {
+                    // ::TODO:: 방 입장 전 로그인 해달라는 응답
+                    return;
+                }
                 var reqData = _packetMgr.GetPacketData<PKTReqRoomEnter>(packetData.Data);
                 _roomMgr.EnterRoomUser(reqData, sessionID, user);
             }
@@ -149,6 +156,29 @@
         {
             _roomMgr.RoomCheckTask();
         }   
+
+        public void ResponseInDbSaveUserGameData(OmokBinaryRequestInfo packetData)
+        {
+            var resData = _packetMgr.GetPacketData<PKTResDbSaveUserGameData>(packetData.Data);
+            if(resData.Result != (short)ErrorCode.None)
+            {
+                // ::TODO:: 클라이언트에게 저장 실패 응답 전송
+                return;
+            }
+
+            var sessionID = packetData.SessionID;
+            var roomObject = CheckRoomAndRoomUser(sessionID);
+            if (roomObject.Item1 == false)
+            {
+                _mainLogger.Error("Room RequestPutStone - CheckRoomAndRoomUserFail");
+                return;
+            }
+
+            var room = roomObject.Item2;
+            var innerPacket = _packetMgr.MakeInNTFRoomLeavePacket(sessionID, room.Number, resData.UserID);
+            DIstributePacketAction(innerPacket);
+
+        }
         
     }
 }

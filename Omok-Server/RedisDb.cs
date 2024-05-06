@@ -18,13 +18,14 @@ namespace Omok_Server
             var redisConfig = new RedisConfig("GameRedis", redisConnectString!);
             _redisConnection = new RedisConnection(redisConfig);
 
-            //for Debug
+            //-- for Debug --
             RegistUserAsync("jacking", "123qwe", TimeSpan.FromHours(1));
-            RegistUserAsync("jacking1", "123qwe", TimeSpan.FromHours(1));
             RegistUserAsync("hello@naver.com", "123qwe", TimeSpan.FromHours(1));
+            RegistUserAsync("crazy@naver.com", "123qwe", TimeSpan.FromHours(1));
+            //-- --------- --
         }
 
-        //for Debug
+        //-- for Debug --
         public async Task<ErrorCode> RegistUserAsync(string id, string authToken, TimeSpan expiry)
         {
             var query = new RedisString<string>(_redisConnection, id, expiry);
@@ -32,6 +33,7 @@ namespace Omok_Server
 
             return ErrorCode.None;
         }
+        //-- --------- --
 
         public async Task<ErrorCode> CheckUserAuthAsync(string id, string authToken)
         {

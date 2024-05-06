@@ -156,7 +156,7 @@ namespace Omok_Server
             _userMgr.Init(maxUserCount, this.SendData, this.DistributeRedisDBWork, this.DistributeMySqlDBWork, MainLogger);
             _userMgr.CreateUsers();
 
-            _roomMgr.Init(this.SendData, this.Distribute, MainLogger, _serverOption);
+            _roomMgr.Init(this.SendData, this.Distribute, this.DistributeMySqlDBWork, _userMgr.UpdateUsersGameData, MainLogger, _serverOption);
             _roomMgr.CreateRooms(_serverOption);
 
             _heartBeatMgr.Init(this.SendData, this.Distribute, MainLogger, _userMgr, _serverOption.CheckUserCount, maxUserCount, _serverOption.HeartBeatInterval);

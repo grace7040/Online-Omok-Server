@@ -235,3 +235,9 @@ public partial class PKTResDbSaveUserGameData : PKHeader
     public string UserID { get; set; }
     public short Result { get; set; }
 }
+
+[MemoryPackable]
+public partial class PKTResSaveUserGameData : PKHeader
+{
+    public short Result { get; set; }
+}

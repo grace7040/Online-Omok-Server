@@ -18,14 +18,27 @@ namespace Omok_Server
         public async Task<OmokBinaryRequestInfo> RequestLoadUserGameData(OmokBinaryRequestInfo packetData, MySqlDb mySqlDb)
         {
             var userId = _packetMgr.GetPacketData<PKTReqDbLoadUserGameData>(packetData.Data).UserID;
-            var userDatas = await mySqlDb.LoadUserGameDataAsync(userId);
-            var response = _packetMgr.MakeInResDbLoadUserGameDataPacket(packetData.SessionID, userId, ErrorCode.None, userDatas.WinCount, userDatas.LoseCount, userDatas.Level, userDatas.Exp); 
+            var userData = await mySqlDb.GetUserGameDataAsync(userId);
+            var response = _packetMgr.MakeInResDbLoadUserGameDataPacket(packetData.SessionID, 
+                                                                        userId, 
+                                                                        ErrorCode.None, 
+                                                                        userData.Win_Count, 
+                                                                        userData.Lose_Count, 
+                                                                        userData.Level, 
+                                                                        userData.Exp); 
             return response;
         }
 
         public async Task<OmokBinaryRequestInfo> RequestSaveUserGameData(OmokBinaryRequestInfo packetData, MySqlDb mySqlDb)
         {
-            return new OmokBinaryRequestInfo();
+            var userData = _packetMgr.GetPacketData<PKTReqDbSaveUserGameData>(packetData.Data);
+            var result = await mySqlDb.UpdateUserGameDataAsync(userData.UserID,
+                                                                userData.WinCount,
+                                                                userData.LoseCount,
+                                                                userData.Level,
+                                                                userData.Exp);
+            var response = _packetMgr.MakeInResDbSaveUserGameDataPacket(packetData.SessionID, result);
+            return response;
         }
     }
 }

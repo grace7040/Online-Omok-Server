@@ -23,4 +23,5 @@ public enum ErrorCode : short
     CheckUserAuthFailNotMatch = 14,
     CheckUserAuthFailException = 15,
     LoadUserGameDataFailNotExist = 16,
+    UpdateUserGameDataFail = 17,
 }

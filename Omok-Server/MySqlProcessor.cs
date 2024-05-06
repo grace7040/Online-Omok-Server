@@ -55,7 +55,6 @@ namespace Omok_Server
 
         async void Process() 
         {
-            // ::TODO:: DB 커넥션 생성
             var db = new MySqlDb(_connectionString);
             while (_isThreadRunning)
             {

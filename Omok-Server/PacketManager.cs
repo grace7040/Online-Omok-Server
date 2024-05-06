@@ -76,53 +76,53 @@ namespace Omok_Server
             return innerPacket;
         }
 
-        public OmokBinaryRequestInfo MakeInReqDbLoginPacket(string sessionId, string userId, string authToken)
+        public OmokBinaryRequestInfo MakeInReqDbLoginPacket(string sessionID, string userID, string authToken)
         {
             var responseLogin = new PKTReqDbLogin()
             {
-                UserID = userId,
+                UserID = userID,
                 AuthToken = authToken
             };
             var sendData = GetBinaryPacketData(responseLogin, PacketId.ReqDbLogin);
             var innerPacket = new OmokBinaryRequestInfo();
             innerPacket.Data = sendData;
-            innerPacket.SessionID = sessionId;
+            innerPacket.SessionID = sessionID;
             return innerPacket;
         }
 
-        public OmokBinaryRequestInfo MakeInResDbLoginPacket(string sessionId, string userId, ErrorCode result)
+        public OmokBinaryRequestInfo MakeInResDbLoginPacket(string sessionID, string userID, ErrorCode result)
         {
             var responseLogin = new PKTResInLogin()
             {
                 Result = (short)result,
-                UserID = userId,
+                UserID = userID,
             };
             var sendData = GetBinaryPacketData(responseLogin, PacketId.ResDbLogin);
             var innerPacket = new OmokBinaryRequestInfo();
             innerPacket.Data = sendData;
-            innerPacket.SessionID = sessionId;
+            innerPacket.SessionID = sessionID;
             return innerPacket;
         }
 
-        public OmokBinaryRequestInfo MakeInReqDbLoadUserGameDataPacket(string sessionId, string userId)
+        public OmokBinaryRequestInfo MakeInReqDbLoadUserGameDataPacket(string sessionID, string userID)
         {
             var reqData = new PKTReqDbLoadUserGameData()
             {
-                UserID = userId
+                UserID = userID
             };
             var sendData = GetBinaryPacketData(reqData, PacketId.ReqDbLoadUserGameData);
             var innerPacket = new OmokBinaryRequestInfo();
             innerPacket.Data = sendData;
-            innerPacket.SessionID = sessionId;
+            innerPacket.SessionID = sessionID;
             return innerPacket;
         }
 
-        public OmokBinaryRequestInfo MakeInResDbLoadUserGameDataPacket(string sessionId, string userId, ErrorCode error, int winCount, int loseCount, int level, int exp)
+        public OmokBinaryRequestInfo MakeInResDbLoadUserGameDataPacket(string sessionID, string userID, ErrorCode error, int winCount, int loseCount, int level, int exp)
         {
             var resData = new PKTResDbLoadUserGameData()
             {
                 Result = (short)error,
-                UserID = userId,
+                UserID = userID,
                 WinCount = winCount,
                 LoseCount = loseCount,
                 Level = level,
@@ -131,7 +131,37 @@ namespace Omok_Server
             var sendData = GetBinaryPacketData(resData, PacketId.ResDbLoadUserGameData);
             var innerPacket = new OmokBinaryRequestInfo();
             innerPacket.Data = sendData;
-            innerPacket.SessionID = sessionId;
+            innerPacket.SessionID = sessionID;
+            return innerPacket;
+        }
+
+        public OmokBinaryRequestInfo MakeInReqDbSaveUserGameDataPacket(string sessionID, string userID, int winCount, int loseCount, int level, int exp)
+        {
+            var reqData = new PKTReqDbSaveUserGameData()
+            {
+                UserID = userID,
+                WinCount = winCount,
+                LoseCount = loseCount,
+                Level = level,
+                Exp = exp
+            };
+            var sendData = GetBinaryPacketData(reqData, PacketId.ReqDbSaveUserGameData);
+            var innerPacket = new OmokBinaryRequestInfo();
+            innerPacket.Data = sendData;
+            innerPacket.SessionID = sessionID;
+            return innerPacket;
+        }
+
+        public OmokBinaryRequestInfo MakeInResDbSaveUserGameDataPacket(string sessionID, ErrorCode result)
+        {
+            var resData = new PKTResDbSaveUserGameData()
+            {
+                Result = (short)result
+            };
+            var sendData = GetBinaryPacketData(resData, PacketId.ResDbSaveUserGameData);
+            var innerPacket = new OmokBinaryRequestInfo();
+            innerPacket.Data = sendData;
+            innerPacket.SessionID = sessionID;
             return innerPacket;
         }
 
@@ -146,5 +176,7 @@ namespace Omok_Server
         {
             return _dataCreator.BinaryToPacketData<T>(binaryPacketData);
         }
+
+        
     }
 }

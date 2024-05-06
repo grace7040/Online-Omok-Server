@@ -85,11 +85,32 @@ namespace Omok_Server
             }
             _userMgr.Login(resData.UserID, packetData.SessionID);
         }
-
+        
         public void InResponseDbLoadUserGameData(OmokBinaryRequestInfo packetData)
         {
+            var sessionID = packetData.SessionID;
             var resData = _packetMgr.GetPacketData<PKTResDbLoadUserGameData>(packetData.Data);
-            _userMgr.ResponseLoadUserGameData(packetData.SessionID, resData.Result, resData.WinCount, resData.LoseCount, resData.Level, resData.Exp); ;
+            var user = _userMgr.GetUserBySessionId(sessionID);
+            
+            if(user == null)
+            {
+                _mainLogger.Error($"[InResponseDbLoadUserGameData Fail] {resData.UserID} 유저가 없습니다.");
+                return;
+            }
+            else if (resData.Result != (short)ErrorCode.None)
+            {
+                _mainLogger.Error($"유저 데이터 로드 실패: {resData.Result}");
+                _userMgr.ResponseLoadUserGameData(sessionID, resData.Result, 0, 0, 0, 0);
+                _userMgr.LogoutUser(sessionID);
+                return;
+            }
+
+            user.SetGameData(new UserGameData() { Level = resData.Level,
+                                                Exp = resData.Exp,
+                                                Win_Count = resData.WinCount,
+                                                Lose_Count = resData.LoseCount, });
+            
+            _userMgr.ResponseLoadUserGameData(sessionID, resData.Result, resData.WinCount, resData.LoseCount, resData.Level, resData.Exp); ;
         }
     }
 }

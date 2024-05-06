@@ -13,7 +13,7 @@ namespace Omok_Server
 {
     public enum RoomState { None, GameStart, GameEnd }
 
-    
+
 
     public class Room
     {
@@ -43,13 +43,17 @@ namespace Omok_Server
 
         Func<string, byte[], bool> SendFunc;
         Action<OmokBinaryRequestInfo> DistributeAction;
+        Action<OmokBinaryRequestInfo> DistributeMySqlDbAction;
+        Action<string, string> UpdateUsersGameDataAction;
 
-        public void Init(int number, int maxUserCount, Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger, int maxGameTime, int turnTimeOut, int maxTurnOverCnt)
+        public void Init(int number, int maxUserCount, Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> distributeAction, Action<OmokBinaryRequestInfo> distributeMySqlAction, Action<string, string> updateUsersGameDataAction, ILog logger, int maxGameTime, int turnTimeOut, int maxTurnOverCnt)
         {
             Number = number;
             _maxUserCount = maxUserCount;
             SendFunc = func;
-            DistributeAction = action;
+            DistributeAction = distributeAction;
+            DistributeMySqlDbAction = distributeMySqlAction;
+            UpdateUsersGameDataAction = updateUsersGameDataAction;
             _mainLogger = logger;
             _maxGameTime = maxGameTime;
             _turnTimeOut = turnTimeOut;
@@ -62,18 +66,11 @@ namespace Omok_Server
             {
                 return false;
             }
-
             var roomUser = new RoomUser();
             roomUser.Set(userID, sessionID);
             _userList.Add(roomUser);
 
             return true;
-        }
-
-        public void RemoveUser(string sessionID)
-        {
-            var index = _userList.FindIndex(x => x.SessionID == sessionID);
-            _userList.RemoveAt(index);
         }
 
         public bool RemoveUser(RoomUser user)
@@ -167,11 +164,11 @@ namespace Omok_Server
         {
             var roomUser = GetRoomUserBySessionId(sessionID);
 
-            if(roomUser.State == RoomUserState.None)
+            if (roomUser.State == RoomUserState.None)
             {
                 roomUser.State = RoomUserState.Ready;
             }
-            else if(roomUser.State == RoomUserState.Ready)
+            else if (roomUser.State == RoomUserState.Ready)
             {
                 roomUser.State = RoomUserState.None;
             }
@@ -201,16 +198,16 @@ namespace Omok_Server
             }
         }
 
-        
+
 
         public bool IsAllUserReady()
         {
-            if(_userList.Count < _maxUserCount)
+            if (_userList.Count < _maxUserCount)
             {
                 return false;
             }
 
-            for(int i = 0; i < _userList.Count; i++)
+            for (int i = 0; i < _userList.Count; i++)
             {
                 if (_userList[i].State != RoomUserState.Ready)
                 {
@@ -235,7 +232,7 @@ namespace Omok_Server
         }
         public void NotifyGameStartToClient(string sessionID, StoneColor stoneColor)
         {
-            var notifyGameStart = new PKTNtfGameStart() { MyStoneColor = stoneColor};
+            var notifyGameStart = new PKTNtfGameStart() { MyStoneColor = stoneColor };
 
             var sendPacket = _packetMgr.GetBinaryPacketData(notifyGameStart, PacketId.NtfGameStart);
             SendFunc(sessionID, sendPacket);
@@ -253,7 +250,7 @@ namespace Omok_Server
 
             for (int i = 0; i < _userList.Count; i++)
             {
-                if(i == turnIndex)
+                if (i == turnIndex)
                 {
                     continue;
                 }
@@ -276,7 +273,7 @@ namespace Omok_Server
             _game.PutStone(reqData.Position.Item1, reqData.Position.Item2);
         }
 
-        
+
 
         public void LeaveRoomUser(string sessionID, User user)
         {
@@ -327,10 +324,13 @@ namespace Omok_Server
             var sendPacket = _packetMgr.GetBinaryPacketData(ntfGameEnd, PacketId.NtfGameENd);
             Broadcast("", sendPacket);
 
-            /* ::TODO:: 게임 데이터 저장 및 n초 대기 */
-
-            LeaveRoomAllUsers();
+            //유저 게임 데이터 저장
+            var loserColor = winnerColor == StoneColor.Black ? StoneColor.White : StoneColor.Black;
+            var winnerSession = _game.GetSessionByStoneColor(winnerColor);
+            var loserSession = _game.GetSessionByStoneColor(loserColor);
+            UpdateUsersGameDataAction(winnerSession, loserSession);
         }
+
 
         void LeaveRoomAllUsers()
         {

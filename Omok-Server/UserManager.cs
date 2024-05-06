@@ -27,7 +27,6 @@ namespace Omok_Server
         Action<OmokBinaryRequestInfo> DistributeMySqlDBWorkAction;
 
         public List<User> UserList { get { return _userList; } }
-        public Dictionary<string, int> SessionIndexDict { get { return _sessionIndexDict; } }
 
         public void Init(int maxUserCount, Func<string, byte[], bool> sendFunc, Action<OmokBinaryRequestInfo> distributeRedisDBaction, Action<OmokBinaryRequestInfo> distributeMySqlDBaction, ILog logger)
         {
@@ -192,13 +191,7 @@ namespace Omok_Server
                 return;
             }
 
-            // ::TODO:: Redis에 확인
-            //Redis 스레드로 sessionID, userID, Auth를 보낸다. (DbReqLogin)
-            //Redis 스레드에서 검증 완료하면 DbResLogin 패킷을 Distribute한다
-            //DbResLogin 패킷 ErrorCode == None이면 Login처리를 한다.
-            //Login(reqData.UserID, sessionID);
-
-            //pkt매니저에서 pkt id req db login을 만들고 distribute한다.
+            //Redis에 로그인 정보 확인 요청
             var innerPacket = _packetMgr.MakeInReqDbLoginPacket(sessionID, reqData.UserID, reqData.AuthToken);
             DistributeRedisDBWorkAction(innerPacket);
         }
@@ -229,6 +222,25 @@ namespace Omok_Server
 
             var sendData = _packetMgr.GetBinaryPacketData(resLoadUserGameData, PacketId.ResLoadUserGameData);
             SendFunc(sessionID, sendData);
+        }
+
+        public void UpdateUsersGameData(string winUserSessionId, string loseUserSessionId)
+        {
+            var winUser = GetUserBySessionId(winUserSessionId);
+            var loseUser = GetUserBySessionId(loseUserSessionId);
+
+            winUser.Win();
+            loseUser.Lose();
+
+            SaveUserGameData(winUserSessionId, winUser.ID, winUser.GameData.Win_Count, winUser.GameData.Lose_Count, winUser.GameData.Level, winUser.GameData.Exp);
+            SaveUserGameData(loseUserSessionId, loseUser.ID, loseUser.GameData.Win_Count, loseUser.GameData.Lose_Count, loseUser.GameData.Level, loseUser.GameData.Exp);
+            
+        }
+
+        void SaveUserGameData(string sessionId, string userId, int winCount, int loseCount, int level, int exp)
+        {
+            var innerPacket = _packetMgr.MakeInReqDbSaveUserGameDataPacket(sessionId, userId, winCount, loseCount, level, exp);
+            DistributeMySqlDBWorkAction(innerPacket);
         }
     }
 }

@@ -25,11 +25,15 @@ namespace Omok_Server
 
         Func<string, byte[], bool> SendFunc;
         Action<OmokBinaryRequestInfo> DistributeAction;
+        Action<OmokBinaryRequestInfo> DistributeMySqlDbAction;
+        Action<string, string> UpdateUsersGameDataAction;
 
-        public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger, ServerOption serverOption)
+        public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> distributeAction, Action<OmokBinaryRequestInfo> distributeMySqlAction, Action<string, string>  updateUserGameDataAction, ILog logger, ServerOption serverOption)
         {
             SendFunc = func;
-            DistributeAction = action;
+            DistributeAction = distributeAction;
+            DistributeMySqlDbAction = distributeMySqlAction;
+            UpdateUsersGameDataAction = updateUserGameDataAction;
             _mainLogger = logger;
             _serverOption = serverOption;
             _interval = serverOption.RoomCheckInterval;
@@ -72,7 +76,7 @@ namespace Omok_Server
             {
                 var roomNumber = (startNumber + i);
                 var room = new Room();
-                room.Init(roomNumber, maxUserCount, SendFunc, DistributeAction, _mainLogger, _serverOption.MaxGameTime, _serverOption.TurnTimeOut, _serverOption.MaxTurnOverCnt);
+                room.Init(roomNumber, maxUserCount, SendFunc, DistributeAction, DistributeMySqlDbAction, UpdateUsersGameDataAction, _mainLogger, _serverOption.MaxGameTime, _serverOption.TurnTimeOut, _serverOption.MaxTurnOverCnt);
                 _roomList.Add(room);
             }
 
@@ -114,7 +118,7 @@ namespace Omok_Server
             {
                 errorCode = ErrorCode.RoomEnterFailInvalidRoomNumber;
             }
-            //유저 추가
+            //유저 추가 
             if (room.AddUser(user.ID, sessionID) == false)
             {
                 errorCode = ErrorCode.RoomEnterFailAddUser;
