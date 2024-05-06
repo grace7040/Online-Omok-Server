@@ -24,6 +24,15 @@ namespace Omok_Server
         
         public int HeartBeatCnt { get { return _heartBeatCnt; } set { _heartBeatCnt = value; } }
 
+
+        //유저 게임 정보
+        public int Level { get; set; }
+        public int Exp { get; set; }
+        public int WinCount { get; set; }
+        public int LoseCount { get; set; }
+        public int TotalGameCount { get { return WinCount + LoseCount; } }
+
+
         public void Use(string sessionID)
         {
             _sessionID = sessionID;

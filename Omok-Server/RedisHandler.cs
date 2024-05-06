@@ -17,7 +17,7 @@ namespace Omok_Server
         }
         public async Task<OmokBinaryRequestInfo> RequestLogin(OmokBinaryRequestInfo packetData, RedisDb redisDb)
         {
-            var reqData = _packetMgr.GetPacketData<PKTReqInLogin>(packetData.Data);
+            var reqData = _packetMgr.GetPacketData<PKTReqDbLogin>(packetData.Data);
             var result = await redisDb.CheckUserAuthAsync(reqData.UserID, reqData.AuthToken);
             var response = _packetMgr.MakeInResDbLoginPacket(packetData.SessionID, reqData.UserID, result);
             return response;

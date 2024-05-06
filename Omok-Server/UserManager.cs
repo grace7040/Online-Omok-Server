@@ -24,14 +24,17 @@ namespace Omok_Server
 
         Action<OmokBinaryRequestInfo> DistributeRedisDBWorkAction;
 
+        Action<OmokBinaryRequestInfo> DistributeMySqlDBWorkAction;
+
         public List<User> UserList { get { return _userList; } }
         public Dictionary<string, int> SessionIndexDict { get { return _sessionIndexDict; } }
 
-        public void Init(int maxUserCount, Func<string, byte[], bool> sendFunc, Action<OmokBinaryRequestInfo> distributeDBaction, ILog logger)
+        public void Init(int maxUserCount, Func<string, byte[], bool> sendFunc, Action<OmokBinaryRequestInfo> distributeRedisDBaction, Action<OmokBinaryRequestInfo> distributeMySqlDBaction, ILog logger)
         {
             _maxUserCount = maxUserCount;
             SendFunc = sendFunc;
-            DistributeRedisDBWorkAction = distributeDBaction;
+            DistributeRedisDBWorkAction = distributeRedisDBaction;
+            DistributeMySqlDBWorkAction = distributeMySqlDBaction;
             _mainLogger = logger;
         }
 
@@ -108,13 +111,17 @@ namespace Omok_Server
                     NotifyMustCloseToClient(ErrorCode.LoginFailFullUserCount, sessionID);
                 }
 
+                _mainLogger.Debug($"로그인 결과. UserID:{userID}, ERROR: {errorCode}");
                 return;
             }
 
             //로그인 성공
             ResponseLogin(errorCode, sessionID);
-
             _mainLogger.Debug($"로그인 결과. UserID:{userID}, ERROR: {errorCode}");
+
+            //게임 데이터 로드
+            var innerPacket = _packetMgr.MakeInReqDbLoadUserGameDataPacket(sessionID, userID);
+            DistributeMySqlDBWorkAction(innerPacket);
         }
         
 
@@ -135,7 +142,7 @@ namespace Omok_Server
             var user = GetUserBySessionId(sessionID);
             if (user == null)
             {
-                return ErrorCode.LoginFailInvalidSessionID;
+                return ErrorCode.LoginFailInvalidUser;
             }
 
             user.Login(userID);
@@ -209,5 +216,19 @@ namespace Omok_Server
             SendFunc(sessionID, sendData);
         }
 
+        public void ResponseLoadUserGameData(string sessionID, short error, int winCount, int loseCount, int level, int exp)
+        {
+            var resLoadUserGameData = new PKTResLoadUserGameData()
+            {
+                Result = error,
+                WinCount = winCount,
+                LoseCount = loseCount,
+                Level = level,
+                Exp = exp
+            };
+
+            var sendData = _packetMgr.GetBinaryPacketData(resLoadUserGameData, PacketId.ResLoadUserGameData);
+            SendFunc(sessionID, sendData);
+        }
     }
 }

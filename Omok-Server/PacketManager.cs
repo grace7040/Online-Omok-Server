@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace Omok_Server
 {
     //패킷 직렬화 방식에 따른 패킷 관리자
+    // ::TODO:: 이너패킷 만드는 중복되는 부분 함수로 묶기
     public class PacketManager<TPacketDataCreator> where TPacketDataCreator : IBinaryPacketDataCreator, new()
     {
         TPacketDataCreator _dataCreator = new();
@@ -77,7 +78,7 @@ namespace Omok_Server
 
         public OmokBinaryRequestInfo MakeInReqDbLoginPacket(string sessionId, string userId, string authToken)
         {
-            var responseLogin = new PKTReqInLogin()
+            var responseLogin = new PKTReqDbLogin()
             {
                 UserID = userId,
                 AuthToken = authToken
@@ -97,6 +98,37 @@ namespace Omok_Server
                 UserID = userId,
             };
             var sendData = GetBinaryPacketData(responseLogin, PacketId.ResDbLogin);
+            var innerPacket = new OmokBinaryRequestInfo();
+            innerPacket.Data = sendData;
+            innerPacket.SessionID = sessionId;
+            return innerPacket;
+        }
+
+        public OmokBinaryRequestInfo MakeInReqDbLoadUserGameDataPacket(string sessionId, string userId)
+        {
+            var reqData = new PKTReqDbLoadUserGameData()
+            {
+                UserID = userId
+            };
+            var sendData = GetBinaryPacketData(reqData, PacketId.ReqDbLoadUserGameData);
+            var innerPacket = new OmokBinaryRequestInfo();
+            innerPacket.Data = sendData;
+            innerPacket.SessionID = sessionId;
+            return innerPacket;
+        }
+
+        public OmokBinaryRequestInfo MakeInResDbLoadUserGameDataPacket(string sessionId, string userId, ErrorCode error, int winCount, int loseCount, int level, int exp)
+        {
+            var resData = new PKTResDbLoadUserGameData()
+            {
+                Result = (short)error,
+                UserID = userId,
+                WinCount = winCount,
+                LoseCount = loseCount,
+                Level = level,
+                Exp = exp
+            };
+            var sendData = GetBinaryPacketData(resData, PacketId.ResDbLoadUserGameData);
             var innerPacket = new OmokBinaryRequestInfo();
             innerPacket.Data = sendData;
             innerPacket.SessionID = sessionId;

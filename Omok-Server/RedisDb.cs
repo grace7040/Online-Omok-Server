@@ -21,6 +21,7 @@ namespace Omok_Server
             //for Debug
             RegistUserAsync("jacking", "123qwe", TimeSpan.FromHours(1));
             RegistUserAsync("jacking1", "123qwe", TimeSpan.FromHours(1));
+            RegistUserAsync("hello@naver.com", "123qwe", TimeSpan.FromHours(1));
         }
 
         //for Debug

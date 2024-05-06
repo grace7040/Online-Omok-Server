@@ -16,6 +16,7 @@ namespace Omok_Server
             packetHandlerMap.Add((int)PacketId.ReqInHeartBeat, InRequestHeartBeat);
             packetHandlerMap.Add((int)PacketId.ReqInDisConnectUser, InReqDisConnectUser);
             packetHandlerMap.Add((int)PacketId.ResDbLogin, InResponseDbLogin);
+            packetHandlerMap.Add((int)PacketId.ResDbLoadUserGameData, InResponseDbLoadUserGameData);
         }
 
         public void InNotifyConnectClient(OmokBinaryRequestInfo packetData)
@@ -83,6 +84,12 @@ namespace Omok_Server
                 return;
             }
             _userMgr.Login(resData.UserID, packetData.SessionID);
+        }
+
+        public void InResponseDbLoadUserGameData(OmokBinaryRequestInfo packetData)
+        {
+            var resData = _packetMgr.GetPacketData<PKTResDbLoadUserGameData>(packetData.Data);
+            _userMgr.ResponseLoadUserGameData(packetData.SessionID, resData.Result, resData.WinCount, resData.LoseCount, resData.Level, resData.Exp); ;
         }
     }
 }
