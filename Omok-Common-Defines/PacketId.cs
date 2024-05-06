@@ -19,6 +19,8 @@ public enum PacketId : int
     ResLogin = 1003,
     NtfMustClose = 1005,
 
+    ResLoadUserGameData = 1006,
+
     ReqRoomEnter = 1015,
     ResRoomEnter = 1016,
     NtfRoomUserList = 1017,
@@ -75,4 +77,10 @@ public enum PacketId : int
     // DB 8101 ~ 9000
     ReqDbLogin = 8101,
     ResDbLogin = 8102,
+
+    ReqDbLoadUserGameData = 8106,
+    ResDbLoadUserGameData = 8107,
+    
+    ReqDbSaveUserGameData = 8110,
+    ResDbSaveUserGameData = 8111,
 }

@@ -24,6 +24,15 @@ namespace Omok_Server
         
         public int HeartBeatCnt { get { return _heartBeatCnt; } set { _heartBeatCnt = value; } }
 
+
+        //유저 게임 정보
+        public UserGameData GameData { get; private set; }
+
+        public void SetGameData(UserGameData userGameData)
+        {
+            GameData = userGameData;
+        }
+
         public void Use(string sessionID)
         {
             _sessionID = sessionID;
@@ -60,5 +69,26 @@ namespace Omok_Server
             RoomNumber = -1;
         }
         
+        public void Win()
+        {
+            GameData.Win_Count++;
+            UpdateExp(10);
+        }
+
+        public void Lose()
+        {
+            GameData.Lose_Count++;
+            UpdateExp(5);
+        }
+
+        void UpdateExp(int exp)
+        {
+            GameData.Exp += exp;
+            if (GameData.Exp >= 100)
+            {
+                GameData.Level++;
+                GameData.Exp = 0;
+            }
+        }
     }
 }

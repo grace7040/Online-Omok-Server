@@ -60,7 +60,7 @@ namespace Omok_Server
             //StartTimer();
         }
 
-        string GetSessionByStoneColor(StoneColor stoneColor)
+        public string GetSessionByStoneColor(StoneColor stoneColor)
         {
             return _userStoneColorDict.FirstOrDefault(entry =>
                        EqualityComparer<StoneColor>.Default.Equals(entry.Value, stoneColor)).Key;

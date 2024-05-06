@@ -22,7 +22,9 @@ namespace Omok_Server
 
         PacketProcessor _packetProcessor = new();
         PacketManager<MemoryPackBinaryPacketDataCreator> _packetManager = new();
-        DBProcessor _dbProcessor = new();
+        //MySqlProcessor _mySqlProcessor = new();
+        RedisProcessor _redisProcessor = new();
+        MySqlProcessor _mySqlProcessor = new();
         RoomManager _roomMgr = new();
         UserManager _userMgr = new();
         HeartBeatManager _heartBeatMgr = new();
@@ -151,18 +153,18 @@ namespace Omok_Server
         void CreateAndInitComponents()
         {
             var maxUserCount = _serverOption.RoomMaxCount * _serverOption.RoomMaxUserCount;
-            _userMgr.Init(maxUserCount, this.SendData, this.DistributeDBWork, MainLogger);
+            _userMgr.Init(maxUserCount, this.SendData, this.DistributeRedisDBWork, this.DistributeMySqlDBWork, MainLogger);
             _userMgr.CreateUsers();
 
-            _roomMgr.Init(this.SendData, this.Distribute, MainLogger, _serverOption);
+            _roomMgr.Init(this.SendData, this.Distribute, this.DistributeMySqlDBWork, _userMgr.UpdateUsersGameData, MainLogger, _serverOption);
             _roomMgr.CreateRooms(_serverOption);
 
             _heartBeatMgr.Init(this.SendData, this.Distribute, MainLogger, _userMgr, _serverOption.CheckUserCount, maxUserCount, _serverOption.HeartBeatInterval);
             _heartBeatMgr.StartTimer();
 
             _packetProcessor.InitAndStartProcessing(_serverOption, _userMgr, _roomMgr, _heartBeatMgr, this.SendData, MainLogger);
-            _dbProcessor.InitAndStartProcessing(_serverOption.DBThreadCount, _serverOption.RedisConnectionString, this.Distribute, MainLogger);
-
+            _mySqlProcessor.InitAndStartProcessing(_serverOption.DbThreadCount, _serverOption.DbConnectionString, this.Distribute, MainLogger);
+            _redisProcessor.InitAndStartProcessing(_serverOption.RedisThreadCount, _serverOption.RedisConnectionString, this.Distribute, MainLogger);
         }
 
         public bool SendData(string sessionID, byte[] sendData)
@@ -195,9 +197,14 @@ namespace Omok_Server
             
         }
 
-        void DistributeDBWork(OmokBinaryRequestInfo requestPacket)
+        void DistributeMySqlDBWork(OmokBinaryRequestInfo requestPacket)
         {
-            _dbProcessor.InsertPakcet(requestPacket);
+            _mySqlProcessor.InsertPakcet(requestPacket);
+        }
+
+        void DistributeRedisDBWork(OmokBinaryRequestInfo requestPacket)
+        {
+            _redisProcessor.InsertPakcet(requestPacket);
         }
 
     }

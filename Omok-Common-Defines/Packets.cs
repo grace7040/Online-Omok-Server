@@ -18,9 +18,25 @@ public partial class PKTReqLogin : PKHeader
 }
 
 [MemoryPackable]
+public partial class PKTReqDbLogin : PKHeader
+{
+    public string UserID { get; set; }
+    public string AuthToken { get; set; }
+}
+
+
+[MemoryPackable]
 public partial class PKTResLogin : PKHeader
 {
     public short Result { get; set; }
+}
+
+[MemoryPackable]
+public partial class PKTResInLogin : PKHeader
+{
+    public string UserID { get; set; }
+    public short Result { get; set; }
+    
 }
 
 
@@ -167,4 +183,61 @@ public partial class PKTReqInHeartBeat : PKHeader
 public partial class PKTReqInDisConnectUser : PKHeader
 {
 
+}
+
+[MemoryPackable]
+public partial class PKTReqInRoomCheck : PKHeader
+{
+
+}
+
+[MemoryPackable]
+public partial class PKTReqDbLoadUserGameData : PKHeader
+{
+    public string UserID { get; set; }
+}
+
+[MemoryPackable]
+public partial class PKTResDbLoadUserGameData : PKHeader
+{
+    public string UserID { get; set; }
+    public short Result { get; set; }
+    public int WinCount { get; set; }
+    public int LoseCount { get; set; }
+    public int Level { get; set; }
+    public int Exp { get; set; }
+}
+
+[MemoryPackable]
+public partial class PKTResLoadUserGameData : PKHeader
+{
+    public short Result { get; set; }
+    public int WinCount { get; set; }
+    public int LoseCount { get; set; }
+    public int Level { get; set; }
+    public int Exp { get; set; }
+}
+
+[MemoryPackable]
+public partial class PKTReqDbSaveUserGameData : PKHeader
+{
+    public string UserID { get; set; }
+    public int WinCount { get; set; }
+    public int LoseCount { get; set; }
+    public int Level { get; set; }
+    public int Exp { get; set; }
+}
+
+
+[MemoryPackable]
+public partial class PKTResDbSaveUserGameData : PKHeader
+{
+    public string UserID { get; set; }
+    public short Result { get; set; }
+}
+
+[MemoryPackable]
+public partial class PKTResSaveUserGameData : PKHeader
+{
+    public short Result { get; set; }
 }
