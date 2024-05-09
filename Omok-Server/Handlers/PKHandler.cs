@@ -11,6 +11,7 @@ namespace Omok_Server
     {
         public static Func<string, byte[], bool> SendFunc;
         public static Action<OmokBinaryRequestInfo> DIstributePacketAction;
+        public static Action<string> CloseSessionAction;
 
         protected ILog _mainLogger;
         protected UserManager _userMgr;

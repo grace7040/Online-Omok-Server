@@ -226,6 +226,10 @@ namespace Omok_Server
 
         public void UpdateUsersGameData(string winUserSessionId, string loseUserSessionId)
         {
+            if(winUserSessionId == null || loseUserSessionId == null)
+            {
+                _mainLogger.Error("WinUser or LoseUser is NULL");
+            }
             var winUser = GetUserBySessionId(winUserSessionId);
             var loseUser = GetUserBySessionId(loseUserSessionId);
 
@@ -239,6 +243,8 @@ namespace Omok_Server
 
         void SaveUserGameData(string sessionId, string userId, int winCount, int loseCount, int level, int exp)
         {
+            if (sessionId == null) return;
+
             var innerPacket = _packetMgr.MakeInReqDbSaveUserGameDataPacket(sessionId, userId, winCount, loseCount, level, exp);
             DistributeMySqlDBWorkAction(innerPacket);
         }

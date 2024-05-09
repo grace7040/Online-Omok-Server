@@ -48,31 +48,23 @@ namespace Omok_Server
 
         public OmokBinaryRequestInfo MakeInReqHeartBeatPacket()
         {
-            var packet = new PKTReqInHeartBeat();
-            var sendData = GetBinaryPacketData(packet, PacketId.ReqInHeartBeat);
-
             var innerPacket = new OmokBinaryRequestInfo();
-            innerPacket.Data = sendData;
+            innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.ReqInHeartBeat);
             return innerPacket;
         }
 
-        public OmokBinaryRequestInfo MakeInReqDisConnectUserPacket()
+        public OmokBinaryRequestInfo MakeInReqDisConnectUserPacket(string sessionID)
         {
-            var packet = new PKTReqInDisConnectUser();
-            var sendData = GetBinaryPacketData(packet, PacketId.ReqInDisConnectUser);
-
             var innerPacket = new OmokBinaryRequestInfo();
-            innerPacket.Data = sendData;
+            innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.ReqInDisConnectUser);
+            innerPacket.SessionID = sessionID;
             return innerPacket;
         }
 
         public OmokBinaryRequestInfo MakeInReqRoomCheckPacket()
         {
-            var packet = new PKTReqInRoomCheck();
-            var sendData = GetBinaryPacketData(packet, PacketId.ReqInRoomCheck);
-
             var innerPacket = new OmokBinaryRequestInfo();
-            innerPacket.Data = sendData;
+            innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.ReqInRoomCheck);
             return innerPacket;
         }
 
@@ -164,6 +156,7 @@ namespace Omok_Server
             innerPacket.SessionID = sessionID;
             return innerPacket;
         }
+
 
         public byte[] GetBinaryPacketData<T>(T pkHeader, PacketId packetId) where T : PKHeader
         {

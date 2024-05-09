@@ -173,23 +173,6 @@ public partial class PKTResHeartBeat : PKHeader
 
 }
 
-[MemoryPackable]
-public partial class PKTReqInHeartBeat : PKHeader
-{
-
-}
-
-[MemoryPackable]
-public partial class PKTReqInDisConnectUser : PKHeader
-{
-
-}
-
-[MemoryPackable]
-public partial class PKTReqInRoomCheck : PKHeader
-{
-
-}
 
 [MemoryPackable]
 public partial class PKTReqDbLoadUserGameData : PKHeader

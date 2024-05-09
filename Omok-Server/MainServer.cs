@@ -92,6 +92,8 @@ namespace Omok_Server
         void OnPacketReceived(NetworkSession session, OmokBinaryRequestInfo requestPacket)
         {
             //MainLogger.Info($"OnPacketReceived(): {session.SessionID} Sent Packet. Packet Body Length: {requestPacket.Data.Length}");
+            // ::TODO:: PacketID가 유효한 범위 내인지 체크
+            
             requestPacket.SessionID = session.SessionID;
 
             Distribute(requestPacket);
@@ -165,6 +167,8 @@ namespace Omok_Server
             _packetProcessor.InitAndStartProcessing(_serverOption, _userMgr, _roomMgr, _heartBeatMgr, this.SendData, MainLogger);
             _mySqlProcessor.InitAndStartProcessing(_serverOption.DbThreadCount, _serverOption.DbConnectionString, this.Distribute, MainLogger);
             _redisProcessor.InitAndStartProcessing(_serverOption.RedisThreadCount, _serverOption.RedisConnectionString, this.Distribute, MainLogger);
+
+            PKHandler.CloseSessionAction = CloseSession;
         }
 
         public bool SendData(string sessionID, byte[] sendData)
@@ -189,6 +193,12 @@ namespace Omok_Server
                 session.Close();
             }
             return true;
+        }
+
+        public void CloseSession(string sessionID)
+        {
+            var session = GetSessionByID(sessionID);
+            session.Close();
         }
 
         void Distribute(OmokBinaryRequestInfo requestPacket)

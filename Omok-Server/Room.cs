@@ -13,8 +13,6 @@ namespace Omok_Server
 {
     public enum RoomState { None, GameStart, GameEnd }
 
-
-
     public class Room
     {
         ILog _mainLogger;
@@ -198,8 +196,6 @@ namespace Omok_Server
             }
         }
 
-
-
         public bool IsAllUserReady()
         {
             if (_userList.Count < _maxUserCount)
@@ -275,14 +271,8 @@ namespace Omok_Server
 
 
 
-        public void LeaveRoomUser(string sessionID, User user)
+        public void LeaveRoomUser(string sessionID)
         {
-            //유저가 없거나
-            if (user == null)
-            {
-                return;
-            }
-
             //해당 유저가 해당 룸에 없거나
             var roomUser = GetRoomUserBySessionId(sessionID);
             if (roomUser == null)
@@ -290,7 +280,6 @@ namespace Omok_Server
                 return;
             }
 
-            user.LeaveRoom();
             RemoveUser(roomUser);
             NotifyLeaveRoomUserToClient(roomUser.UserID);
             ResponseLeaveRoomToClient(sessionID);
@@ -328,6 +317,11 @@ namespace Omok_Server
             var loserColor = winnerColor == StoneColor.Black ? StoneColor.White : StoneColor.Black;
             var winnerSession = _game.GetSessionByStoneColor(winnerColor);
             var loserSession = _game.GetSessionByStoneColor(loserColor);
+            if(winnerSession == null || loserSession == null)
+            {
+                LeaveRoomAllUsers();
+                return;
+            }
             UpdateUsersGameDataAction(winnerSession, loserSession);
         }
 
@@ -377,10 +371,6 @@ namespace Omok_Server
             _recentTurnChangedTime = DateTime.Now;
         }
 
-        internal void Init(int roomNumber, int maxUserCount, Func<string, byte[], bool> sendFunc, Action<OmokBinaryRequestInfo> distributeAction, ILog mainLogger, object maxGameTime, object turnTimeOut)
-        {
-            throw new NotImplementedException();
-        }
     }
     
     
