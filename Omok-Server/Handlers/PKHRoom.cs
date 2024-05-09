@@ -46,13 +46,18 @@ namespace Omok_Server
             try
             {
                 var user = _userMgr.GetUserBySessionId(sessionID);
+                if(user == null)
+                {
+                    _mainLogger.Error("RequestRoomLeave - UserIsNotExit");
+                    return;
+                }
                 if(user.IsInRoom == false)
                 {
                     _mainLogger.Error("RequestRoomLeave - UserIsNotInRoom");
                     return;
                 }
-                var room = _roomMgr.GetRoomByRoomNumber(user.RoomNumber);
-                room.LeaveRoomUser(sessionID, user);
+                _roomMgr.LeaveRoom(user.RoomNumber, sessionID);
+                _userMgr.GetUserBySessionId(sessionID).LeaveRoom();
             }
             catch (Exception ex)
             {

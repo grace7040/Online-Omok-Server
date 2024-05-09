@@ -69,7 +69,7 @@ namespace Omok_Server
 
             if (++_userMgr.UserList[userIdx].HeartBeatCnt >= 3)
             {
-                var innerPacket = _packetMgr.MakeInNTFConnectOrDisConnectClientPacket(false, sessionID);
+                var innerPacket = _packetMgr.MakeInReqDisConnectUserPacket(sessionID);
                 DistributeAction(innerPacket);
                 _mainLogger.Debug("::HeartBeat 응답 없음 - 연결 해제 - sessionID : " + sessionID);
                 return;

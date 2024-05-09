@@ -56,13 +56,14 @@ namespace Omok_Server
             return innerPacket;
         }
 
-        public OmokBinaryRequestInfo MakeInReqDisConnectUserPacket()
+        public OmokBinaryRequestInfo MakeInReqDisConnectUserPacket(string sessionID)
         {
             var packet = new PKTReqInDisConnectUser();
             var sendData = GetBinaryPacketData(packet, PacketId.ReqInDisConnectUser);
 
             var innerPacket = new OmokBinaryRequestInfo();
             innerPacket.Data = sendData;
+            innerPacket.SessionID = sessionID;
             return innerPacket;
         }
 
@@ -164,6 +165,7 @@ namespace Omok_Server
             innerPacket.SessionID = sessionID;
             return innerPacket;
         }
+
 
         public byte[] GetBinaryPacketData<T>(T pkHeader, PacketId packetId) where T : PKHeader
         {

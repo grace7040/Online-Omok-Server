@@ -14,9 +14,9 @@ namespace Omok_Server
             packetHandlerMap.Add((int)PacketId.ReqLogin, RequestLogin);
             packetHandlerMap.Add((int)PacketId.ResHeartBeat, ResponseHeartBeat);
             packetHandlerMap.Add((int)PacketId.ReqInHeartBeat, InRequestHeartBeat);
-            packetHandlerMap.Add((int)PacketId.ReqInDisConnectUser, InReqDisConnectUser);
             packetHandlerMap.Add((int)PacketId.ResDbLogin, InResponseDbLogin);
             packetHandlerMap.Add((int)PacketId.ResDbLoadUserGameData, InResponseDbLoadUserGameData);
+            packetHandlerMap.Add((int)PacketId.ReqInDisConnectUser, InRequestDisConnectClient);
         }
 
         public void InNotifyConnectClient(OmokBinaryRequestInfo packetData)
@@ -25,6 +25,10 @@ namespace Omok_Server
             _mainLogger.Debug($"{packetData.SessionID} 유저의 접속 성공");
         }
 
+        public void InRequestDisConnectClient(OmokBinaryRequestInfo packetData)
+        {
+            CloseSessionAction(packetData.SessionID);
+        }
 
         public void InNotifyDisConnectClient(OmokBinaryRequestInfo packetData)
         {
@@ -36,20 +40,14 @@ namespace Omok_Server
                 // 방에 들어가 있는 상태에서 연결이 끊어진 경우 방에서 나가게 한다.
                 if (user.IsInRoom)
                 {
-                    var internalPacketRoomLeave = _packetMgr.MakeInNTFRoomLeavePacket(sessionID, user.RoomNumber, user.ID);
-                    DIstributePacketAction(internalPacketRoomLeave);
+                    _roomMgr.LeaveRoom(user.RoomNumber, sessionID);
+                    _userMgr.GetUserBySessionId(sessionID).LeaveRoom();
+                    
                 }
 
-                var internalPacketDisconnect = _packetMgr.MakeInReqDisConnectUserPacket();
-                DIstributePacketAction(internalPacketDisconnect);
+                _userMgr.DisConnectUser(sessionID);
                 _mainLogger.Debug($"{packetData.SessionID} 유저의 접속 해제. (IsInRoom: {user.IsInRoom})");
             }
-        }
-
-        public void InReqDisConnectUser(OmokBinaryRequestInfo packetData)
-        {
-            var sessionID = packetData.SessionID;
-            _userMgr.DisConnectUser(sessionID);
         }
 
 
@@ -112,5 +110,7 @@ namespace Omok_Server
             
             _userMgr.ResponseLoadUserGameData(sessionID, resData.Result, resData.WinCount, resData.LoseCount, resData.Level, resData.Exp); ;
         }
+
+        
     }
 }

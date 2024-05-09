@@ -151,5 +151,12 @@ namespace Omok_Server
 
             SendFunc(sessionID, sendPacket);
         }
+
+        public void LeaveRoom(int roomNumber, string sessionID)
+        {
+            var room = GetRoomByRoomNumber(roomNumber);
+            room.LeaveRoomUser(sessionID);
+            
+        }
     }
 }
