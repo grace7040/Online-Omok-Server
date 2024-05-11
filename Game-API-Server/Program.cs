@@ -9,6 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddSingleton<IMemoryDb, RedisDb>();
 builder.Services.AddScoped<IGameDb, MySqlDb>();
 builder.Services.AddSingleton<ICheckAuthService, CheckAuthService>();
+builder.Services.AddScoped<IMatchMakingService, SimpleMatchService>();
 
 
 SettingLogger();

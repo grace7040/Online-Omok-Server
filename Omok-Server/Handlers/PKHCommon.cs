@@ -32,6 +32,7 @@ namespace Omok_Server
 
         public void InNotifyDisConnectClient(OmokBinaryRequestInfo packetData)
         {
+            // ::TODO:: redis 에서 유저:룸넘버 키페어 삭제
             var sessionID = packetData.SessionID;
             var user = _userMgr.GetUserBySessionId(sessionID);
 
