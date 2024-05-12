@@ -181,7 +181,8 @@ namespace Omok_Server
             }
 
             var room = roomObject.Item2;
-            var innerPacket = _packetMgr.MakeInNTFRoomLeavePacket(sessionID, room.Number, resData.UserID);
+            //var innerPacket = _packetMgr.MakeInNTFRoomLeavePacket(sessionID, room.Number, resData.UserID);
+            var innerPacket = _packetMgr.MakeInReqDisConnectUserPacket(sessionID);
             DIstributePacketAction(innerPacket);
 
         }

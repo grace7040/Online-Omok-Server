@@ -319,7 +319,8 @@ namespace Omok_Server
             var loserSession = _game.GetSessionByStoneColor(loserColor);
             if(winnerSession == null || loserSession == null)
             {
-                LeaveRoomAllUsers();
+                //LeaveRoomAllUsers();
+                DisConnectAllUsers();
                 return;
             }
             UpdateUsersGameDataAction(winnerSession, loserSession);
@@ -332,6 +333,16 @@ namespace Omok_Server
             {
                 var innerPacket = _packetMgr.MakeInNTFRoomLeavePacket(_userList[i].SessionID, Number, _userList[i].UserID);
                 
+                DistributeAction(innerPacket);
+            }
+        }
+
+        void DisConnectAllUsers()
+        {
+            for (int i = 0; i < _userList.Count; i++)
+            {
+                var innerPacket = _packetMgr.MakeInReqDisConnectUserPacket(_userList[i].SessionID);
+
                 DistributeAction(innerPacket);
             }
         }

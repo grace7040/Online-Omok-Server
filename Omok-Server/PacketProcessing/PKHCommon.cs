@@ -38,11 +38,10 @@ namespace Omok_Server
 
             if (user != null)
             {
-
+                _userMgr.RequestDbLeaveRoom(sessionID, user.ID, user.RoomNumber);
                 // 방에 들어가 있는 상태에서 연결이 끊어진 경우 방에서 나가게 한다.
                 if (user.IsInRoom)
                 {
-                    _userMgr.RequestDbLeaveRoom(sessionID, user.ID, user.RoomNumber);
                     _roomMgr.LeaveRoom(user.RoomNumber, sessionID);
                     user.LeaveRoom();
                 }
