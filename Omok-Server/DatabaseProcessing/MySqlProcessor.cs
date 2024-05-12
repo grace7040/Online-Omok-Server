@@ -9,17 +9,17 @@ using System.Threading.Tasks.Dataflow;
 
 namespace Omok_Server
 {
-    public class RedisProcessor
+    public class MySqlProcessor
     {
         ILog _mainLogger;
         bool _isThreadRunning = false;
         List<System.Threading.Thread> _processThreadList = new();
 
         BufferBlock<OmokBinaryRequestInfo> _dbPktBuffer = new();
-        RedisHandler _dbWorkHandler = new();
+        MySqlHandler _dbWorkHandler = new();
         string _connectionString;
 
-        Dictionary<int, Func<OmokBinaryRequestInfo, RedisDb, Task<OmokBinaryRequestInfo>>> _dbWorkHandlerMap = new();
+        Dictionary<int, Func<OmokBinaryRequestInfo, MySqlDb, OmokBinaryRequestInfo>> _dbWorkHandlerMap = new();
 
         Action<OmokBinaryRequestInfo> DistributeAction;
 
@@ -53,10 +53,9 @@ namespace Omok_Server
             _dbPktBuffer.Post(requstPacket);
         }
 
-        async void Process() 
+        void Process() 
         {
-            // ::TODO:: DB 커넥션 생성
-            var db = new RedisDb(_connectionString);
+            var db = new MySqlDb(_connectionString);
             while (_isThreadRunning)
             {
                 try
@@ -69,7 +68,7 @@ namespace Omok_Server
 
                     if (_dbWorkHandlerMap.ContainsKey(header.Id))
                     {
-                        var result = await _dbWorkHandlerMap[header.Id](packet, db);
+                        var result = _dbWorkHandlerMap[header.Id](packet, db);
                         DistributeAction(result);
                     }
                     else

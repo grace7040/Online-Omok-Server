@@ -166,7 +166,7 @@ namespace Omok_Server
 
             _packetProcessor.InitAndStartProcessing(_serverOption, _userMgr, _roomMgr, _heartBeatMgr, this.SendData, MainLogger);
             _mySqlProcessor.InitAndStartProcessing(_serverOption.DbThreadCount, _serverOption.DbConnectionString, this.Distribute, MainLogger);
-            _redisProcessor.InitAndStartProcessing(_serverOption.RedisThreadCount, _serverOption.RedisConnectionString, this.Distribute, MainLogger);
+            _redisProcessor.InitAndStartProcessing(_serverOption.RedisThreadCount, _serverOption.RedisConnectionString, _serverOption.UserRoomKey, this.Distribute, MainLogger);
 
             PKHandler.CloseSessionAction = CloseSession;
         }

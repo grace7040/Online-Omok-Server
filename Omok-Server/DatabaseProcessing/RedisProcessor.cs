@@ -9,26 +9,28 @@ using System.Threading.Tasks.Dataflow;
 
 namespace Omok_Server
 {
-    public class MySqlProcessor
+    public class RedisProcessor
     {
         ILog _mainLogger;
         bool _isThreadRunning = false;
         List<System.Threading.Thread> _processThreadList = new();
 
         BufferBlock<OmokBinaryRequestInfo> _dbPktBuffer = new();
-        MySqlHandler _dbWorkHandler = new();
+        RedisHandler _dbWorkHandler = new();
         string _connectionString;
+        string _userRoomKey;
 
-        Dictionary<int, Func<OmokBinaryRequestInfo, MySqlDb, Task<OmokBinaryRequestInfo>>> _dbWorkHandlerMap = new();
+        Dictionary<int, Func<OmokBinaryRequestInfo, RedisDb, Task<OmokBinaryRequestInfo>>> _dbWorkHandlerMap = new();
 
         Action<OmokBinaryRequestInfo> DistributeAction;
 
-        public void InitAndStartProcessing(int threadCount, string connectionString, Action<OmokBinaryRequestInfo> distributeAction, ILog logger) 
+        public void InitAndStartProcessing(int threadCount, string connectionString, string userRoomKey, Action<OmokBinaryRequestInfo> distributeAction, ILog logger) 
         {
             _mainLogger = logger;
             _mainLogger.Info("DB Init Start");
             DistributeAction = distributeAction;
             _connectionString = connectionString;
+            _userRoomKey = userRoomKey;
 
             _isThreadRunning = true;
 
@@ -55,7 +57,8 @@ namespace Omok_Server
 
         async void Process() 
         {
-            var db = new MySqlDb(_connectionString);
+            // ::TODO:: DB 커넥션 생성
+            var db = new RedisDb(_connectionString, _userRoomKey);
             while (_isThreadRunning)
             {
                 try

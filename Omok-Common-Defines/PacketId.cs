@@ -83,4 +83,6 @@ public enum PacketId : int
     
     ReqDbSaveUserGameData = 8110,
     ResDbSaveUserGameData = 8111,
+    ResDbLeaveRoom = 8112,
+    ReqDbLeaveRoom = 8113,
 }

@@ -26,6 +26,7 @@ namespace Omok_Server
                 var user = _userMgr.GetUserBySessionId(sessionID);
                 if (!user.IsLogin) {
                     // ::TODO:: 방 입장 전 로그인 해달라는 응답
+                    _mainLogger.Debug("방 입장 전 로그인 해야함");
                     return;
                 }
                 var reqData = _packetMgr.GetPacketData<PKTReqRoomEnter>(packetData.Data);
@@ -180,7 +181,8 @@ namespace Omok_Server
             }
 
             var room = roomObject.Item2;
-            var innerPacket = _packetMgr.MakeInNTFRoomLeavePacket(sessionID, room.Number, resData.UserID);
+            //var innerPacket = _packetMgr.MakeInNTFRoomLeavePacket(sessionID, room.Number, resData.UserID);
+            var innerPacket = _packetMgr.MakeInReqDisConnectUserPacket(sessionID);
             DIstributePacketAction(innerPacket);
 
         }

@@ -61,7 +61,7 @@ namespace Omok_Server
             return ErrorCode.None;
         }
 
-        public ErrorCode RemoveUser(string sessionID)
+        public ErrorCode RemoveUserFromSessionIndexDict(string sessionID)
         {
             var user = GetUserBySessionId(sessionID);
             if (user == null)
@@ -160,7 +160,7 @@ namespace Omok_Server
             }
 
             user.Free();
-            RemoveUser(sessionID);
+            RemoveUserFromSessionIndexDict(sessionID);
             LogoutUser(sessionID);
             
         }
@@ -248,5 +248,12 @@ namespace Omok_Server
             var innerPacket = _packetMgr.MakeInReqDbSaveUserGameDataPacket(sessionId, userId, winCount, loseCount, level, exp);
             DistributeMySqlDBWorkAction(innerPacket);
         }
+
+        public void RequestDbLeaveRoom(string sessionID, string userId, int roomNumber)
+        {
+            var innerPacket = _packetMgr.MakeInReqDbLeaveRoom(sessionID, userId, roomNumber);
+            DistributeRedisDBWorkAction(innerPacket);
+        }
+
     }
 }

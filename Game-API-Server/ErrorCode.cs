@@ -16,7 +16,10 @@
     //8001~
     CheckUserAuthFailNotMatch = 8001,
     CheckUserAuthFailNotExist,
-    CheckUserAuthFailException
+    CheckUserAuthFailException,
 
+    //9001~
+    MatchingWait = 9001,
+    AddUserToMatchingQueueFailException = 9002,
 }
 

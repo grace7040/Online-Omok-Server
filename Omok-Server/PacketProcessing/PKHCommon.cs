@@ -17,6 +17,7 @@ namespace Omok_Server
             packetHandlerMap.Add((int)PacketId.ResDbLogin, InResponseDbLogin);
             packetHandlerMap.Add((int)PacketId.ResDbLoadUserGameData, InResponseDbLoadUserGameData);
             packetHandlerMap.Add((int)PacketId.ReqInDisConnectUser, InRequestDisConnectClient);
+            packetHandlerMap.Add((int)PacketId.ResDbLeaveRoom, InNotifyRemovedUserDB);
         }
 
         public void InNotifyConnectClient(OmokBinaryRequestInfo packetData)
@@ -37,12 +38,12 @@ namespace Omok_Server
 
             if (user != null)
             {
+                _userMgr.RequestDbLeaveRoom(sessionID, user.ID, user.RoomNumber);
                 // 방에 들어가 있는 상태에서 연결이 끊어진 경우 방에서 나가게 한다.
                 if (user.IsInRoom)
                 {
                     _roomMgr.LeaveRoom(user.RoomNumber, sessionID);
-                    _userMgr.GetUserBySessionId(sessionID).LeaveRoom();
-                    
+                    user.LeaveRoom();
                 }
 
                 _userMgr.DisConnectUser(sessionID);
@@ -111,6 +112,15 @@ namespace Omok_Server
             _userMgr.ResponseLoadUserGameData(sessionID, resData.Result, resData.WinCount, resData.LoseCount, resData.Level, resData.Exp); ;
         }
 
-        
+        public void InNotifyRemovedUserDB(OmokBinaryRequestInfo packetData)
+        {
+            var resData = _packetMgr.GetPacketData<PKTResDbLeaveRoom>(packetData.Data);
+            if(resData.Result != (short)ErrorCode.None)
+            {
+                _mainLogger.Error($"[InNotifyRemovedUserDB Fail] {resData.Result}");
+                return;
+            }
+            _mainLogger.Debug($"[InNotifyRemovedUserDB Success] {resData.Result}");
+        }
     }
 }
