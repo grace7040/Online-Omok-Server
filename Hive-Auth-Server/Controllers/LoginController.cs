@@ -32,7 +32,6 @@ namespace Hive_Auth_Server.Controllers
 
             if (await passwordFromDb != passwordFromRequest)
             {
-                _hiveDb.Dispose();
                 return new ResponseDTO { Result = ErrorCode.LoginFailWrongPassword };
             }
 
