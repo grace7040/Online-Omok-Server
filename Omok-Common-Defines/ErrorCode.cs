@@ -24,4 +24,6 @@ public enum ErrorCode : short
     CheckUserAuthFailException = 15,
     LoadUserGameDataFailNotExist = 16,
     UpdateUserGameDataFail = 17,
+    RemoveUserRoomNumberFail = 18,
+    RemoveUserFromMatchingQueueFail = 19,
 }

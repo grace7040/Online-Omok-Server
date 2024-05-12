@@ -13,27 +13,13 @@ namespace Omok_Server
     public class RedisDb
     {
         RedisConnection _redisConnection;
-        public RedisDb(string redisConnectString)
+        string _userRoomKey;
+        public RedisDb(string redisConnectString, string userRoomKey)
         {
             var redisConfig = new RedisConfig("GameRedis", redisConnectString!);
             _redisConnection = new RedisConnection(redisConfig);
-
-            //-- for Debug --
-            RegistUserAsync("jacking", "123qwe", TimeSpan.FromHours(1));
-            RegistUserAsync("hello@naver.com", "123qwe", TimeSpan.FromHours(1));
-            RegistUserAsync("crazy@naver.com", "123qwe", TimeSpan.FromHours(1));
-            //-- --------- --
+            _userRoomKey = userRoomKey;
         }
-
-        //-- for Debug --
-        public async Task<ErrorCode> RegistUserAsync(string id, string authToken, TimeSpan expiry)
-        {
-            var query = new RedisString<string>(_redisConnection, id, expiry);
-            await query.SetAsync(authToken, expiry);
-
-            return ErrorCode.None;
-        }
-        //-- --------- --
 
         public async Task<ErrorCode> CheckUserAuthAsync(string id, string authToken)
         {
@@ -59,5 +45,18 @@ namespace Omok_Server
 
             return ErrorCode.None;
         }
+
+        public async Task<ErrorCode> RemoveUserRoomNumber(string id, int roomNumber)
+        {
+            var redisKey = id + _userRoomKey;
+            var query = new RedisString<string>(_redisConnection, redisKey, null);
+            var result = await query.DeleteAsync();
+            if (result == false)
+            {
+                return ErrorCode.RemoveUserRoomNumberFail;
+            }
+            return ErrorCode.None;
+        }
+
     }
 }

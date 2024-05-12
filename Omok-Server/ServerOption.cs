@@ -43,5 +43,8 @@ namespace Omok_Server
         public int TurnTimeOut { get;  set; }
         public int MaxGameTime { get; set; }
         public int MaxTurnOverCnt { get; set; }
+
+        public string UserRoomKey { get; set; } = "";
+
     }
 }

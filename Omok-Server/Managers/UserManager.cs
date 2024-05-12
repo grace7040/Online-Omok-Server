@@ -248,5 +248,12 @@ namespace Omok_Server
             var innerPacket = _packetMgr.MakeInReqDbSaveUserGameDataPacket(sessionId, userId, winCount, loseCount, level, exp);
             DistributeMySqlDBWorkAction(innerPacket);
         }
+
+        public void RequestDbLeaveRoom(string sessionID, string userId, int roomNumber)
+        {
+            var innerPacket = _packetMgr.MakeInReqDbLeaveRoom(sessionID, userId, roomNumber);
+            DistributeRedisDBWorkAction(innerPacket);
+        }
+
     }
 }

@@ -82,6 +82,7 @@ namespace Omok_Server
             return innerPacket;
         }
 
+
         public OmokBinaryRequestInfo MakeInResDbLoginPacket(string sessionID, string userID, ErrorCode result)
         {
             var responseLogin = new PKTResInLogin()
@@ -90,6 +91,34 @@ namespace Omok_Server
                 UserID = userID,
             };
             var sendData = GetBinaryPacketData(responseLogin, PacketId.ResDbLogin);
+            var innerPacket = new OmokBinaryRequestInfo();
+            innerPacket.Data = sendData;
+            innerPacket.SessionID = sessionID;
+            return innerPacket;
+        }
+
+        public OmokBinaryRequestInfo MakeInReqDbLeaveRoom(string sessionID, string userID, int roomNumber)
+        {
+            var responseLogin = new PKTReqDbLeaveRoom()
+            {
+                UserID = userID,
+                RoomNumber = roomNumber
+            };
+            var sendData = GetBinaryPacketData(responseLogin, PacketId.ReqDbLeaveRoom);
+            var innerPacket = new OmokBinaryRequestInfo();
+            innerPacket.Data = sendData;
+            innerPacket.SessionID = sessionID;
+            return innerPacket;
+        }
+
+        public OmokBinaryRequestInfo MakeInResDbLeaveRoom(string sessionID, string userID, ErrorCode result)
+        {
+            var responseLogin = new PKTResDbLeaveRoom()
+            {
+                Result = (short)result,
+                UserID = userID,
+            };
+            var sendData = GetBinaryPacketData(responseLogin, PacketId.ResDbLeaveRoom);
             var innerPacket = new OmokBinaryRequestInfo();
             innerPacket.Data = sendData;
             innerPacket.SessionID = sessionID;

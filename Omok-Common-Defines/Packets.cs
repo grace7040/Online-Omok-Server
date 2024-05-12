@@ -83,10 +83,26 @@ public partial class PKTReqRoomLeave : PKHeader
 }
 
 [MemoryPackable]
+public partial class PKTReqDbLeaveRoom : PKHeader
+{
+    public int RoomNumber { get; set; }
+    public string UserID { get; set; }
+}
+
+[MemoryPackable]
 public partial class PKTResRoomLeave : PKHeader
 {
     public short Result { get; set; }
 }
+
+[MemoryPackable]
+public partial class PKTResDbLeaveRoom : PKHeader
+{
+    public int RoomNumber { get; set; }
+    public string UserID { get; set; }
+    public short Result { get; set; }
+}
+
 
 [MemoryPackable]
 public partial class PKTNtfRoomLeaveUser : PKHeader
@@ -222,5 +238,18 @@ public partial class PKTResDbSaveUserGameData : PKHeader
 [MemoryPackable]
 public partial class PKTResSaveUserGameData : PKHeader
 {
+    public short Result { get; set; }
+}
+
+[MemoryPackable]
+public partial class PKTReqDbCancelMatching : PKHeader
+{
+    public string UserID { get; set; }
+}
+
+[MemoryPackable]
+public partial class PKTResDbCancelMatching : PKHeader
+{
+    public string UserID { get; set; }
     public short Result { get; set; }
 }

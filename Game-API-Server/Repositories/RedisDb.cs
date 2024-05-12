@@ -10,7 +10,7 @@ namespace Game_API_Server.Repositories
         RedisConnection _redisConnection;
         string _roomNumberKey;
         string _userRoomKey;
-        string _matchingKey;
+        string _matchingQueueKey;
         public RedisDb(IConfiguration configuration) {
             _configuration = configuration;
 
@@ -18,7 +18,7 @@ namespace Game_API_Server.Repositories
             var redisConfig = new RedisConfig("GameRedis", redisConnectString!);
             _redisConnection = new RedisConnection(redisConfig);
             _userRoomKey = _configuration.GetSection("RedisKeys")["UserRoom"];
-            _matchingKey = _configuration.GetSection("RedisKeys")["MatchMaking"];
+            _matchingQueueKey = _configuration.GetSection("RedisKeys")["MatchMaking"];
             _roomNumberKey = _configuration.GetSection("RedisKeys")["RoomNumber"];
         }
 
@@ -90,7 +90,7 @@ namespace Game_API_Server.Repositories
 
         public async Task<bool> IsUserInMatchingQueue(string id)
         {
-            var query = new RedisSortedSet<string>(_redisConnection, _matchingKey, null);
+            var query = new RedisSortedSet<string>(_redisConnection, _matchingQueueKey, null);
             var result = await query.ScoreAsync(id);
 
             if(result.HasValue)
@@ -103,7 +103,7 @@ namespace Game_API_Server.Repositories
         {
             try
             {
-                var query = new RedisSortedSet<string>(_redisConnection, _matchingKey, null);
+                var query = new RedisSortedSet<string>(_redisConnection, _matchingQueueKey, null);
                 await query.AddAsync(id, DateTime.Now.Ticks);
             }
             catch
@@ -116,7 +116,7 @@ namespace Game_API_Server.Repositories
 
         public async Task<int> GetMatchingQueueSizeAsync()
         {
-            var query = new RedisSortedSet<string>(_redisConnection, _matchingKey, null);
+            var query = new RedisSortedSet<string>(_redisConnection, _matchingQueueKey, null);
             var result = await query.LengthAsync();
 
             return (int)result;
@@ -124,7 +124,7 @@ namespace Game_API_Server.Repositories
 
         public async Task<(string, string)> GetMatchedUsers()
         {
-            var query = new RedisSortedSet<string>(_redisConnection, _matchingKey, null);
+            var query = new RedisSortedSet<string>(_redisConnection, _matchingQueueKey, null);
             var result = await query.RangeByRankWithScoresAsync(0, 1);
 
             if(result.Length != 2)
@@ -151,7 +151,7 @@ namespace Game_API_Server.Repositories
 
         public void RemoveUserFromMatchingQueue(string id)
         {
-            var query = new RedisSortedSet<string>(_redisConnection, _matchingKey, null);
+            var query = new RedisSortedSet<string>(_redisConnection, _matchingQueueKey, null);
             query.RemoveAsync(id);
         }
 

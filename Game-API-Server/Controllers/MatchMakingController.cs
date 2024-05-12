@@ -61,5 +61,12 @@ namespace Game_API_Server.Controllers
 
             return new ResponseDTO { Result = ErrorCode.MatchingWait };
         }
+
+        [HttpPost("cancelmatching")]
+        public void CancelMatching(ReqMatchingDTO request)
+        {
+            var email = request.Email;
+            _memoryDb.RemoveUserFromMatchingQueue(email);
+        }
     }
 }
