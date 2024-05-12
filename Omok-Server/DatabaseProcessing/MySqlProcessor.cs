@@ -19,7 +19,7 @@ namespace Omok_Server
         MySqlHandler _dbWorkHandler = new();
         string _connectionString;
 
-        Dictionary<int, Func<OmokBinaryRequestInfo, MySqlDb, Task<OmokBinaryRequestInfo>>> _dbWorkHandlerMap = new();
+        Dictionary<int, Func<OmokBinaryRequestInfo, MySqlDb, OmokBinaryRequestInfo>> _dbWorkHandlerMap = new();
 
         Action<OmokBinaryRequestInfo> DistributeAction;
 
@@ -53,7 +53,7 @@ namespace Omok_Server
             _dbPktBuffer.Post(requstPacket);
         }
 
-        async void Process() 
+        void Process() 
         {
             var db = new MySqlDb(_connectionString);
             while (_isThreadRunning)
@@ -68,7 +68,7 @@ namespace Omok_Server
 
                     if (_dbWorkHandlerMap.ContainsKey(header.Id))
                     {
-                        var result = await _dbWorkHandlerMap[header.Id](packet, db);
+                        var result = _dbWorkHandlerMap[header.Id](packet, db);
                         DistributeAction(result);
                     }
                     else

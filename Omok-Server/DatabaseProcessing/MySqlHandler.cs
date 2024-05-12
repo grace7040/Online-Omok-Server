@@ -9,16 +9,16 @@ namespace Omok_Server
     public class MySqlHandler
     {
         PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
-        public void RegistDbHandler(Dictionary<int, Func<OmokBinaryRequestInfo, MySqlDb, Task<OmokBinaryRequestInfo>>> dbWorkHandlerMap)
+        public void RegistDbHandler(Dictionary<int, Func<OmokBinaryRequestInfo, MySqlDb, OmokBinaryRequestInfo>> dbWorkHandlerMap)
         {
             dbWorkHandlerMap.Add((int)PacketId.ReqDbLoadUserGameData, RequestLoadUserGameData);
             dbWorkHandlerMap.Add((int)PacketId.ReqDbSaveUserGameData, RequestSaveUserGameData);
         }
 
-        public async Task<OmokBinaryRequestInfo> RequestLoadUserGameData(OmokBinaryRequestInfo packetData, MySqlDb mySqlDb)
+        public OmokBinaryRequestInfo RequestLoadUserGameData(OmokBinaryRequestInfo packetData, MySqlDb mySqlDb)
         {
             var userId = _packetMgr.GetPacketData<PKTReqDbLoadUserGameData>(packetData.Data).UserID;
-            var userData = await mySqlDb.GetUserGameDataAsync(userId);
+            var userData = mySqlDb.GetUserGameData(userId);
             var response = _packetMgr.MakeInResDbLoadUserGameDataPacket(packetData.SessionID, 
                                                                         userId, 
                                                                         ErrorCode.None, 
@@ -29,10 +29,10 @@ namespace Omok_Server
             return response;
         }
 
-        public async Task<OmokBinaryRequestInfo> RequestSaveUserGameData(OmokBinaryRequestInfo packetData, MySqlDb mySqlDb)
+        public OmokBinaryRequestInfo RequestSaveUserGameData(OmokBinaryRequestInfo packetData, MySqlDb mySqlDb)
         {
             var userData = _packetMgr.GetPacketData<PKTReqDbSaveUserGameData>(packetData.Data);
-            var result = await mySqlDb.UpdateUserGameDataAsync(userData.UserID,
+            var result = mySqlDb.UpdateUserGameData(userData.UserID,
                                                                 userData.WinCount,
                                                                 userData.LoseCount,
                                                                 userData.Level,

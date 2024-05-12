@@ -61,7 +61,7 @@ namespace Omok_Server
             return ErrorCode.None;
         }
 
-        public ErrorCode RemoveUser(string sessionID)
+        public ErrorCode RemoveUserFromSessionIndexDict(string sessionID)
         {
             var user = GetUserBySessionId(sessionID);
             if (user == null)
@@ -160,7 +160,7 @@ namespace Omok_Server
             }
 
             user.Free();
-            RemoveUser(sessionID);
+            RemoveUserFromSessionIndexDict(sessionID);
             LogoutUser(sessionID);
             
         }
