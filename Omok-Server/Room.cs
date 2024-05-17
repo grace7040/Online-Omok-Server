@@ -43,8 +43,9 @@ namespace Omok_Server
         Action<OmokBinaryRequestInfo> DistributeAction;
         Action<OmokBinaryRequestInfo> DistributeMySqlDbAction;
         Action<string, string> UpdateUsersGameDataAction;
+        Action<int> AddRoomToEmptyRoomQueueAction;
 
-        public void Init(int number, int maxUserCount, Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> distributeAction, Action<OmokBinaryRequestInfo> distributeMySqlAction, Action<string, string> updateUsersGameDataAction, ILog logger, int maxGameTime, int turnTimeOut, int maxTurnOverCnt)
+        public void Init(int number, int maxUserCount, Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> distributeAction, Action<OmokBinaryRequestInfo> distributeMySqlAction, Action<string, string> updateUsersGameDataAction, ILog logger, int maxGameTime, int turnTimeOut, int maxTurnOverCnt, Action<int> addEmptyRoomAction)
         {
             Number = number;
             _maxUserCount = maxUserCount;
@@ -52,6 +53,7 @@ namespace Omok_Server
             DistributeAction = distributeAction;
             DistributeMySqlDbAction = distributeMySqlAction;
             UpdateUsersGameDataAction = updateUsersGameDataAction;
+            AddRoomToEmptyRoomQueueAction = addEmptyRoomAction;
             _mainLogger = logger;
             _maxGameTime = maxGameTime;
             _turnTimeOut = turnTimeOut;
@@ -281,6 +283,10 @@ namespace Omok_Server
             }
 
             RemoveUser(roomUser);
+            if(_userList.Count == 0) {
+                Free();
+            }
+
             NotifyLeaveRoomUserToClient(roomUser.UserID);
             ResponseLeaveRoomToClient(sessionID);
 
@@ -380,6 +386,12 @@ namespace Omok_Server
         void SetTurnChangedTime()
         {
             _recentTurnChangedTime = DateTime.Now;
+        }
+
+        void Free()
+        {
+            _state = RoomState.None;
+            AddRoomToEmptyRoomQueueAction(Number);
         }
 
     }

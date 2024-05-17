@@ -7,6 +7,8 @@ public interface IMemoryDb
 
     public Task<int> TryGetUserRoomNumberAsync(string id);
 
+
+    //for SimpleMatchingService...
     public Task<ErrorCode> AddUserToMatchingQueueAsync(string id);
 
     public Task<bool> IsUserInMatchingQueue(string id);

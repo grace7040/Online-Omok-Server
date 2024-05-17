@@ -1,51 +1,48 @@
-﻿using Microsoft.Extensions.Options;
+﻿using CloudStructures;
+using CloudStructures.Structures;
+using Matching_Server.DTOs;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection.Metadata.Ecma335;
+using System.Threading.Tasks;
 
-namespace APIServer;
+namespace Matching_Server;
 
 public interface IMatchWorker : IDisposable
 {
     public void AddUser(string userID);
 
-    public (bool, CompleteMatchingData) GetCompleteMatching(string userID);
+    public (bool, MatchingData) GetMatchingData(string userID);
+    public void DeleteMatchingData(string userID);
 }
 
 public class MatchWorker : IMatchWorker
 {
-    List<string> _pvpServerAddressList = new();
-
     System.Threading.Thread _reqWorker = null;
-    ConcurrentQueue<string> _reqQueue = new();
+    ConcurrentQueue<string> _waitingQueue = new();
+    ConcurrentQueue<string> _matchingQueue = new();
 
     System.Threading.Thread _completeWorker = null;
-
     // key는 유저ID
-    ConcurrentDictionary<string, string> _completeDic = new();
+    ConcurrentDictionary<string, MatchingData> _matchingDict = new();
 
-    //TODO: 2개의 Pub/Sub을 사용하므로 Redis 객체가 2개 있어야 한다.
-    // 매칭서버에서 -> 게임서버, 게임서버 -> 매칭서버로
-
-    string _redisAddress = "";
-    string _matchingRedisPubKey = "MatchingReq";
-    string _matchingRedisSubKey = "MatchingReq";
-    
-
+    string _requestMatchingKey;
+    string _checkMatchingKey;
+    RedisConnection _redisConnection;
 
     public MatchWorker(IOptions<MatchingConfig> matchingConfig)
     {
         Console.WriteLine("MatchWoker 생성자 호출");
         
-        _redisAddress = matchingConfig.Value.RedisAddress;
-        _matchingRedisPubKey = matchingConfig.Value.PubKey;
-        _matchingRedisSubKey = matchingConfig.Value.SubKey;
+        var redisConnectString = matchingConfig.Value.RedisConnectionString;
+        var redisConfig = new RedisConfig("MatchingRedis", redisConnectString!);
+        _redisConnection = new RedisConnection(redisConfig);
 
-
-        //TODO: Redis 연결 및 초기화 한다
-
+        _requestMatchingKey = matchingConfig.Value.RequestMatchingKey;
+        _checkMatchingKey = matchingConfig.Value.CheckMatchingKey;
 
         _reqWorker = new System.Threading.Thread(this.RunMatching);
         _reqWorker.Start();
@@ -56,16 +53,40 @@ public class MatchWorker : IMatchWorker
     
     public void AddUser(string userID)
     {
-        _reqQueue.Enqueue(userID);
+        if (!_matchingDict.ContainsKey(userID))
+        {
+            var userData = new MatchingData
+            {
+                OmokServerIP = "",
+                OmokServerPort = "",
+                RoomNumber = -1,
+                State = MatchingState.Waiting
+            };
+            _waitingQueue.Enqueue(userID);
+            _matchingDict.TryAdd(userID, userData);
+        }
+        
     }
 
-    public (bool, CompleteMatchingData) GetCompleteMatching(string userID)
+    public (bool, MatchingData) GetMatchingData(string userID)
     {
-        //TODO: _completeDic에서 검색해서 있으면 반환한다.
+        if(_matchingDict.TryGetValue(userID, out var data))
+        {
+            if(data.State == MatchingState.Complete)
+            {
+                return (true, data);
+            }
+        }
 
         return (false, null);
     }
 
+    public void DeleteMatchingData(string userID)
+    {
+        _matchingDict.TryRemove(userID, out var data);
+    }
+
+    //매칭 요청한 유저가 두명 이상일 시 redis 큐를 통해 매칭 요청(방 배정)
     void RunMatching()
     {
         while (true)
@@ -73,17 +94,22 @@ public class MatchWorker : IMatchWorker
             try
             {
 
-                if (_reqQueue.Count < 2)
+                if (_waitingQueue.Count < 2)
                 {
                     System.Threading.Thread.Sleep(1);
                     continue;
                 }
 
-                //TODO: 큐에서 2명을 가져온다. 두명을 매칭시킨다
+                _waitingQueue.TryDequeue(out var user1);
+                _matchingQueue.Enqueue(user1);
+                _matchingDict[user1].State = MatchingState.Matching;
 
-                //TODO: Redis의 Pub/Sub을 이용해서 매칭된 유저들을 게임서버에 전달한다.
+                _waitingQueue.TryDequeue(out var user2);
+                _matchingQueue.Enqueue(user2);
+                _matchingDict[user2].State = MatchingState.Matching;
 
-
+                //Redis 매칭 요청
+                PushMatchingRequestToRedis();
             }
             catch (Exception ex)
             {
@@ -92,16 +118,27 @@ public class MatchWorker : IMatchWorker
         }
     }
 
+    //redis로부터 방배정 결과를 받아오는 스레드
     void RunMatchingComplete()
     {
         while (true)
         {
             try
             {
-                //TODO: Redis의 Pub/Sub을 이용해서 매칭된 결과를 게임서버로 받는다
+                var redisResult = TryGetEmptyRoomFromRedis();
+                if (redisResult.Item1)
+                {
+                    var ip = redisResult.Item2.OmokServerIP;
+                    var port = redisResult.Item2.OmokServerPort;
+                    var roomNumber = redisResult.Item2.RoomNumber;
 
-                //TODO: 매칭 결과를 _completeDic에 넣는다
-                // 2명이 하므로 각각 유저를 대상으로 총 2개를 _completeDic에 넣어야 한다
+                    MakeCompleteMatching(ip, port, roomNumber);
+                }
+                else
+                {
+                    System.Threading.Thread.Sleep(1);
+                    continue;
+                }
             }
             catch (Exception ex)
             {
@@ -110,25 +147,82 @@ public class MatchWorker : IMatchWorker
         }        
     }
 
+    void MakeCompleteMatching(string ip, string port, int roomNumber)
+    {
+        _matchingQueue.TryDequeue(out var user1);
+        _matchingQueue.TryDequeue(out var user2);
+
+        if(user1 == null || user2 == null)
+        {
+            // ::TODO:: TryDequeue 실패 처리
+            return;
+        }
+
+
+        //Update _matchingDict
+        _matchingDict[user1].State = MatchingState.Complete;
+        _matchingDict[user1].OmokServerIP = ip;
+        _matchingDict[user1].OmokServerPort = port;
+        _matchingDict[user1].RoomNumber = roomNumber;
+
+        _matchingDict[user2].State = MatchingState.Complete;
+        _matchingDict[user2].OmokServerIP = ip;
+        _matchingDict[user2].OmokServerPort = port;
+        _matchingDict[user2].RoomNumber = roomNumber;
+
+        return;
+    }
+
 
 
     public void Dispose()
     {
         Console.WriteLine("MatchWoker 소멸자 호출");
     }
+
+    void PushMatchingRequestToRedis()
+    {
+        var query = new RedisList<int>(_redisConnection, _requestMatchingKey, null);
+        var result = query.RightPushAsync(1).Result;
+        if(result != 1)
+        {
+            // ::TODO:: ErrorCode.AddUserToMatchingQueueFailException
+        }
+    }
+
+    (bool, EmptyRoomInfo) TryGetEmptyRoomFromRedis()
+    {
+        var query = new RedisList<EmptyRoomInfo>(_redisConnection, _checkMatchingKey, null);
+        var result = query.RightPopAsync().Result;
+        if (result.HasValue)
+        {
+            return (true, result.Value);
+        }
+
+        return (false, null);
+    }
+}
+
+public class EmptyRoomInfo
+{
+    public string OmokServerIP { get; set; } = "";
+    public string OmokServerPort { get; set; } = "";
+    public int RoomNumber { get; set; }
 }
 
 
-public class CompleteMatchingData
+public class MatchingData
 {    
-    public string ServerAddress { get; set; }
+    public MatchingState State { get; set; }
+    public string OmokServerIP { get; set; }
+    public string OmokServerPort { get; set; }
     public int RoomNumber { get; set; }
 }
 
 
 public class MatchingConfig
 {
-    public string RedisAddress { get; set; }
-    public string PubKey { get; set; }
-    public string SubKey { get; set; }
+    public string RedisConnectionString { get; set; }
+    public string RequestMatchingKey { get; set; }
+    public string CheckMatchingKey { get; set; }
 }

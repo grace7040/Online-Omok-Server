@@ -21,13 +21,13 @@ namespace Omok_Server
         public ILog MainLogger;
 
         PacketProcessor _packetProcessor = new();
-        PacketManager<MemoryPackBinaryPacketDataCreator> _packetManager = new();
-        //MySqlProcessor _mySqlProcessor = new();
         RedisProcessor _redisProcessor = new();
         MySqlProcessor _mySqlProcessor = new();
+        PacketManager<MemoryPackBinaryPacketDataCreator> _packetManager = new();
         RoomManager _roomMgr = new();
         UserManager _userMgr = new();
         HeartBeatManager _heartBeatMgr = new();
+        MatchWorker _matchWorker;
         
 
         ServerOption _serverOption;     //appsettings의 서버 설정
@@ -44,7 +44,6 @@ namespace Omok_Server
             NewSessionConnected += new SessionHandler<NetworkSession>(OnConnected);
             SessionClosed += new SessionHandler<NetworkSession, CloseReason>(OnClosed);
             NewRequestReceived += new RequestHandler<NetworkSession, OmokBinaryRequestInfo>(OnPacketReceived);
-
         }
 
         // 호스팅 서비스 시작 시 호출
@@ -151,14 +150,16 @@ namespace Omok_Server
                 MainLogger.Error("서버 시작 실패");
             }
         }
-
+        
         void CreateAndInitComponents()
         {
+            _matchWorker = new MatchWorker(_serverOption.RedisConnectionString, _serverOption.RequestMatchingKey, _serverOption.CheckMatchingKey, _serverOption.IP, _serverOption.Port);
+
             var maxUserCount = _serverOption.RoomMaxCount * _serverOption.RoomMaxUserCount;
             _userMgr.Init(maxUserCount, this.SendData, this.DistributeRedisDBWork, this.DistributeMySqlDBWork, MainLogger);
             _userMgr.CreateUsers();
 
-            _roomMgr.Init(this.SendData, this.Distribute, this.DistributeMySqlDBWork, _userMgr.UpdateUsersGameData, MainLogger, _serverOption);
+            _roomMgr.Init(this.SendData, this.Distribute, this.DistributeMySqlDBWork, _userMgr.UpdateUsersGameData, MainLogger, _serverOption, _matchWorker.AddEmptyRoom);
             _roomMgr.CreateRooms(_serverOption);
 
             _heartBeatMgr.Init(this.SendData, this.Distribute, MainLogger, _userMgr, _serverOption.CheckUserCount, maxUserCount, _serverOption.HeartBeatInterval);
@@ -167,6 +168,8 @@ namespace Omok_Server
             _packetProcessor.InitAndStartProcessing(_serverOption, _userMgr, _roomMgr, _heartBeatMgr, this.SendData, MainLogger);
             _mySqlProcessor.InitAndStartProcessing(_serverOption.DbThreadCount, _serverOption.DbConnectionString, this.Distribute, MainLogger);
             _redisProcessor.InitAndStartProcessing(_serverOption.RedisThreadCount, _serverOption.RedisConnectionString, _serverOption.UserRoomKey, this.Distribute, MainLogger);
+
+            
 
             PKHandler.CloseSessionAction = CloseSession;
         }

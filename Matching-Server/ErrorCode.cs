@@ -5,8 +5,7 @@ public enum ErrorCode : UInt16
 {
     None = 0,
 
-    AythCheckFail = 21,
-    ReceiptCheckFail = 22,
-
-
+    //9001~
+    MatchingWait = 9001,
+    AddUserToMatchingQueueFailException = 9002,
 }

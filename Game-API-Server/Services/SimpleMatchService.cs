@@ -1,18 +1,35 @@
-﻿namespace Game_API_Server.Services
+﻿using Game_API_Server.DTOs;
+
+namespace Game_API_Server.Services
 {
+    //redis increment를 사용한 간단한 매칭 방법
+    //매칭 요청 인원이 2명이 이상이 되면 redis에서 룸 넘버(1씩 증가)를 받아와 매칭을 처리한다.
     public class SimpleMatchService : IMatchMakingService
     {
         IMemoryDb _memoryDb;
-        public SimpleMatchService(IMemoryDb memoryDb)
+        IConfiguration _configuration;
+        string _omokServerIP;
+        string _omokServerPort;
+        public SimpleMatchService(IMemoryDb memoryDb, IConfiguration configuration)
         {
+            _configuration = configuration;
             _memoryDb = memoryDb;
+            _omokServerIP = _configuration.GetConnectionString("OmokServerIP");
+            _omokServerPort = _configuration.GetConnectionString("OmokServerPort");
         }
-        public async Task<int> TryGetUserRoomNumber(string email)
+        public async Task<ResMatchingDTO> TryGetUserMatchingInfo(string email)
         {
             //redis에 유저:룸넘버 키페어 존재하는지 확인
-
             var roomNumber = await _memoryDb.TryGetUserRoomNumberAsync(email);
-            return roomNumber;
+
+            var userMatchingInfo = new ResMatchingDTO()
+            {
+                RoomNumber = roomNumber,
+                OmokServerIP = _omokServerIP,
+                OmokServerPort = _omokServerPort
+            };
+
+            return userMatchingInfo;
         }
 
         public async Task<ErrorCode> StartUserMatching(string email)

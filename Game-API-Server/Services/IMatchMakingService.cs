@@ -1,10 +1,8 @@
-﻿namespace Game_API_Server.Services
+﻿using Game_API_Server.DTOs;
+namespace Game_API_Server.Services
 {
     public interface IMatchMakingService
     {
-        Task<int> TryGetUserRoomNumber(string id);
-        Task<ErrorCode> StartUserMatching(string id);
-
-        void UpdateMatchingState();
+        Task<ResMatchingDTO> TryGetUserMatchingInfo(string id);
     }
 }

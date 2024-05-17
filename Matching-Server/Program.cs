@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using APIServer;
+using Matching_Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -17,7 +17,6 @@ builder.Services.Configure<MatchingConfig>(configuration.GetSection(nameof(Match
 
 
 builder.Services.AddSingleton<IMatchWorker, MatchWorker>();
-
 
 builder.Services.AddControllers();
 WebApplication app = builder.Build();
