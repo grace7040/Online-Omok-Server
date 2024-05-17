@@ -21,5 +21,6 @@
     //9001~
     MatchingWait = 9001,
     AddUserToMatchingQueueFailException = 9002,
+    MatchingReqFailException = 9003,
 }
 

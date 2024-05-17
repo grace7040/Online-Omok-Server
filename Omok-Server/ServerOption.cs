@@ -15,7 +15,8 @@ namespace Omok_Server
         public int MaxConnectionNumber { get; set; }
 
         public int CheckUserCount { get; set; }
-
+        
+        public string IP { get; set; } = "";
         public int Port { get; set; }
 
         public int MaxRequestLength { get; set; }
@@ -45,6 +46,8 @@ namespace Omok_Server
         public int MaxTurnOverCnt { get; set; }
 
         public string UserRoomKey { get; set; } = "";
+        public string RequestMatchingKey { get; set; } = "";
+        public string CheckMatchingKey { get; set; } = "";
 
     }
 }

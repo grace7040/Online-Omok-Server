@@ -27,8 +27,9 @@ namespace Omok_Server
         Action<OmokBinaryRequestInfo> DistributeAction;
         Action<OmokBinaryRequestInfo> DistributeMySqlDbAction;
         Action<string, string> UpdateUsersGameDataAction;
+        Action<int> AddRoomToEmptyRoomQueueAction;
 
-        public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> distributeAction, Action<OmokBinaryRequestInfo> distributeMySqlAction, Action<string, string>  updateUserGameDataAction, ILog logger, ServerOption serverOption)
+        public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> distributeAction, Action<OmokBinaryRequestInfo> distributeMySqlAction, Action<string, string>  updateUserGameDataAction, ILog logger, ServerOption serverOption, Action<int> addEmptyRoomAction)
         {
             SendFunc = func;
             DistributeAction = distributeAction;
@@ -38,6 +39,7 @@ namespace Omok_Server
             _serverOption = serverOption;
             _interval = serverOption.RoomCheckInterval;
             _checkRoomCount = serverOption.CheckRoomCount;
+            AddRoomToEmptyRoomQueueAction = addEmptyRoomAction;
             StartTimer();
         }
 
@@ -76,8 +78,9 @@ namespace Omok_Server
             {
                 var roomNumber = (startNumber + i);
                 var room = new Room();
-                room.Init(roomNumber, maxUserCount, SendFunc, DistributeAction, DistributeMySqlDbAction, UpdateUsersGameDataAction, _mainLogger, _serverOption.MaxGameTime, _serverOption.TurnTimeOut, _serverOption.MaxTurnOverCnt);
+                room.Init(roomNumber, maxUserCount, SendFunc, DistributeAction, DistributeMySqlDbAction, UpdateUsersGameDataAction, _mainLogger, _serverOption.MaxGameTime, _serverOption.TurnTimeOut, _serverOption.MaxTurnOverCnt, AddRoomToEmptyRoomQueueAction);
                 _roomList.Add(room);
+                AddRoomToEmptyRoomQueueAction(roomNumber);
             }
 
             _startRoomNumber = _roomList[0].Number;
