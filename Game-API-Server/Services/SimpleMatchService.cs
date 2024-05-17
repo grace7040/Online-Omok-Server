@@ -79,5 +79,11 @@ namespace Game_API_Server.Services
                 _memoryDb.RemoveUserFromMatchingQueue(users.Item2);
             }
         }
+
+        public async Task<ResponseDTO> RequestCancelMatching(string email)
+        {
+            _memoryDb.RemoveUserFromMatchingQueue(email);
+            return new ResponseDTO { Result = ErrorCode.None };
+        }
     }
 }

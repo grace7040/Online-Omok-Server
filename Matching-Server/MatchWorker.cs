@@ -16,7 +16,7 @@ public interface IMatchWorker : IDisposable
     public void AddUser(string userID);
 
     public (bool, MatchingData) GetMatchingData(string userID);
-    public void DeleteMatchingData(string userID);
+    public void DeleteUserFromMatchingDict(string userID);
 }
 
 public class MatchWorker : IMatchWorker
@@ -81,7 +81,7 @@ public class MatchWorker : IMatchWorker
         return (false, null);
     }
 
-    public void DeleteMatchingData(string userID)
+    public void DeleteUserFromMatchingDict(string userID)
     {
         _matchingDict.TryRemove(userID, out var data);
     }
@@ -100,11 +100,15 @@ public class MatchWorker : IMatchWorker
                     continue;
                 }
 
-                _waitingQueue.TryDequeue(out var user1);
+                var CanMatching = GetWaitingTwoUsers(out var user1, out var user2);
+                if (!CanMatching)
+                {
+                    continue;
+                }
+
                 _matchingQueue.Enqueue(user1);
                 _matchingDict[user1].State = MatchingState.Matching;
 
-                _waitingQueue.TryDequeue(out var user2);
                 _matchingQueue.Enqueue(user2);
                 _matchingDict[user2].State = MatchingState.Matching;
 
@@ -116,6 +120,28 @@ public class MatchWorker : IMatchWorker
 
             }
         }
+    }
+
+    bool GetWaitingTwoUsers(out string u1, out string u2)
+    {
+        u1 = "";
+        u2 = "";
+        _waitingQueue.TryDequeue(out var user1);
+        if (!_matchingDict.ContainsKey(user1))
+        {
+            return false;
+        }
+
+        _waitingQueue.TryDequeue(out var user2);
+        if (!_matchingDict.ContainsKey(user2))
+        {
+            _waitingQueue.Enqueue(user1);
+            return false;
+        }
+
+        u1 = user1;
+        u2 = user2;
+        return true;
     }
 
     //redis로부터 방배정 결과를 받아오는 스레드

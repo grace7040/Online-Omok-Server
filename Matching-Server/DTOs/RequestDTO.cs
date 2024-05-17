@@ -1,6 +1,6 @@
 ﻿namespace Matching_Server.DTOs {
 
-    public class ReqMatchingDTO
+    public class RequestDTO
     {
         public string UserID { get; set; }
     }

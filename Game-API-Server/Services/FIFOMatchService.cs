@@ -15,5 +15,16 @@ namespace Game_API_Server.Services
 
             return userMatchingInfo;
         }
+
+        public async Task<ResponseDTO> RequestCancelMatching(string email)
+        {
+            var matchingServerUrl = "http://127.0.0.1:11502/cancelmatching"; // ::TODO:: config에서 받아오게 수정
+            var client = new HttpClient();
+            var response = await client.PostAsJsonAsync(matchingServerUrl, new { UserID = email });
+            var responseContent = response.Content.ReadFromJsonAsync<ResponseDTO>();
+            var userMatchingInfo = responseContent.Result;
+
+            return userMatchingInfo;
+        }
     }
 }

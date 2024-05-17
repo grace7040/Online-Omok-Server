@@ -48,9 +48,11 @@ namespace Game_API_Server.Controllers
         }
 
         [HttpPost("cancelmatching")]
-        public void CancelMatching(ReqMatchingDTO request)
+        public async Task<ResponseDTO> CancelMatching(ReqMatchingDTO request)
         {
             var email = request.Email;
+            var result = await _matchMakingService.RequestCancelMatching(email);
+            return result;
         }
     }
 }

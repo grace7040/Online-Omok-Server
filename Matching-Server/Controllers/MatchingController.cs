@@ -22,7 +22,7 @@ public class MatchingController : ControllerBase
     }
 
     [HttpPost("matching")]
-    public ResMatchingDTO Matching(ReqMatchingDTO request)
+    public ResMatchingDTO Matching(RequestDTO request)
     {
         var response = new ResMatchingDTO() { Result = ErrorCode.MatchingWait };
 
@@ -36,9 +36,18 @@ public class MatchingController : ControllerBase
             response.OmokServerPort = matchingResult.Item2.OmokServerPort;
             response.RoomNumber = matchingResult.Item2.RoomNumber;
 
-            _matchWorker.DeleteMatchingData(request.UserID);
+            _matchWorker.DeleteUserFromMatchingDict(request.UserID);
         }
 
+        return response;
+    }
+
+    [HttpPost("cancelmatching")]
+    public ResponseDTO CancelMatching(RequestDTO request)
+    {
+        var response = new ResponseDTO() { Result = ErrorCode.None };
+        _matchWorker.DeleteUserFromMatchingDict(request.UserID);
+        
         return response;
     }
 }
