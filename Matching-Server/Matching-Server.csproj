@@ -4,14 +4,6 @@
         <TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <OutputPath>..\00_ServerBin\APIServer\</OutputPath>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-        <OutputPath>..\00_ServerBin\APIServer\</OutputPath>
-    </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="CloudStructures" Version="3.3.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />

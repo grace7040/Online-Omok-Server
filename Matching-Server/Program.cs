@@ -24,6 +24,6 @@ WebApplication app = builder.Build();
 app.MapDefaultControllerRoute();
 
 
-app.Run(configuration["ServerAddress"]);
+app.Run();
 
 
