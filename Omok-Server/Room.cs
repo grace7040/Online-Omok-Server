@@ -279,7 +279,19 @@ namespace Omok_Server
                 return;
             }
 
+            //이미 게임이 시작한 경우
+            if(_state == RoomState.GameStart)
+            {
+                for(int i = 0; i < _userList.Count; i++)
+                {
+                    if (_userList[i].SessionID == sessionID)
+                        continue;
+                    _game.EndGame(_game.GetUserStoneColor(_userList[i].SessionID));
+                }
+            }
+
             RemoveUser(roomUser);
+
             if(_userList.Count == 0) {
                 Free();
             }
