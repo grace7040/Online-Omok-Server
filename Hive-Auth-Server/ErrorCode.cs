@@ -10,7 +10,7 @@
     //2001~
     LoginFailRegistRedis=2001,
     LoginFailWrongPassword,
-    LoginFailNotExistEmail,
+    LoginFailNotExistId,
 
     //3001~
     CheckUserAuthFailNotMatch=3001,

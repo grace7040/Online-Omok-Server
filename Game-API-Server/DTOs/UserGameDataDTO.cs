@@ -6,7 +6,7 @@ namespace Game_API_Server.DTOs
     {
         [Required]
         [EmailAddress]
-        public string Email { get; set; } = "";
+        public string Id { get; set; } = "";
 
         public int Level { get; set; }
         public int Exp { get; set; }

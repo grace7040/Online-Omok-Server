@@ -23,7 +23,7 @@ namespace Game_API_Server.Controllers
         [HttpPost("login")]
         public async Task<ResponseDTO> Login(ReqUserAuthDTO auth)
         {
-            bool isAuthedOnHive = await _checkAuthService.CheckAuthToHiveAsync(auth.Email, auth.Token);
+            bool isAuthedOnHive = await _checkAuthService.CheckAuthToHiveAsync(auth.Id, auth.Token);
 
             if (!isAuthedOnHive)
             {
@@ -32,7 +32,7 @@ namespace Game_API_Server.Controllers
             }
 
 
-            ErrorCode redisResult = await _memoryDb.RegistUserAsync(auth.Email, auth.Token, Expiries.LoginToken);
+            ErrorCode redisResult = await _memoryDb.RegistUserAsync(auth.Id, auth.Token, Expiries.LoginToken);
             if (redisResult != ErrorCode.None)
             {
                 return new ResponseDTO { Result = ErrorCode.LoginFailRegistRedis };
@@ -40,9 +40,9 @@ namespace Game_API_Server.Controllers
 
 
             //첫 접속인 경우, db에 game data 추가
-            if (!(await _gameDb.IsUserEmailExistAsync(auth.Email)))
+            if (!(await _gameDb.IsUserIdExistAsync(auth.Id)))
             {
-                ErrorCode dbResult = await _gameDb.InsertAccountAsync(auth.Email);
+                ErrorCode dbResult = await _gameDb.InsertAccountAsync(auth.Id);
                 if(dbResult != ErrorCode.None)
                 {
                     return new ResponseDTO { Result = ErrorCode.LoginFailInsertDB };

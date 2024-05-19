@@ -17,11 +17,11 @@ namespace Game_API_Server.Services
             _memoryDb = memoryDb;
         }
 
-        public async Task<bool> CheckAuthToHiveAsync(string email, string token)
+        public async Task<bool> CheckAuthToHiveAsync(string id, string token)
         {
             string hiveUrl = _configuration.GetConnectionString("HiveServer") + "/checkuserauth";
             HttpClient client = new();
-            var hiveResponse = await client.PostAsJsonAsync(hiveUrl, new { Email = email, Token = token });
+            var hiveResponse = await client.PostAsJsonAsync(hiveUrl, new { Id = id, Token = token });
             if (hiveResponse.StatusCode != HttpStatusCode.OK)
             {
                 return false;
@@ -30,12 +30,12 @@ namespace Game_API_Server.Services
             return true;
         }
 
-        public async Task<bool> CheckAuthToMemoryDbAsync(string email, string token)
+        public async Task<bool> CheckAuthToMemoryDbAsync(string id, string token)
         {
-            ErrorCode redisResult = await _memoryDb.CheckUserAuthAsync(email, token);
+            ErrorCode redisResult = await _memoryDb.CheckUserAuthAsync(id, token);
             if (redisResult != ErrorCode.None)
             {
-                _logger.ZLogInformation($"[CheckAuthToRedis Failed] {redisResult}, request.email: {email}");
+                _logger.ZLogInformation($"[CheckAuthToRedis Failed] {redisResult}, request.Id: {id}");
                 return false;
             }
 

@@ -23,11 +23,10 @@ namespace Game_API_Server.Middleware
             }
             else
             {
-                //email, token값 파싱. 
-                string headerEmail = context.Request.Headers["email"].ToString();
-                string headerToken = context.Request.Headers["token"].ToString();
+                string id = context.Request.Headers["Id"].ToString();
+                string token = context.Request.Headers["token"].ToString();
 
-                bool isAuthed = await _checkAuthService.CheckAuthToMemoryDbAsync(headerEmail, headerToken);
+                bool isAuthed = await _checkAuthService.CheckAuthToMemoryDbAsync(id, token);
                 if (!isAuthed)
                 {
                     context.Response.StatusCode = 400;

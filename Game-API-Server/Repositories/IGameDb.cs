@@ -1,6 +1,6 @@
 ﻿public interface IGameDb : IDisposable
 {
-    public Task<ErrorCode> InsertAccountAsync(string email);
+    public Task<ErrorCode> InsertAccountAsync(string id);
 
-    public Task<bool> IsUserEmailExistAsync(string email);
+    public Task<bool> IsUserIdExistAsync(string id);
 }

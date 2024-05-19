@@ -26,7 +26,7 @@ namespace Omok_Server
         public UserGameData GetUserGameData(string id)
         {
             var datas = ( _queryFactory.Query("user_game_data")
-                                         .Where("email", id)
+                                         .Where("id", id)
                                          .Get<UserGameData>()).FirstOrDefault();
 
             return datas;
@@ -36,7 +36,7 @@ namespace Omok_Server
         public ErrorCode UpdateUserGameData(string id, int winCount, int loseCount, int level, int exp)
         {
             var datas = _queryFactory.Query("user_game_data")
-                                         .Where("email", id)
+                                         .Where("id", id)
                                          .Update(new { win_count = winCount,
                                                           lose_count = loseCount,
                                                           level = level,

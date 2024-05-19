@@ -25,19 +25,19 @@ namespace Game_API_Server.Repositories
         {
             ConnectionClose();
         }
-        public async Task<ErrorCode> InsertAccountAsync(string email)
+        public async Task<ErrorCode> InsertAccountAsync(string id)
         {
             try
             {
-                //존재하는 이메일인지    
-                if (await IsUserEmailExistAsync(email))
+                //존재하는 Id인지    
+                if (await IsUserIdExistAsync(id))
                 {
                     return ErrorCode.CreateAccountFailAlreadyExist;
                 }
 
                 var count = await _queryFactory.Query("user_game_data")
-                                  .InsertAsync(new { 
-                                      email = email,
+                                  .InsertAsync(new {
+                                      id = id,
                                       level = 1,
                                       exp = 0,
                                       win_count = 0,
@@ -58,10 +58,10 @@ namespace Game_API_Server.Repositories
             return ErrorCode.None;
         }
 
-        public async Task<bool> IsUserEmailExistAsync(string email)
+        public async Task<bool> IsUserIdExistAsync(string id)
         {
             var count = (await _queryFactory.Query("user_game_data")
-                                         .Select("level").Where("email", email)
+                                         .Select("level").Where("id", id)
                                          .GetAsync<int>()).FirstOrDefault();
 
             if (count != 0)

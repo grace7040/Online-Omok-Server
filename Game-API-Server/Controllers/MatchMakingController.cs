@@ -22,8 +22,8 @@ namespace Game_API_Server.Controllers
         [HttpPost("matching")]
         public async Task<ResponseDTO> Matching(ReqMatchingDTO request)
         {
-            var email = request.Email;
-            var userMatchingInfo = await _matchMakingService.TryGetUserMatchingInfo(email);
+            var Id = request.Id;
+            var userMatchingInfo = await _matchMakingService.TryGetUserMatchingInfo(Id);
 
             if(userMatchingInfo == null)
             {
@@ -50,8 +50,8 @@ namespace Game_API_Server.Controllers
         [HttpPost("cancelmatching")]
         public async Task<ResponseDTO> CancelMatching(ReqMatchingDTO request)
         {
-            var email = request.Email;
-            var result = await _matchMakingService.RequestCancelMatching(email);
+            var Id = request.Id;
+            var result = await _matchMakingService.RequestCancelMatching(Id);
             return result;
         }
     }

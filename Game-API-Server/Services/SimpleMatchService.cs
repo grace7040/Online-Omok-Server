@@ -17,10 +17,10 @@ namespace Game_API_Server.Services
             _omokServerIP = _configuration.GetConnectionString("OmokServerIP");
             _omokServerPort = _configuration.GetConnectionString("OmokServerPort");
         }
-        public async Task<ResMatchingDTO> TryGetUserMatchingInfo(string email)
+        public async Task<ResMatchingDTO> TryGetUserMatchingInfo(string id)
         {
             //redis에 유저:룸넘버 키페어 존재하는지 확인
-            var roomNumber = await _memoryDb.TryGetUserRoomNumberAsync(email);
+            var roomNumber = await _memoryDb.TryGetUserRoomNumberAsync(id);
 
             var userMatchingInfo = new ResMatchingDTO()
             {
@@ -32,14 +32,14 @@ namespace Game_API_Server.Services
             return userMatchingInfo;
         }
 
-        public async Task<ErrorCode> StartUserMatching(string email)
+        public async Task<ErrorCode> StartUserMatching(string id)
         {
             //매칭 큐에 유저가 존재하는지 확인
-            var IsMatchingStarted = await _memoryDb.IsUserInMatchingQueue(email);
+            var IsMatchingStarted = await _memoryDb.IsUserInMatchingQueue(id);
             if (!IsMatchingStarted)
             {
                 //없다면, 매칭 큐에 유저 정보 추가
-                var result = await _memoryDb.AddUserToMatchingQueueAsync(email);
+                var result = await _memoryDb.AddUserToMatchingQueueAsync(id);
                 return result;
             }
             return ErrorCode.None;
@@ -80,9 +80,9 @@ namespace Game_API_Server.Services
             }
         }
 
-        public async Task<ResponseDTO> RequestCancelMatching(string email)
+        public async Task<ResponseDTO> RequestCancelMatching(string id)
         {
-            _memoryDb.RemoveUserFromMatchingQueue(email);
+            _memoryDb.RemoveUserFromMatchingQueue(id);
             return new ResponseDTO { Result = ErrorCode.None };
         }
     }

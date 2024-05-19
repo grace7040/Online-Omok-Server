@@ -18,7 +18,7 @@ namespace Hive_Auth_Server.Controllers
         [HttpPost("checkuserauth")]
         public async Task<IActionResult> CheckUserAuth(ReqUserAuthDTO auth)
         {
-            bool isAuthedUser = await _checkAuthService.CheckAuthToMemoryDbAsync(auth.Email, auth.Token);
+            bool isAuthedUser = await _checkAuthService.CheckAuthToMemoryDbAsync(auth.Id, auth.Token);
 
             if(!isAuthedUser)
             {
