@@ -23,23 +23,28 @@ namespace Omok_Server
         PacketProcessor _packetProcessor = new();
         RedisProcessor _redisProcessor = new();
         MySqlProcessor _mySqlProcessor = new();
+
         PacketManager<MemoryPackBinaryPacketDataCreator> _packetManager = new();
         RoomManager _roomMgr = new();
         UserManager _userMgr = new();
         HeartBeatManager _heartBeatMgr = new();
+
         MatchWorker _matchWorker;
         
-
-        ServerOption _serverOption;     //appsettings의 서버 설정
-        IServerConfig _networkConfig;   //SuperSocket의 서버 설정
+        ServerOption _serverOption;     
+        DbOption _dbOption;
+        RedisOption _redisOption;
+        IServerConfig _networkConfig;   
 
         private readonly IHostApplicationLifetime _appLifetime;
 
-        public MainServer(IHostApplicationLifetime appLifetime, IOptions<ServerOption> serverConfig)
+        public MainServer(IHostApplicationLifetime appLifetime, IOptions<ServerOption> serverConfig, IOptions<DbOption>  dbOption, IOptions<RedisOption> redisOption)
             : base(new DefaultReceiveFilterFactory<ReceiveFilter, OmokBinaryRequestInfo>())
         {
             _appLifetime = appLifetime;
             _serverOption = serverConfig.Value;
+            _dbOption = dbOption.Value;
+            _redisOption = redisOption.Value;
 
             NewSessionConnected += new SessionHandler<NetworkSession>(OnConnected);
             SessionClosed += new SessionHandler<NetworkSession, CloseReason>(OnClosed);
@@ -153,25 +158,21 @@ namespace Omok_Server
         
         void CreateAndInitComponents()
         {
-            _matchWorker = new MatchWorker(_serverOption.RedisConnectionString, _serverOption.RequestMatchingKey, _serverOption.CheckMatchingKey, _serverOption.IP, _serverOption.Port);
+            _matchWorker = new MatchWorker(_redisOption, _serverOption.IP, _serverOption.Port);
 
             var maxUserCount = _serverOption.RoomMaxCount * _serverOption.RoomMaxUserCount;
-            _userMgr.Init(maxUserCount, this.SendData, this.DistributeRedisDBWork, this.DistributeMySqlDBWork, MainLogger);
+            _userMgr.Init(MainLogger, maxUserCount, this.SendData, this.DistributeRedisDBWork, this.DistributeMySqlDBWork);
             _userMgr.CreateUsers();
 
-            _roomMgr.Init(this.SendData, this.Distribute, this.DistributeMySqlDBWork, _userMgr.UpdateUsersGameData, MainLogger, _serverOption, _matchWorker.AddEmptyRoom);
-            _roomMgr.CreateRooms(_serverOption);
+            _roomMgr.Init(MainLogger, _serverOption, this.SendData, this.Distribute, this.DistributeMySqlDBWork, _userMgr.UpdateUsersGameData, _matchWorker.AddEmptyRoom);
+            _roomMgr.CreateRooms();
 
-            _heartBeatMgr.Init(this.SendData, this.Distribute, MainLogger, _userMgr, _serverOption.CheckUserCount, maxUserCount, _serverOption.HeartBeatInterval);
+            _heartBeatMgr.Init(MainLogger, _userMgr, _serverOption.CheckUserCount, maxUserCount, _serverOption.HeartBeatInterval, this.SendData, this.Distribute);
             _heartBeatMgr.StartTimer();
 
-            _packetProcessor.InitAndStartProcessing(_serverOption, _userMgr, _roomMgr, _heartBeatMgr, this.SendData, MainLogger);
-            _mySqlProcessor.InitAndStartProcessing(_serverOption.DbThreadCount, _serverOption.DbConnectionString, this.Distribute, MainLogger);
-            _redisProcessor.InitAndStartProcessing(_serverOption.RedisThreadCount, _serverOption.RedisConnectionString, _serverOption.UserRoomKey, this.Distribute, MainLogger);
-
-            
-
-            PKHandler.CloseSessionAction = CloseSession;
+            _packetProcessor.InitAndStartProcessing(MainLogger, _serverOption, _userMgr, _roomMgr, _heartBeatMgr, this.SendData, this.CloseSession);
+            _mySqlProcessor.InitAndStartProcessing(MainLogger, _dbOption, this.Distribute);
+            _redisProcessor.InitAndStartProcessing(MainLogger, _redisOption, this.Distribute);
         }
 
         public bool SendData(string sessionID, byte[] sendData)

@@ -15,20 +15,17 @@ namespace Omok_Server
         int _maxUserCount;
 
         Dictionary<string, int> _sessionIndexDict = new();
-
         List<User> _userList = new();
 
         PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
 
         Func<string, byte[], bool> SendFunc;
-
         Action<OmokBinaryRequestInfo> DistributeRedisDBWorkAction;
-
         Action<OmokBinaryRequestInfo> DistributeMySqlDBWorkAction;
 
         public List<User> UserList { get { return _userList; } }
 
-        public void Init(int maxUserCount, Func<string, byte[], bool> sendFunc, Action<OmokBinaryRequestInfo> distributeRedisDBaction, Action<OmokBinaryRequestInfo> distributeMySqlDBaction, ILog logger)
+        public void Init(ILog logger,int maxUserCount, Func<string, byte[], bool> sendFunc, Action<OmokBinaryRequestInfo> distributeRedisDBaction, Action<OmokBinaryRequestInfo> distributeMySqlDBaction)
         {
             _maxUserCount = maxUserCount;
             SendFunc = sendFunc;

@@ -17,9 +17,6 @@ namespace Omok_Server
         PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
         UserManager _userMgr;
 
-        Func<string, byte[], bool> SendFunc;
-        Action<OmokBinaryRequestInfo> DistributeAction;
-
         Timer _timer;
         int _interval;
         int _checkStartIndex = 0;
@@ -27,15 +24,19 @@ namespace Omok_Server
         int _maxUserCount;
         OmokBinaryRequestInfo _innerPacket;
 
-        public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action, ILog logger, UserManager userManager, int checkUserCount, int maxUserCount, int hartBeatInterval)
+        Func<string, byte[], bool> SendFunc;
+        Action<OmokBinaryRequestInfo> DistributeAction;
+
+        public void Init(ILog logger, UserManager userManager, int checkUserCount, int maxUserCount, int hartBeatInterval, Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> action)
         {
-            SendFunc = func;
-            DistributeAction = action;
             _mainLogger = logger;
             _userMgr = userManager;
             _checkUserCount = checkUserCount;
             _maxUserCount = maxUserCount;
             _interval = hartBeatInterval;
+
+            SendFunc = func;
+            DistributeAction = action;
         }
         public void StartTimer()
         {

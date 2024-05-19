@@ -21,15 +21,14 @@ namespace Omok_Server
         System.Threading.Thread _checkMatchingQueueWorker = null;
 
         Queue<int> _emptyRoomQueue = new();
-        public MatchWorker(string redisConnectString, string requestMatchingKey, string checkMatchingKey, string serverIP, int serverPort)
+        public MatchWorker(RedisOption redisOption, string serverIP, int serverPort)
         {
-            Console.WriteLine("MatchWoker 생성자 호출");
-
+            var redisConnectString = redisOption.RedisConnectionString;
             var redisConfig = new RedisConfig("MatchingRedis", redisConnectString!);
             _redisConnection = new RedisConnection(redisConfig);
 
-            _requestMatchingKey = requestMatchingKey;
-            _checkMatchingKey = checkMatchingKey;
+            _requestMatchingKey = redisOption.RequestMatchingKey;
+            _checkMatchingKey = redisOption.CheckMatchingKey;
 
             _checkMatchingQueueWorker = new System.Threading.Thread(this.CheckMatchingQueue);
             _checkMatchingQueueWorker.Start();
