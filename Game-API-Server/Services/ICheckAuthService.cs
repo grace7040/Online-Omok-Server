@@ -2,7 +2,7 @@
 {
     public interface ICheckAuthService
     {
-        public Task<bool> CheckAuthToHiveAsync(string id, string token);
-        public Task<bool> CheckAuthToMemoryDbAsync(string id, string token);
+        public Task<bool> CheckUserAuthToHiveAsync(string id, string token);
+        public Task<bool> CheckUserAuthToMemoryDbAsync(string id, string token);
     }
 }

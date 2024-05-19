@@ -11,6 +11,7 @@ public enum ErrorCode : UInt16
     LoginFailOnHive = 3101,
     LoginFailRegistRedis,
     LoginFailInsertDB,
+    RemoveUserFailException,
 
     CheckUserAuthFailNotMatch = 3201,
     CheckUserAuthFailNotExist,
@@ -19,5 +20,6 @@ public enum ErrorCode : UInt16
     MatchingWait = 3301,
     AddUserToMatchingQueueFailException,
     MatchingReqFailException,
+    
 }
 
