@@ -17,21 +17,22 @@ namespace Omok_Server
 
         BufferBlock<OmokBinaryRequestInfo> _dbPktBuffer = new();
         MySqlHandler _dbWorkHandler = new();
-        string _connectionString;
-
         Dictionary<int, Func<OmokBinaryRequestInfo, MySqlDb, OmokBinaryRequestInfo>> _dbWorkHandlerMap = new();
+
+        string _connectionString;
 
         Action<OmokBinaryRequestInfo> DistributeAction;
 
-        public void InitAndStartProcessing(int threadCount, string connectionString, Action<OmokBinaryRequestInfo> distributeAction, ILog logger) 
+        public void InitAndStartProcessing(ILog logger, DbOption dbOption, Action<OmokBinaryRequestInfo> distributeAction) 
         {
             _mainLogger = logger;
             _mainLogger.Info("DB Init Start");
             DistributeAction = distributeAction;
-            _connectionString = connectionString;
+            _connectionString = dbOption.DbConnectionString;
 
             _isThreadRunning = true;
-
+                
+            var threadCount = dbOption.DbThreadCount;
             for (int i = 0; i < threadCount; i++)
             {
                 var processThread = new System.Threading.Thread(this.Process);

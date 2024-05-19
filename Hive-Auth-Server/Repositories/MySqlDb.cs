@@ -25,18 +25,18 @@ namespace Hive_Auth_Server.Repositories
         {
             ConnectionClose();
         }
-        public async Task<ErrorCode> InsertAccountAsync(string email, string password)
+        public async Task<ErrorCode> InsertAccountAsync(string Id, string password)
         {
             try
             {
                 //존재하는 이메일인지    
-                if (await IsUserEmailExistAsync(email))
+                if (await IsUserEmailExistAsync(Id))
                 {
                     return ErrorCode.CreateAccountFailAlreadyExist;
                 }
 
                 var count = await _queryFactory.Query("user_account_data")
-                                  .InsertAsync(new { email = email, password = password });
+                                  .InsertAsync(new { id = Id, password = password });
 
                 //DB 추가 실패시
                 if (count != 1)
@@ -53,12 +53,12 @@ namespace Hive_Auth_Server.Repositories
             return ErrorCode.None;
         }
 
-        public async Task<string> GetPasswordByEmailAsync(string email)
+        public async Task<string> GetPasswordByIdAsync(string id)
         {
-            if(await IsUserEmailExistAsync(email))
+            if(await IsUserEmailExistAsync(id))
             {
                 var password = (await _queryFactory.Query("user_account_data")
-                                         .Select("password").Where("email", email)
+                                         .Select("password").Where("id", id)
                                          .GetAsync<string>()).FirstOrDefault();
                 return password;
             }
@@ -66,10 +66,10 @@ namespace Hive_Auth_Server.Repositories
         }
 
 
-        async Task<bool> IsUserEmailExistAsync(string email)
+        async Task<bool> IsUserEmailExistAsync(string id)
         {
             var count = (await _queryFactory.Query("user_account_data")
-                                         .Select("uid").Where("email", email)
+                                         .Select("uid").Where("id", id)
                                          .GetAsync<int>()).FirstOrDefault();
             
             if (count != 0)

@@ -142,7 +142,6 @@ namespace Omok_Server
 
         public void RequestPutStone(OmokBinaryRequestInfo packetData)
         {
-            
             var sessionID = packetData.SessionID;
 
             var roomObject = CheckRoomAndRoomUser(sessionID);

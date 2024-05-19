@@ -28,6 +28,8 @@ class Program
             {
                 //서비스 구성
                 services.Configure<ServerOption>(hostContext.Configuration.GetSection("ServerOption"));
+                services.Configure<DbOption>(hostContext.Configuration.GetSection("DbOption"));
+                services.Configure<RedisOption>(hostContext.Configuration.GetSection("RedisOption"));
                 services.AddHostedService<MainServer>();    
             })
             .Build();

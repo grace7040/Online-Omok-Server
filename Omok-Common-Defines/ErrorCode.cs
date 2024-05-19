@@ -27,4 +27,5 @@ public enum ErrorCode : short
     RemoveUserRoomNumberFail = 18,
     RemoveUserFromMatchingQueueFail = 19,
     PopMatchingRequestFromRedisFail = 20,
+    PutStoneFailNotGameStart = 21,
 }

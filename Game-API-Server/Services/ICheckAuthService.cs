@@ -4,7 +4,7 @@ namespace Game_API_Server.Services
 {
     public interface ICheckAuthService
     {
-        public Task<bool> CheckAuthToHiveAsync(string email, string token);
-        public Task<bool> CheckAuthToMemoryDbAsync(string email, string token);
+        public Task<bool> CheckAuthToHiveAsync(string id, string token);
+        public Task<bool> CheckAuthToMemoryDbAsync(string id, string token);
     }
 }

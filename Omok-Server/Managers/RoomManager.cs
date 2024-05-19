@@ -29,7 +29,7 @@ namespace Omok_Server
         Action<string, string> UpdateUsersGameDataAction;
         Action<int> AddRoomToEmptyRoomQueueAction;
 
-        public void Init(Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> distributeAction, Action<OmokBinaryRequestInfo> distributeMySqlAction, Action<string, string>  updateUserGameDataAction, ILog logger, ServerOption serverOption, Action<int> addEmptyRoomAction)
+        public void Init(ILog logger, ServerOption serverOption, Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> distributeAction, Action<OmokBinaryRequestInfo> distributeMySqlAction, Action<string, string>  updateUserGameDataAction, Action<int> addEmptyRoomAction)
         {
             SendFunc = func;
             DistributeAction = distributeAction;
@@ -68,17 +68,17 @@ namespace Omok_Server
         }
 
 
-        public void CreateRooms(ServerOption serverOpt)
+        public void CreateRooms()
         {
-            var maxRoomCount = serverOpt.RoomMaxCount;
-            var startNumber = serverOpt.RoomStartNumber;
-            var maxUserCount = serverOpt.RoomMaxUserCount;
+            var maxRoomCount = _serverOption.RoomMaxCount;
+            var startNumber = _serverOption.RoomStartNumber;
+            var maxUserCount = _serverOption.RoomMaxUserCount;
 
             for (int i = 0; i < maxRoomCount; ++i)
             {
                 var roomNumber = (startNumber + i);
                 var room = new Room();
-                room.Init(roomNumber, maxUserCount, SendFunc, DistributeAction, DistributeMySqlDbAction, UpdateUsersGameDataAction, _mainLogger, _serverOption.MaxGameTime, _serverOption.TurnTimeOut, _serverOption.MaxTurnOverCnt, AddRoomToEmptyRoomQueueAction);
+                room.Init(_mainLogger, roomNumber, maxUserCount, _serverOption.MaxGameTime, _serverOption.TurnTimeOut, _serverOption.MaxTurnOverCnt, SendFunc, DistributeAction, DistributeMySqlDbAction, UpdateUsersGameDataAction, AddRoomToEmptyRoomQueueAction);
                 _roomList.Add(room);
                 AddRoomToEmptyRoomQueueAction(roomNumber);
             }

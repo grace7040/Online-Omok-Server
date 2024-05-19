@@ -17,23 +17,24 @@ namespace Omok_Server
 
         BufferBlock<OmokBinaryRequestInfo> _dbPktBuffer = new();
         RedisHandler _dbWorkHandler = new();
+        Dictionary<int, Func<OmokBinaryRequestInfo, RedisDb, Task<OmokBinaryRequestInfo>>> _dbWorkHandlerMap = new();
+
         string _connectionString;
         string _userRoomKey;
 
-        Dictionary<int, Func<OmokBinaryRequestInfo, RedisDb, Task<OmokBinaryRequestInfo>>> _dbWorkHandlerMap = new();
-
         Action<OmokBinaryRequestInfo> DistributeAction;
 
-        public void InitAndStartProcessing(int threadCount, string connectionString, string userRoomKey, Action<OmokBinaryRequestInfo> distributeAction, ILog logger) 
+        public void InitAndStartProcessing(ILog logger, RedisOption redisOption, Action<OmokBinaryRequestInfo> distributeAction) 
         {
             _mainLogger = logger;
-            _mainLogger.Info("DB Init Start");
+            
+            _connectionString = redisOption.RedisConnectionString;
+            _userRoomKey = redisOption.UserRoomKey;
             DistributeAction = distributeAction;
-            _connectionString = connectionString;
-            _userRoomKey = userRoomKey;
 
             _isThreadRunning = true;
 
+            var threadCount = redisOption.RedisThreadCount;
             for (int i = 0; i < threadCount; i++)
             {
                 var processThread = new System.Threading.Thread(this.Process);
@@ -41,13 +42,12 @@ namespace Omok_Server
 
                 _processThreadList.Add(processThread);
             }
-            RegistDbHandler();
-            _mainLogger.Info("DB Init Success");
+            RegistDbHandlerMap();
         }
 
-        void RegistDbHandler()
+        void RegistDbHandlerMap()
         {
-            _dbWorkHandler.RegistDbHandler(_dbWorkHandlerMap);
+            _dbWorkHandler.RegistDbHandlerMap(_dbWorkHandlerMap);
         }
 
         public void InsertPakcet(OmokBinaryRequestInfo requstPacket)
@@ -57,7 +57,6 @@ namespace Omok_Server
 
         async void Process() 
         {
-            // ::TODO:: DB 커넥션 생성
             var db = new RedisDb(_connectionString, _userRoomKey);
             while (_isThreadRunning)
             {

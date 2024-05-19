@@ -11,7 +11,7 @@ namespace Omok_Server
     public class RedisHandler
     {
         PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
-        public void RegistDbHandler(Dictionary<int, Func<OmokBinaryRequestInfo, RedisDb, Task<OmokBinaryRequestInfo>>> dbWorkHandlerMap) 
+        public void RegistDbHandlerMap(Dictionary<int, Func<OmokBinaryRequestInfo, RedisDb, Task<OmokBinaryRequestInfo>>> dbWorkHandlerMap) 
         {
             dbWorkHandlerMap.Add((int)PacketId.ReqDbLogin, RequestLogin);
             dbWorkHandlerMap.Add((int)PacketId.ReqDbLeaveRoom, RequestLeaveRoom);

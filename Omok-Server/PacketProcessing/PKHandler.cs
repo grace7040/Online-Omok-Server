@@ -18,7 +18,7 @@ namespace Omok_Server
         protected RoomManager _roomMgr;
         protected PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
 
-        public void Init(UserManager userMgr, RoomManager roomMgr, ILog logger)
+        public void Init(ILog logger, UserManager userMgr, RoomManager roomMgr)
         {
             this._userMgr = userMgr;
             this._roomMgr = roomMgr;

@@ -31,14 +31,18 @@ namespace Omok_Server
         PKHRoom _roomPacketHandler = new();
 
         Func<string, byte[], bool> SendFunc;
+        Action<string> CloseSessionAction;
 
-        public void InitAndStartProcessing(ServerOption serverOpt, UserManager userMgr, RoomManager roomMgr, HeartBeatManager heartBeatMgr, Func<string, byte[], bool> sendFunc, ILog logger)
+        public void InitAndStartProcessing(ILog logger, ServerOption serverOpt, UserManager userMgr, RoomManager roomMgr, HeartBeatManager heartBeatMgr, Func<string, byte[], bool> sendFunc, Action<string> closeSessionAction)
         {
+            _mainLogger = logger;
+
             _userMgr = userMgr;
             _roomMgr = roomMgr;
             _heartBeatMgr = heartBeatMgr;
+
             SendFunc = sendFunc;
-            _mainLogger = logger;
+            CloseSessionAction = closeSessionAction;
 
             _isThreadRunning = true;
             _processThread = new System.Threading.Thread(this.Process);
@@ -51,13 +55,13 @@ namespace Omok_Server
         {
             PKHandler.SendFunc = SendFunc;
             PKHandler.DIstributePacketAction = InsertPakcet;
+            PKHandler.CloseSessionAction = CloseSessionAction;
 
-            _commonPacketHandler.Init(_userMgr, _roomMgr, _mainLogger);
+            _commonPacketHandler.Init(_mainLogger, _userMgr, _roomMgr);
             _commonPacketHandler.RegistPacketHandler(_packetHandlerMap);
             _commonPacketHandler._heartBeatMgr = _heartBeatMgr;
-            //_heartBeatMgr.StartTimer();
 
-            _roomPacketHandler.Init(_userMgr, _roomMgr, _mainLogger);
+            _roomPacketHandler.Init(_mainLogger, _userMgr, _roomMgr);
             _roomPacketHandler.RegistPacketHandler(_packetHandlerMap);
         }
 

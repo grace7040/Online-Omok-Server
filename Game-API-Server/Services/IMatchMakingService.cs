@@ -5,6 +5,6 @@ namespace Game_API_Server.Services
     {
         Task<ResMatchingDTO> TryGetUserMatchingInfo(string id);
 
-        Task<ResponseDTO> RequestCancelMatching(string email);
+        Task<ResponseDTO> RequestCancelMatching(string id);
     }
 }

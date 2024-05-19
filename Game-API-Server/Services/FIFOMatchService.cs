@@ -12,22 +12,22 @@ namespace Game_API_Server.Services
             _config = config;
             _matchingServerUrl = _config.GetConnectionString("MatchingServer");
         }
-        public async Task<ResMatchingDTO> TryGetUserMatchingInfo(string email)
+        public async Task<ResMatchingDTO> TryGetUserMatchingInfo(string id)
         {
             var matchingUrl = _matchingServerUrl + "/matching"; 
             var client = new HttpClient();
-            var response = await client.PostAsJsonAsync(matchingUrl, new { UserID = email });
+            var response = await client.PostAsJsonAsync(matchingUrl, new { UserID = id });
             var responseContent = response.Content.ReadFromJsonAsync<ResMatchingDTO>();
             var userMatchingInfo = responseContent.Result;
 
             return userMatchingInfo;
         }
 
-        public async Task<ResponseDTO> RequestCancelMatching(string email)
+        public async Task<ResponseDTO> RequestCancelMatching(string id)
         {
             var cancelMatchingUrl = _matchingServerUrl + "/cancelmatching"; 
             var client = new HttpClient();
-            var response = await client.PostAsJsonAsync(cancelMatchingUrl, new { UserID = email });
+            var response = await client.PostAsJsonAsync(cancelMatchingUrl, new { UserID = id });
             var responseContent = response.Content.ReadFromJsonAsync<ResponseDTO>();
             var userMatchingInfo = responseContent.Result;
 
