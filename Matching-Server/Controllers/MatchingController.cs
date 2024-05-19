@@ -14,9 +14,9 @@ namespace Matching_Server.Controllers;
 [ApiController]
 public class MatchingController : ControllerBase
 {
-    IMatchWorker _matchWorker;
+    IMatchingWorker _matchWorker;
 
-    public MatchingController(IMatchWorker matchWorker)
+    public MatchingController(IMatchingWorker matchWorker)
     {
         _matchWorker = matchWorker;
     }
@@ -29,14 +29,19 @@ public class MatchingController : ControllerBase
         _matchWorker.AddUser(request.UserID);
 
         var matchingResult = _matchWorker.GetMatchingData(request.UserID);
-        if (matchingResult.Item1)
+        var isMatchSucceed = matchingResult.Item1;
+        if (isMatchSucceed)
         {
+            _matchWorker.RemoveUserFromMatchingDict(request.UserID, out var isSucceed);
+            if (!isSucceed)
+            {
+                response.Result = ErrorCode.MatchingFailRemoveOnMatchingDict;
+                return response;
+            }
             response.Result = ErrorCode.None;
             response.OmokServerIP = matchingResult.Item2.OmokServerIP;
             response.OmokServerPort = matchingResult.Item2.OmokServerPort;
             response.RoomNumber = matchingResult.Item2.RoomNumber;
-
-            _matchWorker.DeleteUserFromMatchingDict(request.UserID);
         }
 
         return response;
@@ -46,7 +51,11 @@ public class MatchingController : ControllerBase
     public ResponseDTO CancelMatching(RequestDTO request)
     {
         var response = new ResponseDTO() { Result = ErrorCode.None };
-        _matchWorker.DeleteUserFromMatchingDict(request.UserID);
+        _matchWorker.RemoveUserFromMatchingDict(request.UserID, out var isSucceed);
+        if (!isSucceed)
+        {
+            response.Result = ErrorCode.CancelMatchingFailRemoveOnMatchingDict;
+        }
         
         return response;
     }

@@ -15,7 +15,7 @@ namespace Hive_Auth_Server.Services
 
         public async Task<bool> CheckAuthToMemoryDbAsync(string email, string token)
         {
-            ErrorCode redisResult = await _memoryDb.CheckUserAuthAsync(email, token);
+            var redisResult = await _memoryDb.CheckUserAuthAsync(email, token);
             if (redisResult != ErrorCode.None)
             {
                 _logger.ZLogError($"[CheckAuthToRedis Fail] {redisResult}, request.email: {email}");

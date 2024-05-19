@@ -17,6 +17,7 @@ namespace Omok_Server
             packetHandlerMap.Add((int)PacketId.ResDbLogin, InResponseDbLogin);
             packetHandlerMap.Add((int)PacketId.ResDbLoadUserGameData, InResponseDbLoadUserGameData);
             packetHandlerMap.Add((int)PacketId.ReqInDisConnectUser, InRequestDisConnectClient);
+            packetHandlerMap.Add((int)PacketId.ReqDisConnect, RequestDisConnect);
             packetHandlerMap.Add((int)PacketId.ResDbLeaveRoom, InNotifyRemovedUserDB);
         }
 
@@ -27,6 +28,11 @@ namespace Omok_Server
         }
 
         public void InRequestDisConnectClient(OmokBinaryRequestInfo packetData)
+        {
+            CloseSessionAction(packetData.SessionID);
+        }
+
+        public void RequestDisConnect(OmokBinaryRequestInfo packetData)
         {
             CloseSessionAction(packetData.SessionID);
         }
@@ -50,7 +56,6 @@ namespace Omok_Server
                 _mainLogger.Debug($"{packetData.SessionID} 유저의 접속 해제. (IsInRoom: {user.IsInRoom})");
             }
         }
-
 
         public void RequestLogin(OmokBinaryRequestInfo packetData)
         {

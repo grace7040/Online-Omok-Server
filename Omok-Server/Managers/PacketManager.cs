@@ -1,22 +1,25 @@
-﻿using MemoryPack;
-using SuperSocket.SocketBase.Protocol;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Omok_Server
+﻿namespace Omok_Server
 {
     //패킷 직렬화 방식에 따른 패킷 관리자
-    // ::TODO:: 이너패킷 만드는 중복되는 부분 함수로 묶기
     public class PacketManager<TPacketDataCreator> where TPacketDataCreator : IBinaryPacketDataCreator, new()
     {
         TPacketDataCreator _dataCreator = new();
 
+        public byte[] GetBinaryPacketData<T>(T pkHeader, PacketId packetId) where T : PKHeader
+        {
+            var sendData = _dataCreator.PacketDataToBinary(pkHeader, packetId);
+
+            return sendData;
+        }
+
+        public T GetPacketData<T>(byte[] binaryPacketData) where T : PKHeader
+        {
+            return _dataCreator.BinaryToPacketData<T>(binaryPacketData);
+        }
+
         public OmokBinaryRequestInfo MakeInNTFConnectOrDisConnectClientPacket(bool isConnect, string sessionID)
         {
-            OmokBinaryRequestInfo innerPacket = new OmokBinaryRequestInfo();
+            var innerPacket = new OmokBinaryRequestInfo();
 
             if (isConnect) {
                 innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.NtfInConnectClient);
@@ -40,31 +43,43 @@ namespace Omok_Server
 
             var sendData = GetBinaryPacketData(packet, PacketId.ReqRoomLeave);
 
-            var innerPacket = new OmokBinaryRequestInfo();
-            innerPacket.Data = sendData;
-            innerPacket.SessionID = sessionID;
+            var innerPacket = new OmokBinaryRequestInfo
+            {
+                Data = sendData,
+                SessionID = sessionID
+            };
+
             return innerPacket;
         }
 
         public OmokBinaryRequestInfo MakeInReqHeartBeatPacket()
         {
-            var innerPacket = new OmokBinaryRequestInfo();
-            innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.ReqInHeartBeat);
+            var innerPacket = new OmokBinaryRequestInfo
+            {
+                Data = _dataCreator.PacketIdToBinary(PacketId.ReqInHeartBeat)
+            };
+
             return innerPacket;
         }
 
         public OmokBinaryRequestInfo MakeInReqDisConnectUserPacket(string sessionID)
         {
-            var innerPacket = new OmokBinaryRequestInfo();
-            innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.ReqInDisConnectUser);
-            innerPacket.SessionID = sessionID;
+            var innerPacket = new OmokBinaryRequestInfo()
+            {
+                Data = _dataCreator.PacketIdToBinary(PacketId.ReqInDisConnectUser),
+                SessionID = sessionID
+            };
+            
             return innerPacket;
         }
 
         public OmokBinaryRequestInfo MakeInReqRoomCheckPacket()
         {
-            var innerPacket = new OmokBinaryRequestInfo();
-            innerPacket.Data = _dataCreator.PacketIdToBinary(PacketId.ReqInRoomCheck);
+            var innerPacket = new OmokBinaryRequestInfo()
+            {
+                Data = _dataCreator.PacketIdToBinary(PacketId.ReqInRoomCheck)
+            };
+
             return innerPacket;
         }
 
@@ -75,10 +90,15 @@ namespace Omok_Server
                 UserID = userID,
                 AuthToken = authToken
             };
+
             var sendData = GetBinaryPacketData(responseLogin, PacketId.ReqDbLogin);
-            var innerPacket = new OmokBinaryRequestInfo();
-            innerPacket.Data = sendData;
-            innerPacket.SessionID = sessionID;
+
+            var innerPacket = new OmokBinaryRequestInfo()
+            {
+                Data = sendData,
+                SessionID = sessionID
+            };
+
             return innerPacket;
         }
 
@@ -90,10 +110,15 @@ namespace Omok_Server
                 Result = (short)result,
                 UserID = userID,
             };
+
             var sendData = GetBinaryPacketData(responseLogin, PacketId.ResDbLogin);
-            var innerPacket = new OmokBinaryRequestInfo();
-            innerPacket.Data = sendData;
-            innerPacket.SessionID = sessionID;
+
+            var innerPacket = new OmokBinaryRequestInfo
+            {
+                Data = sendData,
+                SessionID = sessionID
+            };
+
             return innerPacket;
         }
 
@@ -104,10 +129,15 @@ namespace Omok_Server
                 UserID = userID,
                 RoomNumber = roomNumber
             };
+
             var sendData = GetBinaryPacketData(responseLogin, PacketId.ReqDbLeaveRoom);
-            var innerPacket = new OmokBinaryRequestInfo();
-            innerPacket.Data = sendData;
-            innerPacket.SessionID = sessionID;
+
+            var innerPacket = new OmokBinaryRequestInfo
+            {
+                Data = sendData,
+                SessionID = sessionID
+            };
+
             return innerPacket;
         }
 
@@ -118,10 +148,15 @@ namespace Omok_Server
                 Result = (short)result,
                 UserID = userID,
             };
+
             var sendData = GetBinaryPacketData(responseLogin, PacketId.ResDbLeaveRoom);
-            var innerPacket = new OmokBinaryRequestInfo();
-            innerPacket.Data = sendData;
-            innerPacket.SessionID = sessionID;
+
+            var innerPacket = new OmokBinaryRequestInfo
+            {
+                Data = sendData,
+                SessionID = sessionID
+            };
+
             return innerPacket;
         }
 
@@ -131,10 +166,15 @@ namespace Omok_Server
             {
                 UserID = userID
             };
+
             var sendData = GetBinaryPacketData(reqData, PacketId.ReqDbLoadUserGameData);
-            var innerPacket = new OmokBinaryRequestInfo();
-            innerPacket.Data = sendData;
-            innerPacket.SessionID = sessionID;
+
+            var innerPacket = new OmokBinaryRequestInfo
+            {
+                Data = sendData,
+                SessionID = sessionID
+            };
+
             return innerPacket;
         }
 
@@ -149,10 +189,15 @@ namespace Omok_Server
                 Level = level,
                 Exp = exp
             };
+
             var sendData = GetBinaryPacketData(resData, PacketId.ResDbLoadUserGameData);
-            var innerPacket = new OmokBinaryRequestInfo();
-            innerPacket.Data = sendData;
-            innerPacket.SessionID = sessionID;
+
+            var innerPacket = new OmokBinaryRequestInfo
+            {
+                Data = sendData,
+                SessionID = sessionID
+            };
+
             return innerPacket;
         }
 
@@ -166,10 +211,15 @@ namespace Omok_Server
                 Level = level,
                 Exp = exp
             };
+
             var sendData = GetBinaryPacketData(reqData, PacketId.ReqDbSaveUserGameData);
-            var innerPacket = new OmokBinaryRequestInfo();
-            innerPacket.Data = sendData;
-            innerPacket.SessionID = sessionID;
+
+            var innerPacket = new OmokBinaryRequestInfo
+            {
+                Data = sendData,
+                SessionID = sessionID
+            };
+
             return innerPacket;
         }
 
@@ -179,26 +229,16 @@ namespace Omok_Server
             {
                 Result = (short)result
             };
+
             var sendData = GetBinaryPacketData(resData, PacketId.ResDbSaveUserGameData);
-            var innerPacket = new OmokBinaryRequestInfo();
-            innerPacket.Data = sendData;
-            innerPacket.SessionID = sessionID;
+
+            var innerPacket = new OmokBinaryRequestInfo
+            {
+                Data = sendData,
+                SessionID = sessionID
+            };
+
             return innerPacket;
         }
-
-
-        public byte[] GetBinaryPacketData<T>(T pkHeader, PacketId packetId) where T : PKHeader
-        {
-            byte[] sendData = _dataCreator.PacketDataToBinary(pkHeader, packetId);
-
-            return sendData;
-        }
-
-        public T GetPacketData<T>(byte[] binaryPacketData) where T : PKHeader
-        {
-            return _dataCreator.BinaryToPacketData<T>(binaryPacketData);
-        }
-
-        
     }
 }

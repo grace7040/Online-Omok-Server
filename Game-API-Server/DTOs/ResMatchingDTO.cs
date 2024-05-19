@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Game_API_Server.DTOs
+﻿namespace Game_API_Server.DTOs
 {
     public class ResMatchingDTO  : ResponseDTO
     { 

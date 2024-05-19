@@ -1,7 +1,8 @@
 ﻿
 public interface IMemoryDb
 {
-    public Task<ErrorCode> RegistUserAsync(string id, string authToken, TimeSpan expiry);
+    public Task<ErrorCode> RegistUserAuthAsync(string id, string authToken, TimeSpan expiry);
+    public Task<ErrorCode> RemoveUserAuthAsync(string id);
 
     public Task<ErrorCode> CheckUserAuthAsync(string id, string authToken);
 

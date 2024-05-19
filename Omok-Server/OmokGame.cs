@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Omok_Server
+﻿namespace Omok_Server
 {
     public class OmokGame
     {
@@ -59,7 +52,10 @@ namespace Omok_Server
             NotifyPutStoneToClient(firstTurnPlayer, null);
             //StartTimer();
         }
-
+        public StoneColor GetUserStoneColor(string sessionId)
+        {
+            return _userStoneColorDict[sessionId];
+        }
         public string GetSessionByStoneColor(StoneColor stoneColor)
         {
             return _userStoneColorDict.FirstOrDefault(entry =>

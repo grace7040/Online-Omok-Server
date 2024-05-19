@@ -28,16 +28,16 @@ namespace Hive_Auth_Server.Controllers
         public async Task<ResponseDTO> Login(ReqAccountDTO account)
         {
             var passwordFromRequest = _hasher.GetHashedString(account.Password);
-            var passwordFromDb = _hiveDb.GetPasswordByIdAsync(account.Id);
+            var passwordFromDb = await _hiveDb.GetPasswordByIdAsync(account.Id);
 
-            if (await passwordFromDb != passwordFromRequest)
+            if (passwordFromRequest != passwordFromDb)
             {
                 return new ResponseDTO { Result = ErrorCode.LoginFailWrongPassword };
             }
 
             //Token 랜덤 생성 및 Redis에 저장
-            string token = _tokenCreator.CreateAuthToken();
-            ErrorCode result = await _memoryDb.RegistUserAsync(account.Id, token, Expiries.LoginToken);
+            var token = _tokenCreator.CreateAuthToken();
+            var result = await _memoryDb.RegistUserAsync(account.Id, token, Expiries.LoginToken);
             if(result != ErrorCode.None)
             {
                 _logger.ZLogError($"[Login Failed] {result}, request.Id: {account.Id}");

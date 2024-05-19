@@ -1,11 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 using SqlKata.Execution;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Omok_Server
 {
@@ -25,7 +20,7 @@ namespace Omok_Server
 
         public UserGameData GetUserGameData(string id)
         {
-            var datas = ( _queryFactory.Query("user_game_data")
+            var datas = (_queryFactory.Query("user_game_data")
                                          .Where("id", id)
                                          .Get<UserGameData>()).FirstOrDefault();
 

@@ -1,13 +1,4 @@
-﻿using MemoryPack;
-using SuperSocket.SocketBase.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.Marshalling;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Schema;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using SuperSocket.SocketBase.Logging;
 
 namespace Omok_Server
 {
@@ -288,7 +279,19 @@ namespace Omok_Server
                 return;
             }
 
+            //이미 게임이 시작한 경우
+            if(_state == RoomState.GameStart)
+            {
+                for(int i = 0; i < _userList.Count; i++)
+                {
+                    if (_userList[i].SessionID == sessionID)
+                        continue;
+                    _game.EndGame(_game.GetUserStoneColor(_userList[i].SessionID));
+                }
+            }
+
             RemoveUser(roomUser);
+
             if(_userList.Count == 0) {
                 Free();
             }

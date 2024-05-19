@@ -7,4 +7,6 @@ public enum ErrorCode : UInt16
 
     MatchingWait = 5001,
     AddUserToMatchingQueueFailException,
+    CancelMatchingFailRemoveOnMatchingDict,
+    MatchingFailRemoveOnMatchingDict,
 }

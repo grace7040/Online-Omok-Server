@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-//PacketType
+﻿//PacketType
 public enum PacketId : int
 {
     // 클라이언트와 통신 1001 ~ 1100
@@ -13,6 +7,7 @@ public enum PacketId : int
     ReqLogin = 1002,
     ResLogin = 1003,
 
+    ReqDisConnect = 1004,
     NtfMustClose = 1005,
 
     ResLoadUserGameData = 1007,
@@ -80,4 +75,5 @@ public enum PacketId : int
     ReqDbLeaveRoom = 8113,
 
     SsEnd = 8200,
+    
 }

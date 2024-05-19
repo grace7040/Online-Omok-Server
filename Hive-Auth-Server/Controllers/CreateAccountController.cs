@@ -25,7 +25,7 @@ namespace Hive_Auth_Server.Controllers
             var hashedPassword = _hasher.GetHashedString(account.Password);
             
             //DB에 유저 계정 추가
-            ErrorCode result = await _hiveDb.InsertAccountAsync(account.Id, hashedPassword);
+            var result = await _hiveDb.InsertAccountAsync(account.Id, hashedPassword);
             
             if(result != ErrorCode.None)
             {
