@@ -45,7 +45,7 @@ namespace Omok_Server
         Action<string, string> UpdateUsersGameDataAction;
         Action<int> AddRoomToEmptyRoomQueueAction;
 
-        public void Init(int number, int maxUserCount, Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> distributeAction, Action<OmokBinaryRequestInfo> distributeMySqlAction, Action<string, string> updateUsersGameDataAction, ILog logger, int maxGameTime, int turnTimeOut, int maxTurnOverCnt, Action<int> addEmptyRoomAction)
+        public void Init(ILog logger, int number, int maxUserCount, int maxGameTime, int turnTimeOut, int maxTurnOverCnt, Func<string, byte[], bool> func, Action<OmokBinaryRequestInfo> distributeAction, Action<OmokBinaryRequestInfo> distributeMySqlAction, Action<string, string> updateUsersGameDataAction, Action<int> addEmptyRoomAction)
         {
             Number = number;
             _maxUserCount = maxUserCount;
@@ -262,6 +262,12 @@ namespace Omok_Server
 
         public void CheckUserTurnAndPutStone(string sessionID, PKTReqPutStone reqData)
         {
+            if(_state != RoomState.GameStart)
+            {
+                //:: TODO :: 게임시작 전에 둘 수 없음
+                return;
+            }
+
             if (!_game.IsUserTurn(sessionID))
             {
                 _game.ResponsePutStone(sessionID, ErrorCode.PutStoneFailNotTurn);
