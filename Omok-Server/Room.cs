@@ -322,7 +322,7 @@ namespace Omok_Server
                 WinnerColor = winnerColor
             };
 
-            var sendPacket = _packetMgr.GetBinaryPacketData(ntfGameEnd, PacketId.NtfGameENd);
+            var sendPacket = _packetMgr.GetBinaryPacketData(ntfGameEnd, PacketId.NtfGameEnd);
             Broadcast("", sendPacket);
 
             //유저 게임 데이터 저장
