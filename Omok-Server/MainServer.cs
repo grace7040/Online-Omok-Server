@@ -95,12 +95,24 @@ namespace Omok_Server
 
         void OnPacketReceived(NetworkSession session, OmokBinaryRequestInfo requestPacket)
         {
-            //MainLogger.Info($"OnPacketReceived(): {session.SessionID} Sent Packet. Packet Body Length: {requestPacket.Data.Length}");
-            // ::TODO:: PacketID가 유효한 범위 내인지 체크
-            
-            requestPacket.SessionID = session.SessionID;
+            var header = new MemoryPackPacketHeadInfo();
+            header.Read(requestPacket.Data);
+            if (IsValidPacket(header.Id))
+            {
+                requestPacket.SessionID = session.SessionID;
+                Distribute(requestPacket);
+            }
+        }
 
-            Distribute(requestPacket);
+        bool IsValidPacket(ushort packetId)
+        {
+            if (packetId < (ushort)PacketId.CsBegin || packetId > (ushort)PacketId.CsEnd)
+            {
+                MainLogger.Error($"[ERROR] Received Invalid Packet: ID.{packetId}");
+                return false;
+            }
+
+            return true;
         }
 
         void InitConfig()

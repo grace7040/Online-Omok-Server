@@ -7,19 +7,16 @@ using System.Threading.Tasks;
 //PacketType
 public enum PacketId : int
 {
-    ReqResTestEcho = 101,
-
-    ReqHeartBeat = 102,
-    ResHeartBeat = 103,
-
     // 클라이언트
     CsBegin = 1001,
 
     ReqLogin = 1002,
     ResLogin = 1003,
     NtfMustClose = 1005,
-
     ResLoadUserGameData = 1006,
+
+    ReqHeartBeat = 1009,
+    ResHeartBeat = 1010,
 
     ReqRoomEnter = 1015,
     ResRoomEnter = 1016,
@@ -71,9 +68,6 @@ public enum PacketId : int
 
     ReqInRoomCheck = 8046,
 
-    
-
-
     // DB 8101 ~ 9000
     ReqDbLogin = 8101,
     ResDbLogin = 8102,
@@ -85,4 +79,6 @@ public enum PacketId : int
     ResDbSaveUserGameData = 8111,
     ResDbLeaveRoom = 8112,
     ReqDbLeaveRoom = 8113,
+
+    SsEnd = 9000,
 }
