@@ -12,6 +12,7 @@ namespace Game_API_Server.Controllers
         IMemoryDb _memoryDb;
         IMatchMakingService _matchMakingService;
 
+
         public MatchMakingController(IConfiguration configuration, IMemoryDb memoryDb, IMatchMakingService matchMakingService)
         {
             _configuration = configuration;
@@ -31,10 +32,8 @@ namespace Game_API_Server.Controllers
                 return new ResponseDTO { Result = ErrorCode.MatchingReqFailException };
             }
 
-            //redis에 유저정보:룸넘버 키페어가 존재하는 경우
             if (userMatchingInfo.IsMatchSucceed)
             {
-                //매칭 성공 시ErrorCode.None + 소켓서버 주소 + 룸 넘버 응답
                 return new ResMatchingDTO
                 {
                     Result = ErrorCode.None,

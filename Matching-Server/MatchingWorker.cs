@@ -11,32 +11,29 @@ using System.Threading.Tasks;
 
 namespace Matching_Server;
 
-public interface IMatchWorker : IDisposable
+public interface IMatchingWorker : IDisposable
 {
     public void AddUser(string userID);
 
     public (bool, MatchingData) GetMatchingData(string userID);
-    public void DeleteUserFromMatchingDict(string userID);
+    public void RemoveUserFromMatchingDict(string userID, out bool result);
 }
 
-public class MatchWorker : IMatchWorker
+public class MatchingWorker : IMatchingWorker
 {
     System.Threading.Thread _reqWorker = null;
+    System.Threading.Thread _completeWorker = null;
+    
+    ConcurrentDictionary<string, MatchingData> _matchingDict = new(); // key는 유저ID
     ConcurrentQueue<string> _waitingQueue = new();
     ConcurrentQueue<string> _matchingQueue = new();
-
-    System.Threading.Thread _completeWorker = null;
-    // key는 유저ID
-    ConcurrentDictionary<string, MatchingData> _matchingDict = new();
 
     string _requestMatchingKey;
     string _checkMatchingKey;
     RedisConnection _redisConnection;
 
-    public MatchWorker(IOptions<MatchingConfig> matchingConfig)
-    {
-        Console.WriteLine("MatchWoker 생성자 호출");
-        
+    public MatchingWorker(IOptions<MatchingConfig> matchingConfig)
+    {        
         var redisConnectString = matchingConfig.Value.RedisConnectionString;
         var redisConfig = new RedisConfig("MatchingRedis", redisConnectString!);
         _redisConnection = new RedisConnection(redisConfig);
@@ -44,6 +41,11 @@ public class MatchWorker : IMatchWorker
         _requestMatchingKey = matchingConfig.Value.RequestMatchingKey;
         _checkMatchingKey = matchingConfig.Value.CheckMatchingKey;
 
+        InitWorkers();
+    }
+
+    void InitWorkers()
+    {
         _reqWorker = new System.Threading.Thread(this.RunMatching);
         _reqWorker.Start();
 
@@ -81,19 +83,18 @@ public class MatchWorker : IMatchWorker
         return (false, null);
     }
 
-    public void DeleteUserFromMatchingDict(string userID)
+    public void RemoveUserFromMatchingDict(string userID, out bool result)
     {
-        _matchingDict.TryRemove(userID, out var data);
+        result = _matchingDict.TryRemove(userID, out var data);
     }
 
-    //매칭 요청한 유저가 두명 이상일 시 redis 큐를 통해 매칭 요청(방 배정)
+    //매칭을 기다리는 유저가 2명 이상인 경우 redis에 매칭 요청을 추가하는 스레드
     void RunMatching()
     {
         while (true)
         {
             try
             {
-
                 if (_waitingQueue.Count < 2)
                 {
                     System.Threading.Thread.Sleep(1);
@@ -112,7 +113,7 @@ public class MatchWorker : IMatchWorker
                 _matchingQueue.Enqueue(user2);
                 _matchingDict[user2].State = MatchingState.Matching;
 
-                //Redis 매칭 요청
+                //Redis에 매칭 요청 추가
                 PushMatchingRequestToRedis();
             }
             catch (Exception ex)
@@ -144,7 +145,7 @@ public class MatchWorker : IMatchWorker
         return true;
     }
 
-    //redis로부터 방배정 결과를 받아오는 스레드
+    //redis로부터 방배정 결과를 받아와서 실제 매칭을 진행하는 스레드
     void RunMatchingComplete()
     {
         while (true)
@@ -152,7 +153,8 @@ public class MatchWorker : IMatchWorker
             try
             {
                 var redisResult = TryGetEmptyRoomFromRedis();
-                if (redisResult.Item1)
+                var isEmptyRoomExist = redisResult.Item1;
+                if (isEmptyRoomExist)
                 {
                     var ip = redisResult.Item2.OmokServerIP;
                     var port = redisResult.Item2.OmokServerPort;
@@ -184,26 +186,25 @@ public class MatchWorker : IMatchWorker
             return;
         }
 
-
-        //Update _matchingDict
-        _matchingDict[user1].State = MatchingState.Complete;
-        _matchingDict[user1].OmokServerIP = ip;
-        _matchingDict[user1].OmokServerPort = port;
-        _matchingDict[user1].RoomNumber = roomNumber;
-
-        _matchingDict[user2].State = MatchingState.Complete;
-        _matchingDict[user2].OmokServerIP = ip;
-        _matchingDict[user2].OmokServerPort = port;
-        _matchingDict[user2].RoomNumber = roomNumber;
+        UpdateMatchingDict(user1, MatchingState.Complete, ip, port, roomNumber);
+        UpdateMatchingDict(user2, MatchingState.Complete, ip, port, roomNumber);
 
         return;
+    }
+
+    void UpdateMatchingDict(string user, MatchingState state, string ip, string port, int roomNumber)
+    {
+        _matchingDict[user].State = state;
+        _matchingDict[user].OmokServerIP = ip;
+        _matchingDict[user].OmokServerPort = port;
+        _matchingDict[user].RoomNumber = roomNumber;
     }
 
 
 
     public void Dispose()
     {
-        Console.WriteLine("MatchWoker 소멸자 호출");
+        // ::TODO:: MatchWorker Dispose
     }
 
     void PushMatchingRequestToRedis()
@@ -227,28 +228,4 @@ public class MatchWorker : IMatchWorker
 
         return (false, null);
     }
-}
-
-public class EmptyRoomInfo
-{
-    public string OmokServerIP { get; set; } = "";
-    public string OmokServerPort { get; set; } = "";
-    public int RoomNumber { get; set; }
-}
-
-
-public class MatchingData
-{    
-    public MatchingState State { get; set; }
-    public string OmokServerIP { get; set; }
-    public string OmokServerPort { get; set; }
-    public int RoomNumber { get; set; }
-}
-
-
-public class MatchingConfig
-{
-    public string RedisConnectionString { get; set; }
-    public string RequestMatchingKey { get; set; }
-    public string CheckMatchingKey { get; set; }
 }

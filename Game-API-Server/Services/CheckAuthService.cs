@@ -19,8 +19,8 @@ namespace Game_API_Server.Services
 
         public async Task<bool> CheckAuthToHiveAsync(string id, string token)
         {
-            string hiveUrl = _configuration.GetConnectionString("HiveServer") + "/checkuserauth";
-            HttpClient client = new();
+            var hiveUrl = _configuration.GetConnectionString("HiveServer") + "/checkuserauth";
+            var client = new HttpClient();
             var hiveResponse = await client.PostAsJsonAsync(hiveUrl, new { Id = id, Token = token });
             if (hiveResponse.StatusCode != HttpStatusCode.OK)
             {
@@ -32,7 +32,7 @@ namespace Game_API_Server.Services
 
         public async Task<bool> CheckAuthToMemoryDbAsync(string id, string token)
         {
-            ErrorCode redisResult = await _memoryDb.CheckUserAuthAsync(id, token);
+            var redisResult = await _memoryDb.CheckUserAuthAsync(id, token);
             if (redisResult != ErrorCode.None)
             {
                 _logger.ZLogInformation($"[CheckAuthToRedis Failed] {redisResult}, request.Id: {id}");

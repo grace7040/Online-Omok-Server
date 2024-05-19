@@ -8,14 +8,14 @@ namespace Hive_Auth_Server.Servicies
     {
         public string GetHashedString(string str)
         {
-            byte[] hashedValues = SHA256.HashData(Encoding.UTF8.GetBytes(str));
+            var hashedValues = SHA256.HashData(Encoding.UTF8.GetBytes(str));
 
-            StringBuilder tmp = new StringBuilder();
+            var tmp = new StringBuilder();
             for (int i = 0; i < hashedValues.Length; i++)
             {
                 tmp.Append(hashedValues[i].ToString("x2"));
             }
-            string result = tmp.ToString();
+            var result = tmp.ToString();
 
             return result;
         }

@@ -23,10 +23,10 @@ namespace Game_API_Server.Middleware
             }
             else
             {
-                string id = context.Request.Headers["Id"].ToString();
-                string token = context.Request.Headers["token"].ToString();
+                var id = context.Request.Headers["Id"].ToString();
+                var token = context.Request.Headers["token"].ToString();
 
-                bool isAuthed = await _checkAuthService.CheckAuthToMemoryDbAsync(id, token);
+                var isAuthed = await _checkAuthService.CheckAuthToMemoryDbAsync(id, token);
                 if (!isAuthed)
                 {
                     context.Response.StatusCode = 400;

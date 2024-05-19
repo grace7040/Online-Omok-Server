@@ -23,24 +23,22 @@ namespace Game_API_Server.Controllers
         [HttpPost("login")]
         public async Task<ResponseDTO> Login(ReqUserAuthDTO auth)
         {
-            bool isAuthedOnHive = await _checkAuthService.CheckAuthToHiveAsync(auth.Id, auth.Token);
-
+            var isAuthedOnHive = await _checkAuthService.CheckAuthToHiveAsync(auth.Id, auth.Token);
             if (!isAuthedOnHive)
             {
-                _gameDb.Dispose();
                 return new ResponseDTO { Result = ErrorCode.LoginFailOnHive };
             }
 
-
-            ErrorCode redisResult = await _memoryDb.RegistUserAsync(auth.Id, auth.Token, Expiries.LoginToken);
+            //redis에 로그인용 토큰 등록
+            var redisResult = await _memoryDb.RegistUserAsync(auth.Id, auth.Token, Expiries.LoginToken);
             if (redisResult != ErrorCode.None)
             {
                 return new ResponseDTO { Result = ErrorCode.LoginFailRegistRedis };
             }
 
-
             //첫 접속인 경우, db에 game data 추가
-            if (!(await _gameDb.IsUserIdExistAsync(auth.Id)))
+            var isNewUser = !(await _gameDb.IsUserIdExistAsync(auth.Id));
+            if (isNewUser)
             {
                 ErrorCode dbResult = await _gameDb.InsertAccountAsync(auth.Id);
                 if(dbResult != ErrorCode.None)
@@ -50,12 +48,6 @@ namespace Game_API_Server.Controllers
             }
 
             return new ResponseDTO { Result = ErrorCode.None };
-        }
-
-        [Route("Test")]
-        public IActionResult Test()
-        {
-            return Ok();
         }
     }
 }

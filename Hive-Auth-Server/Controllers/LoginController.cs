@@ -36,8 +36,8 @@ namespace Hive_Auth_Server.Controllers
             }
 
             //Token 랜덤 생성 및 Redis에 저장
-            string token = _tokenCreator.CreateAuthToken();
-            ErrorCode result = await _memoryDb.RegistUserAsync(account.Id, token, Expiries.LoginToken);
+            var token = _tokenCreator.CreateAuthToken();
+            var result = await _memoryDb.RegistUserAsync(account.Id, token, Expiries.LoginToken);
             if(result != ErrorCode.None)
             {
                 _logger.ZLogError($"[Login Failed] {result}, request.Id: {account.Id}");
