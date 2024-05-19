@@ -7,6 +7,7 @@ public enum PacketId : int
     ReqLogin = 1002,
     ResLogin = 1003,
 
+    ReqDisConnect = 1004,
     NtfMustClose = 1005,
 
     ResLoadUserGameData = 1007,
@@ -74,4 +75,5 @@ public enum PacketId : int
     ReqDbLeaveRoom = 8113,
 
     SsEnd = 8200,
+    
 }

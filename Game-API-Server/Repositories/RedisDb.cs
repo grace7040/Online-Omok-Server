@@ -22,7 +22,7 @@ namespace Game_API_Server.Repositories
             _roomNumberKey = _configuration.GetSection("RedisKeys")["RoomNumber"];
         }
 
-        public async Task<ErrorCode> RegistUserAsync(string id, string authToken, TimeSpan expiry)
+        public async Task<ErrorCode> RegistUserAuthAsync(string id, string authToken, TimeSpan expiry)
         {
             try
             {
@@ -37,6 +37,21 @@ namespace Game_API_Server.Repositories
                 return ErrorCode.LoginFailRegistRedis;
             }
             
+            return ErrorCode.None;
+        }
+
+        public async Task<ErrorCode> RemoveUserAuthAsync(string id)
+        {
+            try
+            {
+                var query = new RedisString<string>(_redisConnection, id, null);
+                await query.DeleteAsync();
+            }
+            catch
+            {
+                return ErrorCode.RemoveUserFailException;
+            }
+
             return ErrorCode.None;
         }
 

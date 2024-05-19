@@ -52,7 +52,10 @@
             NotifyPutStoneToClient(firstTurnPlayer, null);
             //StartTimer();
         }
-
+        public StoneColor GetUserStoneColor(string sessionId)
+        {
+            return _userStoneColorDict[sessionId];
+        }
         public string GetSessionByStoneColor(StoneColor stoneColor)
         {
             return _userStoneColorDict.FirstOrDefault(entry =>
