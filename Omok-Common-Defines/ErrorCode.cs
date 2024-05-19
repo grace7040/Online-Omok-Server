@@ -1,31 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿// 7001 ~ 8000
 public enum ErrorCode : short
 {
     None = 0,
-    LoginFailFullUserCount = 1,
-    AddUserDuplication = 2,
-    RemoveUserFailInvalidSessionID = 3,
-    LoginFailAlreadyLogined = 4,
-    RoomEnterFailInvalidUser = 5,
-    RoomEnterFailInvalidState = 6,
-    RoomEnterFailInvalidRoomNumber = 7,
-    RoomEnterFailAddUser = 8,
-    PutStoneFailNotTurn = 9,
-    PutStoneFailInvalidPosition = 10,
-    AddUserFailFullUserCount = 11,
-    LoginFailInvalidUser = 12,
-    CheckUserAuthFailNotExist = 13,
-    CheckUserAuthFailNotMatch = 14,
-    CheckUserAuthFailException = 15,
-    LoadUserGameDataFailNotExist = 16,
-    UpdateUserGameDataFail = 17,
-    RemoveUserRoomNumberFail = 18,
-    RemoveUserFromMatchingQueueFail = 19,
-    PopMatchingRequestFromRedisFail = 20,
-    PutStoneFailNotGameStart = 21,
+
+    LoginFailFullUserCount = 7001,
+    LoginFailAlreadyLogined,
+    LoginFailInvalidUser,
+
+    AddUserDuplication = 7011,
+    AddUserFailFullUserCount,
+
+    RemoveUserFailInvalidSessionID = 7021,
+    RemoveUserRoomNumberFail,
+    RemoveUserFromMatchingQueueFail,
+
+    RoomEnterFailInvalidUser = 7031,
+    RoomEnterFailInvalidState,
+    RoomEnterFailInvalidRoomNumber,
+    RoomEnterFailAddUser,
+
+    CheckUserAuthFailNotExist = 7041,
+    CheckUserAuthFailNotMatch,
+    CheckUserAuthFailException,
+
+    LoadUserGameDataFailNotExist = 7051,
+    UpdateUserGameDataFail,
+    
+    PopMatchingRequestFromRedisFail = 7061,
+
+    PutStoneFailNotTurn = 7101,
+    PutStoneFailInvalidPosition,
+    PutStoneFailNotGameStart,
 }

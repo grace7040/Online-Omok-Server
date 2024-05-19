@@ -1,19 +1,18 @@
-﻿public enum ErrorCode : UInt16
+﻿
+// 1001 ~ 2000
+public enum ErrorCode : UInt16
 {
     None = 0,
 
-    //1001~
     CreateAccountFailInsertAccount = 1001,
     CreateAccountFailAlreadyExist,
     CreateAccountFailException,
 
-    //2001~
-    LoginFailRegistRedis=2001,
+    LoginFailRegistRedis=1101,
     LoginFailWrongPassword,
     LoginFailNotExistId,
 
-    //3001~
-    CheckUserAuthFailNotMatch=3001,
+    CheckUserAuthFailNotMatch= 1201,
     CheckUserAuthFailNotExist,
     CheckUserAuthFailException,
 

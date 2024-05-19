@@ -7,19 +7,18 @@ using System.Threading.Tasks;
 //PacketType
 public enum PacketId : int
 {
-    ReqResTestEcho = 101,
-
-    ReqHeartBeat = 102,
-    ResHeartBeat = 103,
-
-    // 클라이언트
+    // 클라이언트와 통신 1001 ~ 1100
     CsBegin = 1001,
 
     ReqLogin = 1002,
     ResLogin = 1003,
+
     NtfMustClose = 1005,
 
-    ResLoadUserGameData = 1006,
+    ResLoadUserGameData = 1007,
+
+    ReqHeartBeat = 1009,
+    ResHeartBeat = 1010,
 
     ReqRoomEnter = 1015,
     ResRoomEnter = 1016,
@@ -42,17 +41,14 @@ public enum PacketId : int
     NtfPutStone = 1043,
 
     NtfTurnOver = 1046,
-    NtfGameENd = 1047,
+    NtfGameEnd = 1047,
 
-    ReqRoomDevAllRoomStartGame = 1091,
-    ResRoomDevAllRoomStartGame = 1092,
-
-    ReqRoomDevAllRoomEndGame = 1093,
-    ResRoomDevAllRoomEndGame = 1094,
 
     CsEnd = 1100,
 
-    // 시스템, 서버 - 서버
+
+
+    // 서버 간 통신 or 서버 내부 패킷 8001 ~ 8200
     SsStart = 8001,
 
     NtfInConnectClient = 8011,
@@ -71,10 +67,7 @@ public enum PacketId : int
 
     ReqInRoomCheck = 8046,
 
-    
-
-
-    // DB 8101 ~ 9000
+    // DB 요청 8101 ~ 8200
     ReqDbLogin = 8101,
     ResDbLogin = 8102,
 
@@ -85,4 +78,6 @@ public enum PacketId : int
     ResDbSaveUserGameData = 8111,
     ResDbLeaveRoom = 8112,
     ReqDbLeaveRoom = 8113,
+
+    SsEnd = 8200,
 }
