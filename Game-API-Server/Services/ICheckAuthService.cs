@@ -1,6 +1,4 @@
-﻿using Game_API_Server.DTOs;
-
-namespace Game_API_Server.Services
+﻿namespace Game_API_Server.Services
 {
     public interface ICheckAuthService
     {

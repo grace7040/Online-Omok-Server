@@ -1,5 +1,4 @@
 ﻿using System.Security.Cryptography;
-using System.Security.Principal;
 using System.Text;
 
 namespace Hive_Auth_Server.Servicies

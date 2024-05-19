@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Omok_Server
+﻿namespace Omok_Server
 {
     public class User
     {
@@ -20,13 +14,10 @@ namespace Omok_Server
 
         public bool IsUsing { get { return _isUsing; } }
         public bool IsLogin { get { return _isLogin; } }
-        public bool IsInRoom { get { return RoomNumber != Room.InvalidRoomNumber; } }   //룸입장시 시 RoomNumber 설정. 룸퇴장시  RoomNumber을 -1로 설정
+        public bool IsInRoom { get { return RoomNumber != Room.InvalidRoomNumber; } }   //룸 입장시 RoomNumber 설정. 룸퇴장시  RoomNumber을 -1로 설정
         
         public int HeartBeatCnt { get { return _heartBeatCnt; } set { _heartBeatCnt = value; } }
-
-
-        //유저 게임 정보
-        public UserGameData GameData { get; private set; }
+        public UserGameData GameData { get; private set; }  //유저의 게임 정보
 
         public void SetGameData(UserGameData userGameData)
         {

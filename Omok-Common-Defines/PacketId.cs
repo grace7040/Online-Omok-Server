@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-//PacketType
+﻿//PacketType
 public enum PacketId : int
 {
     // 클라이언트와 통신 1001 ~ 1100

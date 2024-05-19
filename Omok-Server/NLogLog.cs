@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Omok_Server
+﻿namespace Omok_Server
 {
     public class NLogLog : SuperSocket.SocketBase.Logging.ILog
     {

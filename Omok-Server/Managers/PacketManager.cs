@@ -1,12 +1,4 @@
-﻿using MemoryPack;
-using SuperSocket.SocketBase.Protocol;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Omok_Server
+﻿namespace Omok_Server
 {
     //패킷 직렬화 방식에 따른 패킷 관리자
     // ::TODO:: 이너패킷 만드는 중복되는 부분 함수로 묶기

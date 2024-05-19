@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using ZLogger;
-using Microsoft.Extensions.Logging;
 
 namespace Game_API_Server.Services
 {

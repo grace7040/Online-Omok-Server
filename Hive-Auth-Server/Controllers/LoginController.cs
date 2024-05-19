@@ -28,9 +28,9 @@ namespace Hive_Auth_Server.Controllers
         public async Task<ResponseDTO> Login(ReqAccountDTO account)
         {
             var passwordFromRequest = _hasher.GetHashedString(account.Password);
-            var passwordFromDb = _hiveDb.GetPasswordByIdAsync(account.Id);
+            var passwordFromDb = await _hiveDb.GetPasswordByIdAsync(account.Id);
 
-            if (await passwordFromDb != passwordFromRequest)
+            if (passwordFromRequest != passwordFromDb)
             {
                 return new ResponseDTO { Result = ErrorCode.LoginFailWrongPassword };
             }

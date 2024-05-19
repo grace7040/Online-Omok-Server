@@ -1,5 +1,4 @@
 ﻿using Game_API_Server.Services;
-using System.Net;
 
 namespace Game_API_Server.Middleware
 {

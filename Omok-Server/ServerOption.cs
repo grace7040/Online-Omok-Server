@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Omok_Server
+﻿namespace Omok_Server
 {
     public class ServerOption
     {
@@ -37,20 +31,6 @@ namespace Omok_Server
         public int MaxTurnOverCnt { get; set; }
 
         public int RoomStartNumber { get; set; } = 0;
-
-        
-
-        //public int DbThreadCount { get; set; }
-
-        //public string DbConnectionString { get; set; }
-        
-
-        //public int RedisThreadCount { get; set; }
-
-        //public string RedisConnectionString { get; set; }
-        //public string UserRoomKey { get; set; } = "";
-        //public string RequestMatchingKey { get; set; } = "";
-        //public string CheckMatchingKey { get; set; } = "";
 
     }
 
