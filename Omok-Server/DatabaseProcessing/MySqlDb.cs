@@ -25,7 +25,7 @@ namespace Omok_Server
 
         public UserGameData GetUserGameData(string id)
         {
-            var datas = ( _queryFactory.Query("user_game_data")
+            var datas = (_queryFactory.Query("user_game_data")
                                          .Where("id", id)
                                          .Get<UserGameData>()).FirstOrDefault();
 

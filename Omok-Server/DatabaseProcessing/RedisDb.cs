@@ -21,12 +21,12 @@ namespace Omok_Server
             _userRoomKey = userRoomKey;
         }
 
-        public async Task<ErrorCode> CheckUserAuthAsync(string id, string authToken)
+        public ErrorCode CheckUserAuth(string id, string authToken)
         {
             try
             {
                 var query = new RedisString<string>(_redisConnection, id, null);
-                var user = await query.GetAsync();
+                var user = query.GetAsync().Result;
 
                 if (!user.HasValue)
                 {
@@ -46,11 +46,11 @@ namespace Omok_Server
             return ErrorCode.None;
         }
 
-        public async Task<ErrorCode> RemoveUserRoomNumber(string id, int roomNumber)
+        public ErrorCode RemoveUserRoomNumber(string id, int roomNumber)
         {
             var redisKey = id + _userRoomKey;
             var query = new RedisString<string>(_redisConnection, redisKey, null);
-            var result = await query.DeleteAsync();
+            var result = query.DeleteAsync().Result;
             if (result == false)
             {
                 return ErrorCode.RemoveUserRoomNumberFail;

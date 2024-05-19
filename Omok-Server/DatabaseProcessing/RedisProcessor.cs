@@ -17,7 +17,7 @@ namespace Omok_Server
 
         BufferBlock<OmokBinaryRequestInfo> _dbPktBuffer = new();
         RedisHandler _dbWorkHandler = new();
-        Dictionary<int, Func<OmokBinaryRequestInfo, RedisDb, Task<OmokBinaryRequestInfo>>> _dbWorkHandlerMap = new();
+        Dictionary<int, Func<OmokBinaryRequestInfo, RedisDb, OmokBinaryRequestInfo>> _dbWorkHandlerMap = new();
 
         string _connectionString;
         string _userRoomKey;
@@ -70,7 +70,7 @@ namespace Omok_Server
 
                     if (_dbWorkHandlerMap.ContainsKey(header.Id))
                     {
-                        var result = await _dbWorkHandlerMap[header.Id](packet, db);
+                        var result = _dbWorkHandlerMap[header.Id](packet, db);
                         DistributeAction(result);
                     }
                     else
