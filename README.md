@@ -5,7 +5,7 @@
 ***
 
 # ASP.NET Core 학습 정리 문서
-[ASP.NET Core Docs](https://github.com/grace7040/AspNetCore-MVC-Docs)
+- [ASP.NET Core Docs](https://github.com/grace7040/AspNetCore-MVC-Docs)
 
 ***
 
