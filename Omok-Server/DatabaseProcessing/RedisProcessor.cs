@@ -1,7 +1,7 @@
 ﻿using SuperSocket.SocketBase.Logging;
 using System.Threading.Tasks.Dataflow;
 
-namespace Omok_Server
+namespace OmokServer
 {
     public class RedisProcessor
     {

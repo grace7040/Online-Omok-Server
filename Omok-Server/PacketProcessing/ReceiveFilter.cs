@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Omok_Server
+namespace OmokServer
 {
     
     public class ReceiveFilter : FixedHeaderReceiveFilter<OmokBinaryRequestInfo> 

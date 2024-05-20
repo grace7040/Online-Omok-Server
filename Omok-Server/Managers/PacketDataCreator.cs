@@ -1,6 +1,6 @@
 ﻿using MemoryPack;
 
-namespace Omok_Server
+namespace OmokServer
 {
     public interface IBinaryPacketDataCreator
     {

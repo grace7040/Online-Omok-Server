@@ -1,9 +1,9 @@
-﻿using Hive_Auth_Server.DTOs;
-using Hive_Auth_Server.Servicies;
+﻿using HiveAuthServer.DTOs;
+using HiveAuthServer.Servicies;
 using Microsoft.AspNetCore.Mvc;
 using ZLogger;
 
-namespace Hive_Auth_Server.Controllers
+namespace HiveAuthServer.Controllers
 {
     [ApiController]
     public class CreateAccountController : Controller

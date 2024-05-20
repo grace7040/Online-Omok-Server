@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace Hive_Auth_Server.Servicies
+namespace HiveAuthServer.Servicies
 {
     public class HasherSHA256 : IHasher
     {

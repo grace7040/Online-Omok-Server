@@ -2,7 +2,7 @@
 using CloudStructures.Structures;
 using ZLogger;
 
-namespace Hive_Auth_Server.Repositories
+namespace HiveAuthServer.Repositories
 {
     
     public class RedisDb : IMemoryDb

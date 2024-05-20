@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace Hive_Auth_Server.Servicies
+namespace HiveAuthServer.Servicies
 {
     public class TokenCreator : ITokenCreator
     {

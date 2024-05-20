@@ -1,6 +1,6 @@
 ﻿using ZLogger;
 
-namespace Hive_Auth_Server.Services
+namespace HiveAuthServer.Services
 {
     public class CheckAuthService : ICheckAuthService
     {

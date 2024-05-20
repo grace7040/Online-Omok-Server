@@ -1,7 +1,7 @@
 ﻿using CloudStructures;
 using CloudStructures.Structures;
 
-namespace Game_API_Server.Repositories
+namespace GameAPIServer.Repositories
 {
     
     public class RedisDb : IMemoryDb

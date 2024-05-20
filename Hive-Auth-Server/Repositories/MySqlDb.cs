@@ -1,7 +1,7 @@
 ﻿using MySqlConnector;
 using SqlKata.Execution;
 
-namespace Hive_Auth_Server.Repositories
+namespace HiveAuthServer.Repositories
 {
     public class MySqlDb : IHiveDb
     {

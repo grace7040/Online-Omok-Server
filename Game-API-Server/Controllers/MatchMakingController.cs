@@ -1,9 +1,9 @@
-﻿using Game_API_Server.DTOs;
+﻿using GameAPIServer.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using Game_API_Server.Services;
+using GameAPIServer.Services;
 
 
-namespace Game_API_Server.Controllers
+namespace GameAPIServer.Controllers
 {
     [ApiController]
     public class MatchMakingController : Controller

@@ -1,4 +1,4 @@
-﻿using Omok_Server;
+﻿using OmokServer;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -8,7 +8,7 @@ using SuperSocket.SocketBase;
 using SuperSocket.SocketBase.Protocol;
 using SuperSocket.SocketBase.Config;
 
-namespace Omok_Server
+namespace OmokServer
 {
     //네트워크 I/O 처리를 위한 서버 클래스 (비동기 처리)
     public class MainServer : AppServer<NetworkSession, OmokBinaryRequestInfo>, IHostedService

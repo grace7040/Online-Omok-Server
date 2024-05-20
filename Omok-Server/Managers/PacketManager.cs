@@ -1,4 +1,4 @@
-﻿namespace Omok_Server
+﻿namespace OmokServer
 {
     //패킷 직렬화 방식에 따른 패킷 관리자
     public class PacketManager<TPacketDataCreator> where TPacketDataCreator : IBinaryPacketDataCreator, new()

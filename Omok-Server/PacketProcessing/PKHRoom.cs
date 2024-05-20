@@ -1,6 +1,6 @@
 ﻿using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace Omok_Server
+namespace OmokServer
 {
     public class PKHRoom : PKHandler
     {

@@ -1,6 +1,6 @@
-﻿using Game_API_Server.DTOs;
+﻿using GameAPIServer.DTOs;
 
-namespace Game_API_Server.Services
+namespace GameAPIServer.Services
 {
     //Matching API Server를 사용한 FIFO 방식의 매칭
     public class FIFOMatchService : IMatchMakingService

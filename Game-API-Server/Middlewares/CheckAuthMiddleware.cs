@@ -1,6 +1,6 @@
-﻿using Game_API_Server.Services;
+﻿using GameAPIServer.Services;
 
-namespace Game_API_Server.Middleware
+namespace GameAPIServer.Middleware
 {
     public class CheckAuthMiddleware
     {

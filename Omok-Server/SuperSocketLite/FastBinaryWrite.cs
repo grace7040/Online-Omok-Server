@@ -1,9 +1,9 @@
-﻿using Omok_Server;
+﻿using OmokServer;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Omok_Server
+namespace OmokServer
 {
     public class FastBinaryWrite
     {

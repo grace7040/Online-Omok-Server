@@ -1,4 +1,4 @@
-﻿namespace Hive_Auth_Server.DTOs
+﻿namespace HiveAuthServer.DTOs
 {
     public class ResUserAuthDTO : ResponseDTO
     {

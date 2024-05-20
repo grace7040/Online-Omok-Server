@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ZLogger;
-using Matching_Server.DTOs;
+using MatchingServer.DTOs;
 using Microsoft.Extensions.FileSystemGlobbing;
 
 
-namespace Matching_Server.Controllers;
+namespace MatchingServer.Controllers;
 
 [ApiController]
 public class MatchingController : ControllerBase

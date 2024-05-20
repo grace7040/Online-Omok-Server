@@ -1,7 +1,7 @@
 ﻿using MySqlConnector;
 using SqlKata.Execution;
 
-namespace Game_API_Server.Repositories
+namespace GameAPIServer.Repositories
 {
     public class MySqlDb : IGameDb
     {

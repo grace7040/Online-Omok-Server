@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using ZLogger;
 
-namespace Game_API_Server.Services
+namespace GameAPIServer.Services
 {
     public class CheckAuthService : ICheckAuthService
     {
