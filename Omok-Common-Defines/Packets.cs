@@ -8,6 +8,11 @@ public partial class PKHeader
     public byte Type { get; set; } = 0;
 }
 
+[MemoryPackable]
+public partial class PKTResConnect : PKHeader
+{
+    public short Result { get; set; }
+}
 
 // 로그인 요청
 [MemoryPackable]

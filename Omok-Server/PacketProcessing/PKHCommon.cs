@@ -20,6 +20,7 @@ public class PKHCommon : PKHandler
     public void InNotifyConnectClient(OmokBinaryRequestInfo packetData)
     {
         _userMgr.AddUser(packetData.SessionID);
+        _userMgr.ResponseConnectToClient(packetData.SessionID);
         _mainLogger.Debug($"{packetData.SessionID} 유저의 접속 성공");
     }
 

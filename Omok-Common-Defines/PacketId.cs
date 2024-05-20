@@ -4,11 +4,12 @@ public enum PacketId : int
     // 클라이언트와 통신 1001 ~ 1100
     CsBegin = 1001,
 
-    ReqLogin = 1002,
-    ResLogin = 1003,
-
-    ReqDisConnect = 1004,
-    NtfMustClose = 1005,
+    
+    ResConnect = 1002,
+    ReqDisConnect = 1003,
+    NtfMustClose = 1004,
+    ReqLogin = 1005,
+    ResLogin = 1006,
 
     ResLoadUserGameData = 1007,
 

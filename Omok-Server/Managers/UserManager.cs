@@ -52,7 +52,19 @@ public class UserManager
         return ErrorCode.None;
     }
 
-    public ErrorCode RemoveUserFromSessionIndexDict(string sessionID)
+    public void ResponseConnectToClient(string sessionID)
+    {
+        var resConnect = new PKTResConnect()
+        {
+            Result = (short)ErrorCode.None
+        };
+
+        var sendData = _packetMgr.GetBinaryPacketData(resConnect, PacketId.ResConnect);
+        SendFunc(sessionID, sendData);
+    }
+
+
+public ErrorCode RemoveUserFromSessionIndexDict(string sessionID)
     {
         var user = GetUserBySessionId(sessionID);
         if (user == null)
