@@ -1,10 +1,10 @@
-﻿using Game_API_Server.DTOs;
+﻿using GameAPIServer.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using Hive_Auth_Server;
-using Game_API_Server.Services;
+using HiveAuthServer;
+using GameAPIServer.Services;
 
 
-namespace Game_API_Server.Controllers
+namespace GameAPIServer.Controllers
 {
     [ApiController]
     public class LoginController : Controller

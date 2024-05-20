@@ -1,4 +1,4 @@
-﻿namespace Omok_Server
+﻿namespace OmokServer
 {
     public class User
     {

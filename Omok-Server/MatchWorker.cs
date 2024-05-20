@@ -1,7 +1,7 @@
 ﻿using CloudStructures;
 using CloudStructures.Structures;
 
-namespace Omok_Server
+namespace OmokServer
 {
     public class MatchWorker
     {

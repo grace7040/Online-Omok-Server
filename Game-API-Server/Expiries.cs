@@ -1,4 +1,4 @@
-﻿namespace Hive_Auth_Server
+﻿namespace HiveAuthServer
 {
     public static class Expiries
     {

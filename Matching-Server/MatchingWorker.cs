@@ -1,6 +1,6 @@
 ﻿using CloudStructures;
 using CloudStructures.Structures;
-using Matching_Server.DTOs;
+using MatchingServer.DTOs;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Concurrent;
@@ -9,7 +9,7 @@ using System.Diagnostics;
 using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 
-namespace Matching_Server;
+namespace MatchingServer;
 
 public interface IMatchingWorker : IDisposable
 {

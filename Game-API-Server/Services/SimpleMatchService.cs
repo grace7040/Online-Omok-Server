@@ -1,6 +1,6 @@
-﻿using Game_API_Server.DTOs;
+﻿using GameAPIServer.DTOs;
 
-namespace Game_API_Server.Services
+namespace GameAPIServer.Services
 {
     //redis increment를 사용한 간단한 매칭 방법
     //매칭 요청 인원이 2명이 이상이 되면 redis에서 룸 넘버(1씩 증가)를 받아와 매칭을 처리한다.

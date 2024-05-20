@@ -1,6 +1,6 @@
-using Hive_Auth_Server.Repositories;
-using Hive_Auth_Server.Services;
-using Hive_Auth_Server.Servicies;
+using HiveAuthServer.Repositories;
+using HiveAuthServer.Services;
+using HiveAuthServer.Servicies;
 using ZLogger;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Hive_Auth_Server.DTOs;
-using Hive_Auth_Server.Servicies;
+using HiveAuthServer.DTOs;
+using HiveAuthServer.Servicies;
 using ZLogger;
 
-namespace Hive_Auth_Server.Controllers
+namespace HiveAuthServer.Controllers
 {
     [ApiController]
     public class LoginController : Controller

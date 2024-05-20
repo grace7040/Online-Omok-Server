@@ -2,7 +2,7 @@
 using MySqlConnector;
 using SqlKata.Execution;
 
-namespace Omok_Server
+namespace OmokServer
 {
     public class MySqlDb
     {

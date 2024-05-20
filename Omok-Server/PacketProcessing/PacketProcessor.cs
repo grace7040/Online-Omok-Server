@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SuperSocket.SocketBase.Logging;
 
-namespace Omok_Server
+namespace OmokServer
 {
     public class PacketProcessor
     {

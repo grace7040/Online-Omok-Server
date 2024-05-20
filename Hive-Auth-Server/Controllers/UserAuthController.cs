@@ -1,8 +1,8 @@
-﻿using Hive_Auth_Server.DTOs;
-using Hive_Auth_Server.Services;
+﻿using HiveAuthServer.DTOs;
+using HiveAuthServer.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Hive_Auth_Server.Controllers
+namespace HiveAuthServer.Controllers
 {
     [ApiController]
     public class UserAuthController : Controller

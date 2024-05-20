@@ -1,4 +1,4 @@
-﻿namespace Hive_Auth_Server.Servicies
+﻿namespace HiveAuthServer.Servicies
 {
     public interface ITokenCreator
     {

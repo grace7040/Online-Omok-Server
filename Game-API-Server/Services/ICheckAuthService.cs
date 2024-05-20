@@ -1,4 +1,4 @@
-﻿namespace Game_API_Server.Services
+﻿namespace GameAPIServer.Services
 {
     public interface ICheckAuthService
     {

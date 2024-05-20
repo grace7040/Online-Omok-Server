@@ -1,4 +1,4 @@
-﻿namespace Hive_Auth_Server.Repositories
+﻿namespace HiveAuthServer.Repositories
 {
     public interface IDisposable
     {

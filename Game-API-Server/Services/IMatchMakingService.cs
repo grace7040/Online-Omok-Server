@@ -1,5 +1,5 @@
-﻿using Game_API_Server.DTOs;
-namespace Game_API_Server.Services
+﻿using GameAPIServer.DTOs;
+namespace GameAPIServer.Services
 {
     public interface IMatchMakingService
     {

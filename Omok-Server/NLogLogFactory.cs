@@ -1,6 +1,6 @@
 ﻿using NLog;
 
-namespace Omok_Server
+namespace OmokServer
 {
 #if (__NOT_USE_NLOG__ != true)  //NLog를 사용하지 않는다면 __NOT_USE_NLOG__ 선언한다
     public class NLogLogFactory : SuperSocket.SocketBase.Logging.LogFactoryBase

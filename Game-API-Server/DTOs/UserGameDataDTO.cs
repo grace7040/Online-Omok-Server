@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Game_API_Server.DTOs
+namespace GameAPIServer.DTOs
 {
     public class UserGameDataDTO
     {

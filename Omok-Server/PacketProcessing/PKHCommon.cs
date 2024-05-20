@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Omok_Server
+namespace OmokServer
 {
     public class PKHCommon : PKHandler
     {

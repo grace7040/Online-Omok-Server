@@ -1,6 +1,6 @@
-using Game_API_Server.Middleware;
-using Game_API_Server.Services;
-using Game_API_Server.Repositories;
+using GameAPIServer.Middleware;
+using GameAPIServer.Services;
+using GameAPIServer.Repositories;
 using ZLogger;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,4 +1,4 @@
-﻿namespace Game_API_Server.Repositories
+﻿namespace GameAPIServer.Repositories
 {
     public interface IDisposable
     {

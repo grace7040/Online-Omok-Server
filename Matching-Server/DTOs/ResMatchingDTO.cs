@@ -1,4 +1,4 @@
-﻿namespace Matching_Server.DTOs {
+﻿namespace MatchingServer.DTOs {
 
 
     public class ResMatchingDTO

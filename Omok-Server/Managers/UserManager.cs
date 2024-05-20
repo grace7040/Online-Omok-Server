@@ -1,6 +1,6 @@
 ﻿using SuperSocket.SocketBase.Logging;
 
-namespace Omok_Server
+namespace OmokServer
 {
     public class UserManager
     {
