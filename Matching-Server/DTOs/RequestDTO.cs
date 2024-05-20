@@ -1,9 +1,7 @@
-﻿namespace MatchingServer.DTOs {
+﻿namespace MatchingServer.DTOs; 
 
-    public class RequestDTO
-    {
-        public string UserID { get; set; }
-    }
-
+public class RequestDTO
+{
+    public string UserID { get; set; }
 }
 

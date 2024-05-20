@@ -2,54 +2,53 @@
 using MySqlConnector;
 using SqlKata.Execution;
 
-namespace OmokServer
+namespace OmokServer;
+
+public class MySqlDb
 {
-    public class MySqlDb
+    QueryFactory _queryFactory;
+    MySqlConnection _dbConnection;
+
+    public MySqlDb(string dbConnectString)
+    { 
+        _dbConnection = new MySqlConnection(dbConnectString);
+        _dbConnection.Open();
+
+        var compiler = new SqlKata.Compilers.MySqlCompiler();
+        _queryFactory = new QueryFactory(_dbConnection, compiler);
+    }
+
+    public UserGameData GetUserGameData(string id)
     {
-        QueryFactory _queryFactory;
-        MySqlConnection _dbConnection;
+        var datas = (_queryFactory.Query("user_game_data")
+                                     .Where("id", id)
+                                     .Get<UserGameData>()).FirstOrDefault();
 
-        public MySqlDb(string dbConnectString)
-        { 
-            _dbConnection = new MySqlConnection(dbConnectString);
-            _dbConnection.Open();
+        return datas;
 
-            var compiler = new SqlKata.Compilers.MySqlCompiler();
-            _queryFactory = new QueryFactory(_dbConnection, compiler);
-        }
+    }
 
-        public UserGameData GetUserGameData(string id)
+    public ErrorCode UpdateUserGameData(string id, int winCount, int loseCount, int level, int exp)
+    {
+        var datas = _queryFactory.Query("user_game_data")
+                                     .Where("id", id)
+                                     .Update(new { win_count = winCount,
+                                                      lose_count = loseCount,
+                                                      level = level,
+                                                      exp = exp });
+
+        if(datas == 0)
         {
-            var datas = (_queryFactory.Query("user_game_data")
-                                         .Where("id", id)
-                                         .Get<UserGameData>()).FirstOrDefault();
-
-            return datas;
-
+            return ErrorCode.UpdateUserGameDataFail;
         }
+                                     
 
-        public ErrorCode UpdateUserGameData(string id, int winCount, int loseCount, int level, int exp)
-        {
-            var datas = _queryFactory.Query("user_game_data")
-                                         .Where("id", id)
-                                         .Update(new { win_count = winCount,
-                                                          lose_count = loseCount,
-                                                          level = level,
-                                                          exp = exp });
+        return ErrorCode.None;
 
-            if(datas == 0)
-            {
-                return ErrorCode.UpdateUserGameDataFail;
-            }
-                                         
+    }
 
-            return ErrorCode.None;
-
-        }
-
-        void ConnectionClose()
-        {
-            _dbConnection.Close();
-        }
+    void ConnectionClose()
+    {
+        _dbConnection.Close();
     }
 }

@@ -1,7 +1,6 @@
-﻿namespace HiveAuthServer.DTOs
+﻿namespace HiveAuthServer.DTOs;
+
+public class ResUserAuthDTO : ResponseDTO
 {
-    public class ResUserAuthDTO : ResponseDTO
-    {
-        public string Token { get; set; } = "";
-    }
+    public string Token { get; set; } = "";
 }

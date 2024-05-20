@@ -3,51 +3,50 @@ using Microsoft.AspNetCore.Mvc;
 using GameAPIServer.Services;
 
 
-namespace GameAPIServer.Controllers
+namespace GameAPIServer.Controllers;
+
+[ApiController]
+public class MatchMakingController : Controller
 {
-    [ApiController]
-    public class MatchMakingController : Controller
+    IMatchMakingService _matchMakingService;
+
+
+    public MatchMakingController(IMatchMakingService matchMakingService)
     {
-        IMatchMakingService _matchMakingService;
+        _matchMakingService = matchMakingService;
+    }
 
+    [HttpPost("matching")]
+    public async Task<ResponseDTO> Matching(RequestDTO request)
+    {
+        var Id = request.Id;
+        var userMatchingInfo = await _matchMakingService.TryGetUserMatchingInfo(Id);
 
-        public MatchMakingController(IMatchMakingService matchMakingService)
+        if(userMatchingInfo == null)
         {
-            _matchMakingService = matchMakingService;
+            // ::TODO:: exception
+            return new ResponseDTO { Result = ErrorCode.MatchingReqFailException };
         }
 
-        [HttpPost("matching")]
-        public async Task<ResponseDTO> Matching(RequestDTO request)
+        if (userMatchingInfo.IsMatchSucceed)
         {
-            var Id = request.Id;
-            var userMatchingInfo = await _matchMakingService.TryGetUserMatchingInfo(Id);
-
-            if(userMatchingInfo == null)
+            return new ResMatchingDTO
             {
-                // ::TODO:: exception
-                return new ResponseDTO { Result = ErrorCode.MatchingReqFailException };
-            }
-
-            if (userMatchingInfo.IsMatchSucceed)
-            {
-                return new ResMatchingDTO
-                {
-                    Result = ErrorCode.None,
-                    OmokServerIP = userMatchingInfo.OmokServerIP,
-                    OmokServerPort = userMatchingInfo.OmokServerPort,
-                    RoomNumber = userMatchingInfo.RoomNumber
-                };
-            }
-
-            return new ResponseDTO { Result = ErrorCode.MatchingWait };
+                Result = ErrorCode.None,
+                OmokServerIP = userMatchingInfo.OmokServerIP,
+                OmokServerPort = userMatchingInfo.OmokServerPort,
+                RoomNumber = userMatchingInfo.RoomNumber
+            };
         }
 
-        [HttpPost("cancelmatching")]
-        public async Task<ResponseDTO> CancelMatching(RequestDTO request)
-        {
-            var Id = request.Id;
-            var result = await _matchMakingService.RequestCancelMatching(Id);
-            return result;
-        }
+        return new ResponseDTO { Result = ErrorCode.MatchingWait };
+    }
+
+    [HttpPost("cancelmatching")]
+    public async Task<ResponseDTO> CancelMatching(RequestDTO request)
+    {
+        var Id = request.Id;
+        var result = await _matchMakingService.RequestCancelMatching(Id);
+        return result;
     }
 }

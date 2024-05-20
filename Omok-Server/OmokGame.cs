@@ -1,489 +1,487 @@
-﻿namespace OmokServer
+﻿namespace OmokServer;
+public class OmokGame
 {
-    public class OmokGame
+    const int _boardSize = 19;
+
+    PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
+    Dictionary<string, StoneColor> _userStoneColorDict;
+
+    int[,] _omokBoard = new int[_boardSize, _boardSize];
+
+    int _previousX  = -1;
+    int _previousY  = -1;
+    int _currentX  = -1;
+    int _currentY  = -1;
+
+    StoneColor _currStoneColor;
+
+    int _turnOverCnt;
+    int _maxTurnOverCnt;
+
+    public bool IsGameEnd { get; private set; } = false;
+    public bool IsDoubleThree { get; private set; } = false;
+
+    Action<StoneColor> GameEndAction;
+    Action SetTurnChangedTimeAction;
+    Func<string, byte[], bool> SendFunc;
+
+    public OmokGame(Dictionary<string, StoneColor> userStoneColorDict, Func<string, byte[], bool> sendFunc, Action setRecentPutStoneTimeAction, Action<StoneColor> gameEndAction, int maxTurnOverCnt)
     {
-        const int _boardSize = 19;
+        _userStoneColorDict = userStoneColorDict;
+        SendFunc = sendFunc;
+        GameEndAction = gameEndAction;
+        SetTurnChangedTimeAction = setRecentPutStoneTimeAction;
+        _maxTurnOverCnt = maxTurnOverCnt;
 
-        PacketManager<MemoryPackBinaryPacketDataCreator> _packetMgr = new();
-        Dictionary<string, StoneColor> _userStoneColorDict;
+        StartGame();
+    }
 
-        int[,] _omokBoard = new int[_boardSize, _boardSize];
+    public void StartGame()
+    {
+        Array.Clear(_omokBoard, 0, _boardSize * _boardSize);
 
-        int _previousX  = -1;
-        int _previousY  = -1;
-        int _currentX  = -1;
-        int _currentY  = -1;
+        _previousX = _previousY = -1;
+        _currentX = _currentY = -1;
+        _currStoneColor = StoneColor.Black;
+        _turnOverCnt = 0;
+        IsDoubleThree = false;
+        IsGameEnd = false;
 
-        StoneColor _currStoneColor;
+        string firstTurnPlayer = GetSessionByStoneColor(StoneColor.Black);
+        NotifyPutStoneToClient(firstTurnPlayer, null);
+        //StartTimer();
+    }
+    public StoneColor GetUserStoneColor(string sessionId)
+    {
+        return _userStoneColorDict[sessionId];
+    }
+    public string GetSessionByStoneColor(StoneColor stoneColor)
+    {
+        return _userStoneColorDict.FirstOrDefault(entry =>
+                   EqualityComparer<StoneColor>.Default.Equals(entry.Value, stoneColor)).Key;
+    }
 
-        int _turnOverCnt;
-        int _maxTurnOverCnt;
-
-        public bool IsGameEnd { get; private set; } = false;
-        public bool IsDoubleThree { get; private set; } = false;
-
-        Action<StoneColor> GameEndAction;
-        Action SetTurnChangedTimeAction;
-        Func<string, byte[], bool> SendFunc;
-
-        public OmokGame(Dictionary<string, StoneColor> userStoneColorDict, Func<string, byte[], bool> sendFunc, Action setRecentPutStoneTimeAction, Action<StoneColor> gameEndAction, int maxTurnOverCnt)
+    public void PutStone(int x, int y)
+    {
+        CheckDoubleThree(x, y);
+        if (IsDoubleThree)
         {
-            _userStoneColorDict = userStoneColorDict;
-            SendFunc = sendFunc;
-            GameEndAction = gameEndAction;
-            SetTurnChangedTimeAction = setRecentPutStoneTimeAction;
-            _maxTurnOverCnt = maxTurnOverCnt;
-
-            StartGame();
-        }
-
-        public void StartGame()
-        {
-            Array.Clear(_omokBoard, 0, _boardSize * _boardSize);
-
-            _previousX = _previousY = -1;
-            _currentX = _currentY = -1;
-            _currStoneColor = StoneColor.Black;
-            _turnOverCnt = 0;
+            ResponsePutStone(GetSessionByStoneColor(_currStoneColor), ErrorCode.PutStoneFailInvalidPosition);
             IsDoubleThree = false;
-            IsGameEnd = false;
-
-            string firstTurnPlayer = GetSessionByStoneColor(StoneColor.Black);
-            NotifyPutStoneToClient(firstTurnPlayer, null);
-            //StartTimer();
+            return;
         }
-        public StoneColor GetUserStoneColor(string sessionId)
+        if (_omokBoard[x, y] != (int)StoneColor.None)
         {
-            return _userStoneColorDict[sessionId];
-        }
-        public string GetSessionByStoneColor(StoneColor stoneColor)
-        {
-            return _userStoneColorDict.FirstOrDefault(entry =>
-                       EqualityComparer<StoneColor>.Default.Equals(entry.Value, stoneColor)).Key;
+            ResponsePutStone(GetSessionByStoneColor(_currStoneColor), ErrorCode.PutStoneFailInvalidPosition);
+            return;
         }
 
-        public void PutStone(int x, int y)
+        _omokBoard[x, y] = (int)_currStoneColor;
+        _turnOverCnt = 0;
+
+        _previousX = _currentX;
+        _previousY = _currentY;
+
+        _currentX = x;
+        _currentY = y;
+
+        ResponsePutStone(GetSessionByStoneColor(_currStoneColor), ErrorCode.None);
+        ChangeTurn();
+        CheckOmokComplete(x, y);
+        
+    }
+
+    void ChangeTurn()
+    {
+        if (IsGameEnd) return;
+
+        if (_currStoneColor == StoneColor.Black)
+            _currStoneColor = StoneColor.White;
+        else if (_currStoneColor == StoneColor.White)
+            _currStoneColor = StoneColor.Black;
+
+        NotifyPutStoneToClient(GetSessionByStoneColor(_currStoneColor), new Tuple<int,int> (_currentX, _currentY));
+        SetTurnChangedTimeAction();
+    }
+
+    public void ForceChangeTurn()
+    {
+        NotifyTurnOver(GetSessionByStoneColor(_currStoneColor));
+        ChangeTurn();
+        
+
+        if (++_turnOverCnt >= _maxTurnOverCnt)
         {
-            CheckDoubleThree(x, y);
-            if (IsDoubleThree)
-            {
-                ResponsePutStone(GetSessionByStoneColor(_currStoneColor), ErrorCode.PutStoneFailInvalidPosition);
-                IsDoubleThree = false;
-                return;
-            }
-            if (_omokBoard[x, y] != (int)StoneColor.None)
-            {
-                ResponsePutStone(GetSessionByStoneColor(_currStoneColor), ErrorCode.PutStoneFailInvalidPosition);
-                return;
-            }
+            //게임 종료
+            EndGame(StoneColor.None);
+        }
+    }
 
-            _omokBoard[x, y] = (int)_currStoneColor;
-            _turnOverCnt = 0;
+    public bool IsUserTurn(string sessionId)
+    {
+        return _currStoneColor == _userStoneColorDict[sessionId];
+    }
 
-            _previousX = _currentX;
-            _previousY = _currentY;
-
-            _currentX = x;
-            _currentY = y;
-
-            ResponsePutStone(GetSessionByStoneColor(_currStoneColor), ErrorCode.None);
-            ChangeTurn();
-            CheckOmokComplete(x, y);
-            
+    public void CheckOmokComplete(int x, int y)
+    {
+        bool omokComplete = false;
+        if (CheckOmokHorizontal(x, y) == 5)        // 같은 돌 개수가 5개면 (6목이상이면 게임 계속) 
+        {
+            omokComplete = true;
         }
 
-        void ChangeTurn()
+        else if (CheckOmokVertical(x, y) == 5)
         {
-            if (IsGameEnd) return;
-
-            if (_currStoneColor == StoneColor.Black)
-                _currStoneColor = StoneColor.White;
-            else if (_currStoneColor == StoneColor.White)
-                _currStoneColor = StoneColor.Black;
-
-            NotifyPutStoneToClient(GetSessionByStoneColor(_currStoneColor), new Tuple<int,int> (_currentX, _currentY));
-            SetTurnChangedTimeAction();
+            omokComplete = true;
         }
 
-        public void ForceChangeTurn()
+        else if (CheckOmokDiagonal(x, y) == 5)
         {
-            NotifyTurnOver(GetSessionByStoneColor(_currStoneColor));
-            ChangeTurn();
-            
-
-            if (++_turnOverCnt >= _maxTurnOverCnt)
-            {
-                //게임 종료
-                EndGame(StoneColor.None);
-            }
+            omokComplete = true;
         }
 
-        public bool IsUserTurn(string sessionId)
+        else if (CheckOmokInverseDiagonal(x, y) == 5)
         {
-            return _currStoneColor == _userStoneColorDict[sessionId];
+            omokComplete = true;
         }
 
-        public void CheckOmokComplete(int x, int y)
+        if (omokComplete)
         {
-            bool omokComplete = false;
-            if (CheckOmokHorizontal(x, y) == 5)        // 같은 돌 개수가 5개면 (6목이상이면 게임 계속) 
-            {
-                omokComplete = true;
-            }
-
-            else if (CheckOmokVertical(x, y) == 5)
-            {
-                omokComplete = true;
-            }
-
-            else if (CheckOmokDiagonal(x, y) == 5)
-            {
-                omokComplete = true;
-            }
-
-            else if (CheckOmokInverseDiagonal(x, y) == 5)
-            {
-                omokComplete = true;
-            }
-
-            if (omokComplete)
-            {
-                EndGame((StoneColor)_omokBoard[x, y]);
-            }
-
+            EndGame((StoneColor)_omokBoard[x, y]);
         }
 
-        void NotifyPutStoneToClient(string sessionID, Tuple<int, int>? position)
+    }
+
+    void NotifyPutStoneToClient(string sessionID, Tuple<int, int>? position)
+    {
+        var notifyPutStone = new PKTNtfPutStone()
         {
-            var notifyPutStone = new PKTNtfPutStone()
-            {
-                Position = position
-            };
+            Position = position
+        };
 
-            var sendPacket = _packetMgr.GetBinaryPacketData(notifyPutStone, PacketId.NtfPutStone);
+        var sendPacket = _packetMgr.GetBinaryPacketData(notifyPutStone, PacketId.NtfPutStone);
 
-            SendFunc(sessionID, sendPacket);
-        }
+        SendFunc(sessionID, sendPacket);
+    }
 
-        public void ResponsePutStone(string sessionID, ErrorCode errorCode)
+    public void ResponsePutStone(string sessionID, ErrorCode errorCode)
+    {
+        var resPutStone = new PKTResPutStone()
         {
-            var resPutStone = new PKTResPutStone()
-            {
-                Result = (short)errorCode
-            };
+            Result = (short)errorCode
+        };
 
-            var sendPacket = _packetMgr.GetBinaryPacketData(resPutStone, PacketId.ResPutStone);
-            SendFunc(sessionID, sendPacket);
-        }
+        var sendPacket = _packetMgr.GetBinaryPacketData(resPutStone, PacketId.ResPutStone);
+        SendFunc(sessionID, sendPacket);
+    }
 
-        public void EndGame(StoneColor stoneColor)
+    public void EndGame(StoneColor stoneColor)
+    {
+        if (IsGameEnd) return;
+
+        IsGameEnd = true;
+        GameEndAction(stoneColor);
+    }
+
+    void NotifyTurnOver(string sessionID)
+    {
+        var notifyTurnOver = new PKTNtfTurnOver();
+        var sendPacket = _packetMgr.GetBinaryPacketData(notifyTurnOver, PacketId.NtfTurnOver);
+        SendFunc(sessionID, sendPacket);
+    }
+
+    int CheckOmokHorizontal(int x, int y)      // ㅡ 확인
+    {
+        int sameStoneCnt = 1;
+
+        for (int i = 1; i <= 5; i++)
         {
-            if (IsGameEnd) return;
-
-            IsGameEnd = true;
-            GameEndAction(stoneColor);
-        }
-
-        void NotifyTurnOver(string sessionID)
-        {
-            var notifyTurnOver = new PKTNtfTurnOver();
-            var sendPacket = _packetMgr.GetBinaryPacketData(notifyTurnOver, PacketId.NtfTurnOver);
-            SendFunc(sessionID, sendPacket);
-        }
-
-        int CheckOmokHorizontal(int x, int y)      // ㅡ 확인
-        {
-            int sameStoneCnt = 1;
-
-            for (int i = 1; i <= 5; i++)
-            {
-                if (x + i <= 18 && _omokBoard[x + i, y] == _omokBoard[x, y])
-                    sameStoneCnt++;
-
-                else
-                    break;
-            }
-
-            for (int i = 1; i <= 5; i++)
-            {
-                if (x - i >= 0 && _omokBoard[x - i, y] == _omokBoard[x, y])
-                    sameStoneCnt++;
-
-                else
-                    break;
-            }
-
-            return sameStoneCnt;
-        }
-
-        int CheckOmokVertical(int x, int y)      // | 확인
-        {
-            int sameStoneCnt = 1;
-
-            for (int i = 1; i <= 5; i++)
-            {
-                if (y + i <= 18 && _omokBoard[x, y + i] == _omokBoard[x, y])
-                    sameStoneCnt++;
-
-                else
-                    break;
-            }
-
-            for (int i = 1; i <= 5; i++)
-            {
-                if (y - i >= 0 && _omokBoard[x, y - i] == _omokBoard[x, y])
-                    sameStoneCnt++;
-
-                else
-                    break;
-            }
-
-            return sameStoneCnt;
-        }
-
-        int CheckOmokDiagonal(int x, int y)      // / 확인
-        {
-            int sameStoneCnt = 1;
-
-            for (int i = 1; i <= 5; i++)
-            {
-                if (x + i <= 18 && y - i >= 0 && _omokBoard[x + i, y - i] == _omokBoard[x, y])
-                    sameStoneCnt++;
-
-                else
-                    break;
-            }
-
-            for (int i = 1; i <= 5; i++)
-            {
-                if (x - i >= 0 && y + i <= 18 && _omokBoard[x - i, y + i] == _omokBoard[x, y])
-                    sameStoneCnt++;
-
-                else
-                    break;
-            }
-
-            return sameStoneCnt;
-        }
-
-        int CheckOmokInverseDiagonal(int x, int y)     // ＼ 확인
-        {
-            int sameStoneCnt = 1;
-
-            for (int i = 1; i <= 5; i++)
-            {
-                if (x + i <= 18 && y + i <= 18 && _omokBoard[x + i, y + i] == _omokBoard[x, y])
-                    sameStoneCnt++;
-
-                else
-                    break;
-            }
-
-            for (int i = 1; i <= 5; i++)
-            {
-                if (x - i >= 0 && y - i >= 0 && _omokBoard[x - i, y - i] == _omokBoard[x, y])
-                    sameStoneCnt++;
-
-                else
-                    break;
-            }
-
-            return sameStoneCnt;
-        }
-
-        void CheckDoubleThree(int x, int y)     // 33확인
-        {
-            int doubleThreeCnt = 0;
-
-            doubleThreeCnt += CheckHorizontalDoubleThree(x, y);
-            doubleThreeCnt += CheckVerticalDoubleThree(x, y);
-            doubleThreeCnt += CheckDiagonalDoubleThree(x, y);
-            doubleThreeCnt += CheckInverseDiagonalDoubleThree(x, y);
-
-            if (doubleThreeCnt >= 2)
-                IsDoubleThree = true;
+            if (x + i <= 18 && _omokBoard[x + i, y] == _omokBoard[x, y])
+                sameStoneCnt++;
 
             else
-                IsDoubleThree = false;
+                break;
         }
 
-        int CheckHorizontalDoubleThree(int x, int y)    // 가로 (ㅡ) 확인
+        for (int i = 1; i <= 5; i++)
         {
-            int threeStoneCnt = 1;
-            int i, j;
+            if (x - i >= 0 && _omokBoard[x - i, y] == _omokBoard[x, y])
+                sameStoneCnt++;
 
-            for (i = 1; i <= 3; i++) // 돌을 둔 위치로부터 → 확인
-            {
-                if (x + i > 18)
-                    break;
-
-                else if (_omokBoard[x + i, y] == _omokBoard[x, y])
-                    threeStoneCnt++;
-
-                else if (_omokBoard[x + i, y] != (int)StoneColor.None)
-                    break;
-            }
-
-            for (j = 1; j <= 3; j++) // 돌을 둔 위치로부터 ← 확인
-            {
-                if (x - j < 0)
-                    break;
-
-                else if (_omokBoard[x - j, y] == _omokBoard[x, y])
-                    threeStoneCnt++;
-
-                else if (_omokBoard[x - j, y] != (int)StoneColor.None)
-                    break;
-            }
-
-            if (threeStoneCnt == 3 && x + i < 18 && x - j > 0)    //돌 개수가 3개면서 양쪽 벽에 붙어잇으면 안된다
-            {
-                if ((_omokBoard[x + i, y] != (int)StoneColor.None && _omokBoard[x + i - 1, y] != (int)StoneColor.None) || (_omokBoard[x - j, y] != (int)StoneColor.None && _omokBoard[x - j + 1, y] != (int)StoneColor.None))
-                {
-                    return 0;
-                }
-
-                else
-                    return 1;
-            }
-
-            return 0;
+            else
+                break;
         }
 
-        private int CheckVerticalDoubleThree(int x, int y)    // 세로 (|) 확인
+        return sameStoneCnt;
+    }
+
+    int CheckOmokVertical(int x, int y)      // | 확인
+    {
+        int sameStoneCnt = 1;
+
+        for (int i = 1; i <= 5; i++)
         {
-            int threeStoneCnt = 1;
-            int i, j;
+            if (y + i <= 18 && _omokBoard[x, y + i] == _omokBoard[x, y])
+                sameStoneCnt++;
 
-            threeStoneCnt = 1;
-
-            for (i = 1; i <= 3; i++) // 돌을 둔 위치로부터 ↓ 확인
-            {
-                if (y + i > 18)
-                    break;
-
-                else if (_omokBoard[x, y + i] == _omokBoard[x, y])
-                    threeStoneCnt++;
-
-                else if (_omokBoard[x, y + i] != (int)StoneColor.None)
-                    break;
-            }
-
-            for (j = 1; j <= 3; j++) // 돌을 둔 위치로부터 ↑ 확인
-            {
-                if (y - j < 0)
-                    break;
-
-                else if (_omokBoard[x, y - j] == _omokBoard[x, y])
-                    threeStoneCnt++;
-
-                else if (_omokBoard[x, y - j] != (int)StoneColor.None)
-                    break;
-            }
-
-            if (threeStoneCnt == 3 && y + i < 18 && y - j > 0)    //돌 개수가 3개면서 양쪽 벽에 붙어잇으면 안된다
-            {
-                if ((_omokBoard[x, y + i] != (int)StoneColor.None && _omokBoard[x, y + i - 1] != (int)StoneColor.None) || (_omokBoard[x, y - j] != (int)StoneColor.None && _omokBoard[x, y - j + 1] != (int)StoneColor.None))
-                {
-                    return 0;
-                }
-
-                else
-                    return 1;
-            }
-
-            return 0;
+            else
+                break;
         }
 
-        int CheckDiagonalDoubleThree(int x, int y)    // 사선 (/) 확인
+        for (int i = 1; i <= 5; i++)
         {
-            int threeStoneCnt = 1;
-            int i, j;
+            if (y - i >= 0 && _omokBoard[x, y - i] == _omokBoard[x, y])
+                sameStoneCnt++;
 
-            threeStoneCnt = 1;
-
-            for (i = 1; i <= 3; i++) // 돌을 둔 위치로부터 ↗ 확인
-            {
-                if (x + i > 18 || y - i < 0)
-                    break;
-
-                else if (_omokBoard[x + i, y - i] == _omokBoard[x, y])
-                    threeStoneCnt++;
-
-                else if (_omokBoard[x + i, y - i] != (int)StoneColor.None)
-                    break;
-            }
-
-            for (j = 1; j <= 3; j++) // 돌을 둔 위치로부터 ↙ 확인
-            {
-                if (x - j < 0 || y + j > 18)
-                    break;
-
-                else if (_omokBoard[x - j, y + j] == _omokBoard[x, y])
-                    threeStoneCnt++;
-
-                else if (_omokBoard[x - j, y + j] != (int)StoneColor.None)
-                    break;
-            }
-
-            if (threeStoneCnt == 3 && x + i < 18 && y - i > 0 && x - j > 0 && y + j < 18)    //돌 개수가 3개면서 양쪽 벽에 붙어잇으면 안된다
-            {
-                if ((_omokBoard[x + i, y - i] != (int)StoneColor.None && _omokBoard[x + i - 1, y - i + 1] != (int)StoneColor.None) || (_omokBoard[x - j, y + j] != (int)StoneColor.None && _omokBoard[x - j + 1, y + j - 1] != (int)StoneColor.None))
-                {
-                    return 0;
-                }
-
-                else
-                    return 1;
-            }
-
-            return 0;
+            else
+                break;
         }
 
-        int CheckInverseDiagonalDoubleThree(int x, int y)    // 역사선 (＼) 확인
+        return sameStoneCnt;
+    }
+
+    int CheckOmokDiagonal(int x, int y)      // / 확인
+    {
+        int sameStoneCnt = 1;
+
+        for (int i = 1; i <= 5; i++)
         {
-            int threeStoneCnt = 1;
-            int i, j;
+            if (x + i <= 18 && y - i >= 0 && _omokBoard[x + i, y - i] == _omokBoard[x, y])
+                sameStoneCnt++;
 
-            threeStoneCnt = 1;
-
-            for (i = 1; i <= 3; i++) // 돌을 둔 위치로부터 ↘ 확인
-            {
-                if (x + i > 18 || y + i > 18)
-                    break;
-
-                else if (_omokBoard[x + i, y + i] == _omokBoard[x, y])
-                    threeStoneCnt++;
-
-                else if (_omokBoard[x + i, y + i] != (int)StoneColor.None)
-                    break;
-            }
-
-            for (j = 1; j <= 3; j++) // 돌을 둔 위치로부터 ↖ 확인
-            {
-                if (x - j < 0 || y - j < 0)
-                    break;
-
-                else if (_omokBoard[x - j, y - j] == _omokBoard[x, y])
-                    threeStoneCnt++;
-
-                else if (_omokBoard[x - j, y - j] != (int)StoneColor.None)
-                    break;
-            }
-
-            if (threeStoneCnt == 3 && x + i < 18 && y + i < 18 && x - j > 0 && y - j > 0)    //돌 개수가 3개면서 양쪽 벽에 붙어잇으면 안된다
-            {
-                if ((_omokBoard[x + i, y + i] != (int)StoneColor.None && _omokBoard[x + i - 1, y + i - 1] != (int)StoneColor.None) || (_omokBoard[x - j, y - j] != (int)StoneColor.None && _omokBoard[x - j + 1, y - j + 1] != (int)StoneColor.None))
-                {
-                    return 0;
-                }
-
-                else
-                    return 1;
-            }
-
-            return 0;
+            else
+                break;
         }
+
+        for (int i = 1; i <= 5; i++)
+        {
+            if (x - i >= 0 && y + i <= 18 && _omokBoard[x - i, y + i] == _omokBoard[x, y])
+                sameStoneCnt++;
+
+            else
+                break;
+        }
+
+        return sameStoneCnt;
+    }
+
+    int CheckOmokInverseDiagonal(int x, int y)     // ＼ 확인
+    {
+        int sameStoneCnt = 1;
+
+        for (int i = 1; i <= 5; i++)
+        {
+            if (x + i <= 18 && y + i <= 18 && _omokBoard[x + i, y + i] == _omokBoard[x, y])
+                sameStoneCnt++;
+
+            else
+                break;
+        }
+
+        for (int i = 1; i <= 5; i++)
+        {
+            if (x - i >= 0 && y - i >= 0 && _omokBoard[x - i, y - i] == _omokBoard[x, y])
+                sameStoneCnt++;
+
+            else
+                break;
+        }
+
+        return sameStoneCnt;
+    }
+
+    void CheckDoubleThree(int x, int y)     // 33확인
+    {
+        int doubleThreeCnt = 0;
+
+        doubleThreeCnt += CheckHorizontalDoubleThree(x, y);
+        doubleThreeCnt += CheckVerticalDoubleThree(x, y);
+        doubleThreeCnt += CheckDiagonalDoubleThree(x, y);
+        doubleThreeCnt += CheckInverseDiagonalDoubleThree(x, y);
+
+        if (doubleThreeCnt >= 2)
+            IsDoubleThree = true;
+
+        else
+            IsDoubleThree = false;
+    }
+
+    int CheckHorizontalDoubleThree(int x, int y)    // 가로 (ㅡ) 확인
+    {
+        int threeStoneCnt = 1;
+        int i, j;
+
+        for (i = 1; i <= 3; i++) // 돌을 둔 위치로부터 → 확인
+        {
+            if (x + i > 18)
+                break;
+
+            else if (_omokBoard[x + i, y] == _omokBoard[x, y])
+                threeStoneCnt++;
+
+            else if (_omokBoard[x + i, y] != (int)StoneColor.None)
+                break;
+        }
+
+        for (j = 1; j <= 3; j++) // 돌을 둔 위치로부터 ← 확인
+        {
+            if (x - j < 0)
+                break;
+
+            else if (_omokBoard[x - j, y] == _omokBoard[x, y])
+                threeStoneCnt++;
+
+            else if (_omokBoard[x - j, y] != (int)StoneColor.None)
+                break;
+        }
+
+        if (threeStoneCnt == 3 && x + i < 18 && x - j > 0)    //돌 개수가 3개면서 양쪽 벽에 붙어잇으면 안된다
+        {
+            if ((_omokBoard[x + i, y] != (int)StoneColor.None && _omokBoard[x + i - 1, y] != (int)StoneColor.None) || (_omokBoard[x - j, y] != (int)StoneColor.None && _omokBoard[x - j + 1, y] != (int)StoneColor.None))
+            {
+                return 0;
+            }
+
+            else
+                return 1;
+        }
+
+        return 0;
+    }
+
+    private int CheckVerticalDoubleThree(int x, int y)    // 세로 (|) 확인
+    {
+        int threeStoneCnt = 1;
+        int i, j;
+
+        threeStoneCnt = 1;
+
+        for (i = 1; i <= 3; i++) // 돌을 둔 위치로부터 ↓ 확인
+        {
+            if (y + i > 18)
+                break;
+
+            else if (_omokBoard[x, y + i] == _omokBoard[x, y])
+                threeStoneCnt++;
+
+            else if (_omokBoard[x, y + i] != (int)StoneColor.None)
+                break;
+        }
+
+        for (j = 1; j <= 3; j++) // 돌을 둔 위치로부터 ↑ 확인
+        {
+            if (y - j < 0)
+                break;
+
+            else if (_omokBoard[x, y - j] == _omokBoard[x, y])
+                threeStoneCnt++;
+
+            else if (_omokBoard[x, y - j] != (int)StoneColor.None)
+                break;
+        }
+
+        if (threeStoneCnt == 3 && y + i < 18 && y - j > 0)    //돌 개수가 3개면서 양쪽 벽에 붙어잇으면 안된다
+        {
+            if ((_omokBoard[x, y + i] != (int)StoneColor.None && _omokBoard[x, y + i - 1] != (int)StoneColor.None) || (_omokBoard[x, y - j] != (int)StoneColor.None && _omokBoard[x, y - j + 1] != (int)StoneColor.None))
+            {
+                return 0;
+            }
+
+            else
+                return 1;
+        }
+
+        return 0;
+    }
+
+    int CheckDiagonalDoubleThree(int x, int y)    // 사선 (/) 확인
+    {
+        int threeStoneCnt = 1;
+        int i, j;
+
+        threeStoneCnt = 1;
+
+        for (i = 1; i <= 3; i++) // 돌을 둔 위치로부터 ↗ 확인
+        {
+            if (x + i > 18 || y - i < 0)
+                break;
+
+            else if (_omokBoard[x + i, y - i] == _omokBoard[x, y])
+                threeStoneCnt++;
+
+            else if (_omokBoard[x + i, y - i] != (int)StoneColor.None)
+                break;
+        }
+
+        for (j = 1; j <= 3; j++) // 돌을 둔 위치로부터 ↙ 확인
+        {
+            if (x - j < 0 || y + j > 18)
+                break;
+
+            else if (_omokBoard[x - j, y + j] == _omokBoard[x, y])
+                threeStoneCnt++;
+
+            else if (_omokBoard[x - j, y + j] != (int)StoneColor.None)
+                break;
+        }
+
+        if (threeStoneCnt == 3 && x + i < 18 && y - i > 0 && x - j > 0 && y + j < 18)    //돌 개수가 3개면서 양쪽 벽에 붙어잇으면 안된다
+        {
+            if ((_omokBoard[x + i, y - i] != (int)StoneColor.None && _omokBoard[x + i - 1, y - i + 1] != (int)StoneColor.None) || (_omokBoard[x - j, y + j] != (int)StoneColor.None && _omokBoard[x - j + 1, y + j - 1] != (int)StoneColor.None))
+            {
+                return 0;
+            }
+
+            else
+                return 1;
+        }
+
+        return 0;
+    }
+
+    int CheckInverseDiagonalDoubleThree(int x, int y)    // 역사선 (＼) 확인
+    {
+        int threeStoneCnt = 1;
+        int i, j;
+
+        threeStoneCnt = 1;
+
+        for (i = 1; i <= 3; i++) // 돌을 둔 위치로부터 ↘ 확인
+        {
+            if (x + i > 18 || y + i > 18)
+                break;
+
+            else if (_omokBoard[x + i, y + i] == _omokBoard[x, y])
+                threeStoneCnt++;
+
+            else if (_omokBoard[x + i, y + i] != (int)StoneColor.None)
+                break;
+        }
+
+        for (j = 1; j <= 3; j++) // 돌을 둔 위치로부터 ↖ 확인
+        {
+            if (x - j < 0 || y - j < 0)
+                break;
+
+            else if (_omokBoard[x - j, y - j] == _omokBoard[x, y])
+                threeStoneCnt++;
+
+            else if (_omokBoard[x - j, y - j] != (int)StoneColor.None)
+                break;
+        }
+
+        if (threeStoneCnt == 3 && x + i < 18 && y + i < 18 && x - j > 0 && y - j > 0)    //돌 개수가 3개면서 양쪽 벽에 붙어잇으면 안된다
+        {
+            if ((_omokBoard[x + i, y + i] != (int)StoneColor.None && _omokBoard[x + i - 1, y + i - 1] != (int)StoneColor.None) || (_omokBoard[x - j, y - j] != (int)StoneColor.None && _omokBoard[x - j + 1, y - j + 1] != (int)StoneColor.None))
+            {
+                return 0;
+            }
+
+            else
+                return 1;
+        }
+
+        return 0;
     }
 }
 

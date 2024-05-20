@@ -1,7 +1,6 @@
-﻿namespace HiveAuthServer.Servicies
+﻿namespace HiveAuthServer.Servicies;
+
+public interface IHasher
 {
-    public interface IHasher
-    {
-        public string GetHashedString(string str);
-    }
+    public string GetHashedString(string str);
 }

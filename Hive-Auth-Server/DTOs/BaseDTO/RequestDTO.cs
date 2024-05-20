@@ -1,6 +1,5 @@
-﻿namespace HiveAuthServer.DTOs
+﻿namespace HiveAuthServer.DTOs;
+
+public class RequestDTO
 {
-    public class RequestDTO
-    {
-    }
 }

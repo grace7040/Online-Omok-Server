@@ -1,9 +1,8 @@
-﻿namespace GameAPIServer.DTOs
+﻿namespace GameAPIServer.DTOs;
+
+public class ResponseDTO
 {
-    public class ResponseDTO
-    {
-        public ErrorCode Result { get; set; }
-    }
+    public ErrorCode Result { get; set; }
 }
 
 

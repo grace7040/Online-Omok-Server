@@ -1,7 +1,6 @@
-﻿namespace HiveAuthServer.Services
+﻿namespace HiveAuthServer.Services;
+
+public interface ICheckAuthService
 {
-    public interface ICheckAuthService
-    {
-        public Task<bool> CheckAuthToMemoryDbAsync(string email, string token);
-    }
+    public Task<bool> CheckAuthToMemoryDbAsync(string email, string token);
 }

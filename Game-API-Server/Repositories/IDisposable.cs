@@ -1,7 +1,6 @@
-﻿namespace GameAPIServer.Repositories
+﻿namespace GameAPIServer.Repositories;
+
+public interface IDisposable
 {
-    public interface IDisposable
-    {
-        public void Dispose();
-    }
+    public void Dispose();
 }

@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GameAPIServer.DTOs
+namespace GameAPIServer.DTOs;
+
+public class ReqUserAuthDTO : RequestDTO
 {
-    public class ReqUserAuthDTO : RequestDTO
-    {
-        [Required]
-        public string Token { get; set; } = "";
-    }
+    [Required]
+    public string Token { get; set; } = "";
 }

@@ -1,7 +1,6 @@
-﻿namespace MatchingServer.DTOs
+﻿namespace MatchingServer.DTOs;
+
+public class ResponseDTO
 {
-    public class ResponseDTO
-    {
-        public ErrorCode Result;
-    }
+    public ErrorCode Result;
 }

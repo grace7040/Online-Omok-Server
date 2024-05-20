@@ -1,8 +1,7 @@
-﻿namespace HiveAuthServer.Servicies
-{
-    public interface ITokenCreator
-    {
-        public string CreateAuthToken();
+﻿namespace HiveAuthServer.Servicies;
 
-    }
+public interface ITokenCreator
+{
+    public string CreateAuthToken();
+
 }

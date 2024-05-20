@@ -1,13 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GameAPIServer.DTOs
+namespace GameAPIServer.DTOs;
+
+public class RequestDTO
 {
-    public class RequestDTO
-    {
-        [Required]
-        [EmailAddress]
-        public string Id { get; set; } = "";
-    }
+    [Required]
+    [EmailAddress]
+    public string Id { get; set; } = "";
 }
 
 

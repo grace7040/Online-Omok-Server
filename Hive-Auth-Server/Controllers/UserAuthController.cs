@@ -2,29 +2,28 @@
 using HiveAuthServer.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HiveAuthServer.Controllers
+namespace HiveAuthServer.Controllers;
+
+[ApiController]
+public class UserAuthController : Controller
 {
-    [ApiController]
-    public class UserAuthController : Controller
+    ICheckAuthService _checkAuthService;
+
+    public UserAuthController(IMemoryDb memoryDb, ICheckAuthService checkAuthService) {
+        _checkAuthService = checkAuthService;
+    }
+
+
+    //Get HttpPost Request from GameAPIServer(LoginController)
+    [HttpPost("checkuserauth")]
+    public async Task<IActionResult> CheckUserAuth(ReqUserAuthDTO auth)
     {
-        ICheckAuthService _checkAuthService;
+        var isAuthedUser = await _checkAuthService.CheckAuthToMemoryDbAsync(auth.Id, auth.Token);
 
-        public UserAuthController(IMemoryDb memoryDb, ICheckAuthService checkAuthService) {
-            _checkAuthService = checkAuthService;
-        }
-
-
-        //Get HttpPost Request from GameAPIServer(LoginController)
-        [HttpPost("checkuserauth")]
-        public async Task<IActionResult> CheckUserAuth(ReqUserAuthDTO auth)
+        if(!isAuthedUser)
         {
-            var isAuthedUser = await _checkAuthService.CheckAuthToMemoryDbAsync(auth.Id, auth.Token);
-
-            if(!isAuthedUser)
-            {
-                return BadRequest();
-            }
-            return Ok();
+            return BadRequest();
         }
+        return Ok();
     }
 }

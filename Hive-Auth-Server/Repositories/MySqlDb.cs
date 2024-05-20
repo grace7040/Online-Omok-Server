@@ -1,88 +1,87 @@
 ﻿using MySqlConnector;
 using SqlKata.Execution;
 
-namespace HiveAuthServer.Repositories
+namespace HiveAuthServer.Repositories;
+
+public class MySqlDb : IHiveDb
 {
-    public class MySqlDb : IHiveDb
+    IConfiguration _configuration;
+    QueryFactory _queryFactory;
+    MySqlConnection _dbConnection;
+
+    public MySqlDb(IConfiguration configuration)
     {
-        IConfiguration _configuration;
-        QueryFactory _queryFactory;
-        MySqlConnection _dbConnection;
+        _configuration = configuration;
 
-        public MySqlDb(IConfiguration configuration)
+        var dbConnectString = _configuration.GetConnectionString("HiveDB");
+        _dbConnection = new MySqlConnection(dbConnectString);
+        _dbConnection.Open();
+
+        var compiler = new SqlKata.Compilers.MySqlCompiler();
+        _queryFactory = new QueryFactory(_dbConnection, compiler);
+    }
+
+    public void Dispose()
+    {
+        ConnectionClose();
+    }
+    public async Task<ErrorCode> InsertAccountAsync(string Id, string password)
+    {
+        try
         {
-            _configuration = configuration;
-
-            var dbConnectString = _configuration.GetConnectionString("HiveDB");
-            _dbConnection = new MySqlConnection(dbConnectString);
-            _dbConnection.Open();
-
-            var compiler = new SqlKata.Compilers.MySqlCompiler();
-            _queryFactory = new QueryFactory(_dbConnection, compiler);
-        }
-
-        public void Dispose()
-        {
-            ConnectionClose();
-        }
-        public async Task<ErrorCode> InsertAccountAsync(string Id, string password)
-        {
-            try
+            //존재하는 이메일인지    
+            if (await IsUserEmailExistAsync(Id))
             {
-                //존재하는 이메일인지    
-                if (await IsUserEmailExistAsync(Id))
-                {
-                    return ErrorCode.CreateAccountFailAlreadyExist;
-                }
-
-                var count = await _queryFactory.Query("user_account_data")
-                                  .InsertAsync(new { id = Id, password = password });
-
-                //DB 추가 실패시
-                if (count != 1)
-                {
-                    return ErrorCode.CreateAccountFailInsertAccount;
-                }
-            }
-            catch
-            {
-                return ErrorCode.CreateAccountFailException;
+                return ErrorCode.CreateAccountFailAlreadyExist;
             }
 
-            
-            return ErrorCode.None;
-        }
+            var count = await _queryFactory.Query("user_account_data")
+                              .InsertAsync(new { id = Id, password = password });
 
-        public async Task<string> GetPasswordByIdAsync(string id)
-        {
-            if(await IsUserEmailExistAsync(id))
+            //DB 추가 실패시
+            if (count != 1)
             {
-                var password = (await _queryFactory.Query("user_account_data")
-                                         .Select("password").Where("id", id)
-                                         .GetAsync<string>()).FirstOrDefault();
-                return password;
+                return ErrorCode.CreateAccountFailInsertAccount;
             }
-            return string.Empty;
         }
-
-
-        async Task<bool> IsUserEmailExistAsync(string id)
+        catch
         {
-            var count = (await _queryFactory.Query("user_account_data")
-                                         .Select("uid").Where("id", id)
-                                         .GetAsync<int>()).FirstOrDefault();
-            
-            if (count != 0)
-            {
-                return true;
-            }
-
-            return false;
+            return ErrorCode.CreateAccountFailException;
         }
 
-        void ConnectionClose()
+        
+        return ErrorCode.None;
+    }
+
+    public async Task<string> GetPasswordByIdAsync(string id)
+    {
+        if(await IsUserEmailExistAsync(id))
         {
-            _dbConnection.Close();
+            var password = (await _queryFactory.Query("user_account_data")
+                                     .Select("password").Where("id", id)
+                                     .GetAsync<string>()).FirstOrDefault();
+            return password;
         }
+        return string.Empty;
+    }
+
+
+    async Task<bool> IsUserEmailExistAsync(string id)
+    {
+        var count = (await _queryFactory.Query("user_account_data")
+                                     .Select("uid").Where("id", id)
+                                     .GetAsync<int>()).FirstOrDefault();
+        
+        if (count != 0)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    void ConnectionClose()
+    {
+        _dbConnection.Close();
     }
 }

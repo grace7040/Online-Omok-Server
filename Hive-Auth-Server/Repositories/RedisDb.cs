@@ -2,63 +2,60 @@
 using CloudStructures.Structures;
 using ZLogger;
 
-namespace HiveAuthServer.Repositories
+namespace HiveAuthServer.Repositories;
+public class RedisDb : IMemoryDb
 {
-    
-    public class RedisDb : IMemoryDb
+    IConfiguration _configuration;
+    RedisConnection _redisConnection;
+    public RedisDb(IConfiguration configuration)
     {
-        IConfiguration _configuration;
-        RedisConnection _redisConnection;
-        public RedisDb(IConfiguration configuration)
-        {
-            _configuration = configuration;
+        _configuration = configuration;
 
-            var redisConnectString = _configuration.GetConnectionString("HiveRedis");
-            var redisConfig = new RedisConfig("HiveRedis", redisConnectString!);
-            _redisConnection = new RedisConnection(redisConfig);
-            
-        }
-        public async Task<ErrorCode> RegistUserAsync(string id, string authToken, TimeSpan expiry)
+        var redisConnectString = _configuration.GetConnectionString("HiveRedis");
+        var redisConfig = new RedisConfig("HiveRedis", redisConnectString!);
+        _redisConnection = new RedisConnection(redisConfig);
+        
+    }
+    public async Task<ErrorCode> RegistUserAsync(string id, string authToken, TimeSpan expiry)
+    {
+        try
         {
-            try
-            {
-                var query = new RedisString<string>(_redisConnection, id, expiry);
-                if(await query.SetAsync(authToken, expiry) == false)    
-                {
-                    return ErrorCode.LoginFailRegistRedis;
-                }
-            }
-            catch
+            var query = new RedisString<string>(_redisConnection, id, expiry);
+            if(await query.SetAsync(authToken, expiry) == false)    
             {
                 return ErrorCode.LoginFailRegistRedis;
             }
-            
-            return ErrorCode.None;
         }
-
-        public async Task<ErrorCode> CheckUserAuthAsync(string id, string authToken)
+        catch
         {
-            try
-            {
-                var query = new RedisString<string>(_redisConnection, id, null);
-                var user = await query.GetAsync();
-
-                if (!user.HasValue)
-                {
-                    return ErrorCode.CheckUserAuthFailNotExist;
-                }
-
-                if (user.Value != authToken)
-                {
-                    return ErrorCode.CheckUserAuthFailNotMatch;
-                }
-            }
-            catch
-            {
-                return ErrorCode.CheckUserAuthFailException;
-            }
-
-            return ErrorCode.None;  
+            return ErrorCode.LoginFailRegistRedis;
         }
+        
+        return ErrorCode.None;
+    }
+
+    public async Task<ErrorCode> CheckUserAuthAsync(string id, string authToken)
+    {
+        try
+        {
+            var query = new RedisString<string>(_redisConnection, id, null);
+            var user = await query.GetAsync();
+
+            if (!user.HasValue)
+            {
+                return ErrorCode.CheckUserAuthFailNotExist;
+            }
+
+            if (user.Value != authToken)
+            {
+                return ErrorCode.CheckUserAuthFailNotMatch;
+            }
+        }
+        catch
+        {
+            return ErrorCode.CheckUserAuthFailException;
+        }
+
+        return ErrorCode.None;  
     }
 }
