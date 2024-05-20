@@ -1,6 +1,12 @@
 # Server-Project-Com2us
 컴투스 서버캠퍼스 2기 한세은
 
+
+***
+
+# ASP.NET Core 학습 정리 문서
+[ASP.NET Core Docs](https://github.com/grace7040/AspNetCore-MVC-Docs)
+
 ***
 
 # TODO-LIST
