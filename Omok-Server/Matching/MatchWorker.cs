@@ -40,7 +40,7 @@ public class MatchWorker
         {
             if (_emptyRoomQueue.Count < 1)
             {
-                Thread.Sleep(1);
+                Thread.Sleep(1000);
                 continue;
             }
 

@@ -40,15 +40,14 @@ public class UserManager
     //연결 시
     public ErrorCode AddUser(string sessionID)
     {
-        var emptyUserObject = GetEmptyUser();
-        var user = emptyUserObject.Item1;
+        var (user, matchingData) = GetEmptyUser();
         if(user == null)
         {
             return ErrorCode.AddUserFailFullUserCount;
         }
 
         user.Use(sessionID);
-        _sessionIndexDict.Add(sessionID, emptyUserObject.Item2);
+        _sessionIndexDict.Add(sessionID, matchingData);
         return ErrorCode.None;
     }
 
