@@ -9,23 +9,18 @@ namespace HiveAuthServer.Controllers;
 public class CreateAccountController : Controller
 {
     ILogger<CreateAccountController> _logger;
-    IHiveDb _hiveDb;
-    IHasher _hasher;
+    ICreateAccountService _createAccountService;
 
-    public CreateAccountController(ILogger<CreateAccountController> logger, IHiveDb hiveDb, IHasher hasher)
+    public CreateAccountController(ILogger<CreateAccountController> logger, ICreateAccountService createAccountService)
     {
         _logger = logger;
-        _hiveDb = hiveDb;
-        _hasher = hasher;
+        _createAccountService = createAccountService;
     }
 
     [HttpPost("createaccount")]
     public async Task<ResponseDTO> CreateAccount(ReqAccountDTO account)
     {
-        var hashedPassword = _hasher.GetHashedString(account.Password);
-        
-        //DB에 유저 계정 추가
-        var result = await _hiveDb.InsertAccountAsync(account.Id, hashedPassword);
+        var result = await _createAccountService.CreateAccount(account.Id, account.Password);
         
         if(result != ErrorCode.None)
         {
