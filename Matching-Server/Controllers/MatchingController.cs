@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using ZLogger;
+﻿using Microsoft.AspNetCore.Mvc;
 using MatchingServer.DTOs;
-using Microsoft.Extensions.FileSystemGlobbing;
-
 
 namespace MatchingServer.Controllers;
 
@@ -28,9 +20,8 @@ public class MatchingController : ControllerBase
 
         _matchWorker.AddUser(request.UserID);
 
-        var matchingResult = _matchWorker.GetMatchingData(request.UserID);
-        var isMatchSucceed = matchingResult.Item1;
-        if (isMatchSucceed)
+        var (isMatchingSucceed, data) = _matchWorker.GetMatchingData(request.UserID);
+        if (isMatchingSucceed)
         {
             _matchWorker.RemoveUserFromMatchingDict(request.UserID, out var isSucceed);
             if (!isSucceed)
@@ -39,9 +30,9 @@ public class MatchingController : ControllerBase
                 return response;
             }
             response.Result = ErrorCode.None;
-            response.OmokServerIP = matchingResult.Item2.OmokServerIP;
-            response.OmokServerPort = matchingResult.Item2.OmokServerPort;
-            response.RoomNumber = matchingResult.Item2.RoomNumber;
+            response.OmokServerIP = data.OmokServerIP;
+            response.OmokServerPort = data.OmokServerPort;
+            response.RoomNumber = data.RoomNumber;
         }
 
         return response;

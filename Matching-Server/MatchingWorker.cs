@@ -96,8 +96,8 @@ public class MatchingWorker : IMatchingWorker
                     continue;
                 }
 
-                var CanMatching = GetWaitingTwoUsers(out var user1, out var user2);
-                if (!CanMatching)
+                var canMatching = GetWaitingTwoUsers(out var user1, out var user2);
+                if (!canMatching)
                 {
                     continue;
                 }
@@ -107,7 +107,7 @@ public class MatchingWorker : IMatchingWorker
             }
             catch (Exception ex)
             {
-
+                // ::TODO:: 예외처리
             }
         }
     }
@@ -150,13 +150,12 @@ public class MatchingWorker : IMatchingWorker
         {
             try
             {
-                var redisResult = TryGetEmptyRoomFromRedis();
-                var isEmptyRoomExist = redisResult.Item1;
+                var (isEmptyRoomExist, completeMatchingData) = TryGetEmptyRoomInfoFromRedis();
                 if (isEmptyRoomExist)
                 {
-                    var ip = redisResult.Item2.OmokServerIP;
-                    var port = redisResult.Item2.OmokServerPort;
-                    var roomNumber = redisResult.Item2.RoomNumber;
+                    var ip = completeMatchingData.OmokServerIP;
+                    var port = completeMatchingData.OmokServerPort;
+                    var roomNumber = completeMatchingData.RoomNumber;
 
                     MakeCompleteMatching(ip, port, roomNumber);
                 }
@@ -168,7 +167,7 @@ public class MatchingWorker : IMatchingWorker
             }
             catch (Exception ex)
             {
-
+                // ::TODO:: 예외처리
             }
         }        
     }
@@ -198,8 +197,6 @@ public class MatchingWorker : IMatchingWorker
         _matchingDict[user].RoomNumber = roomNumber;
     }
 
-
-
     public void Dispose()
     {
         // ::TODO:: MatchWorker Dispose
@@ -215,7 +212,7 @@ public class MatchingWorker : IMatchingWorker
         }
     }
 
-    (bool, EmptyRoomInfo) TryGetEmptyRoomFromRedis()
+    (bool, EmptyRoomInfo) TryGetEmptyRoomInfoFromRedis()
     {
         var query = new RedisList<EmptyRoomInfo>(_redisConnection, _checkMatchingKey, null);
         var result = query.RightPopAsync().Result;

@@ -105,15 +105,15 @@ public class PKHRoom : PKHandler
         var sessionID = packetData.SessionID;
         _mainLogger.Debug("Room RequestChat");
 
-        var roomObject = CheckRoomAndRoomUser(sessionID);
-        if (roomObject.Item1 == false)
+        var (isSucceed, room, roomUser) = CheckRoomAndRoomUser(sessionID);
+        if (!isSucceed)
         {
             _mainLogger.Error("Room RequestChat - CheckRoomAndRoomUserFail");
             return;
         }
 
         var reqData = _packetMgr.GetPacketData<PKTReqRoomChat>(packetData.Data);
-        roomObject.Item2.NotifyRoomChat(roomObject.Item3.UserID, reqData.ChatMessage);
+        room.NotifyRoomChat(roomUser.UserID, reqData.ChatMessage);
 
         _mainLogger.Debug("Room RequestChat - Success");
 
@@ -124,17 +124,15 @@ public class PKHRoom : PKHandler
 
         var sessionID = packetData.SessionID;
 
-        var roomObject = CheckRoomAndRoomUser(sessionID);
-        if (roomObject.Item1 == false)
+        var (isSucceed, room, roomUser) = CheckRoomAndRoomUser(sessionID);
+        if (!isSucceed)
         {
             _mainLogger.Error("Room RequestGameReady - CheckRoomAndRoomUserFail");
             return;
         }
 
-        var room = roomObject.Item2;
         room.SetUserStateReadyOrNone(sessionID);
         room.StartGameOnAllUserReady();
-
     }
 
 
@@ -142,14 +140,13 @@ public class PKHRoom : PKHandler
     {
         var sessionID = packetData.SessionID;
 
-        var roomObject = CheckRoomAndRoomUser(sessionID);
-        if (roomObject.Item1 == false)
+        var (isSucceed, room, roomUser) = CheckRoomAndRoomUser(sessionID);
+        if (!isSucceed)
         {
             _mainLogger.Error("Room RequestPutStone - CheckRoomAndRoomUserFail");
             return;
         }
 
-        var room = roomObject.Item2;
         var reqData = _packetMgr.GetPacketData<PKTReqPutStone>(packetData.Data);
         room.CheckUserTurnAndPutStone(sessionID, reqData);
         
@@ -170,14 +167,13 @@ public class PKHRoom : PKHandler
         }
 
         var sessionID = packetData.SessionID;
-        var roomObject = CheckRoomAndRoomUser(sessionID);
-        if (roomObject.Item1 == false)
+        var (isSucceed, room, roomUser) = CheckRoomAndRoomUser(sessionID);
+        if (!isSucceed)
         {
             _mainLogger.Error("Room RequestPutStone - CheckRoomAndRoomUserFail");
             return;
         }
 
-        var room = roomObject.Item2;
         //var innerPacket = _packetMgr.MakeInNTFRoomLeavePacket(sessionID, room.Number, resData.UserID);
         var innerPacket = _packetMgr.MakeInReqDisConnectUserPacket(sessionID);
         DIstributePacketAction(innerPacket);
