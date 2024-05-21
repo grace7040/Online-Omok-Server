@@ -11,6 +11,8 @@ builder.Services.AddScoped<IHiveDb, MySqlDb>();
 builder.Services.AddScoped<IHasher, HasherSHA256>();
 builder.Services.AddScoped<ITokenCreator, TokenCreator>();
 builder.Services.AddScoped<ICheckAuthService, CheckAuthService>();
+builder.Services.AddScoped<ICreateAccountService, CreateAccountService>();
+builder.Services.AddScoped<ILoginService, LoginService>();
 
 
 SettingLogger();
