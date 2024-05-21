@@ -102,13 +102,7 @@ public class MatchingWorker : IMatchingWorker
                     continue;
                 }
 
-                _matchingQueue.Enqueue(user1);
-                _matchingDict[user1].State = MatchingState.Matching;
-
-                _matchingQueue.Enqueue(user2);
-                _matchingDict[user2].State = MatchingState.Matching;
-
-                //Redis에 매칭 요청 추가
+                StartMatching(user1, user2);
                 PushMatchingRequestToRedis();
             }
             catch (Exception ex)
@@ -140,6 +134,15 @@ public class MatchingWorker : IMatchingWorker
         return true;
     }
 
+    void StartMatching(string user1, string user2)
+    {
+        _matchingQueue.Enqueue(user1);
+        _matchingDict[user1].State = MatchingState.Matching;
+
+        _matchingQueue.Enqueue(user2);
+        _matchingDict[user2].State = MatchingState.Matching;
+    }
+
     //redis로부터 방배정 결과를 받아와서 실제 매칭을 진행하는 스레드
     void RunMatchingComplete()
     {
@@ -159,7 +162,7 @@ public class MatchingWorker : IMatchingWorker
                 }
                 else
                 {
-                    System.Threading.Thread.Sleep(1);
+                    System.Threading.Thread.Sleep(500);
                     continue;
                 }
             }

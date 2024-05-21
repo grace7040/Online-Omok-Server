@@ -46,26 +46,12 @@ public class MatchWorker
 
             if (!IsMatchingRequestReceived())
             {
-                Thread.Sleep(1);
+                Thread.Sleep(500);
                 continue;
             }
 
-            var roomNumber = _emptyRoomQueue.Dequeue();
-            var roomInfo = new EmptyRoomInfo
-            {
-                OmokServerIP = _serverIP,
-                OmokServerPort = _serverPort.ToString(),
-                RoomNumber = roomNumber
-            };
-
-            var query = new RedisList<EmptyRoomInfo>(_redisConnection, _checkMatchingKey, null);
-            var result = query.RightPushAsync(roomInfo).Result;
-
-            if (result != 1)
-            {
-                // ::TODO:: redis Push 실패
-                continue;
-            }
+            GetEmptyRoomInfo(out var roomInfo);
+            PushEmptyRoomInfoToRedis(roomInfo);
         }
     }
 
@@ -75,6 +61,29 @@ public class MatchWorker
         var result = query.RightPopAsync().Result;
 
         return result.HasValue;
+    }
+    
+    void GetEmptyRoomInfo(out EmptyRoomInfo roomInfo)
+    {
+        var roomNumber = _emptyRoomQueue.Dequeue();
+        roomInfo = new EmptyRoomInfo
+        {
+            OmokServerIP = _serverIP,
+            OmokServerPort = _serverPort.ToString(),
+            RoomNumber = roomNumber
+        };
+    }
+
+    void PushEmptyRoomInfoToRedis(EmptyRoomInfo roomInfo)
+    {
+        var query = new RedisList<EmptyRoomInfo>(_redisConnection, _checkMatchingKey, null);
+        var result = query.RightPushAsync(roomInfo).Result;
+
+        if (result != 1)
+        {
+            // ::TODO:: redis Push 실패
+            return;
+        }
     }
 }
 public class EmptyRoomInfo
