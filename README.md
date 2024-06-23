@@ -8,8 +8,14 @@
 
 ***
 
-# ASP.NET Core 학습 정리 문서
-- [ASP.NET Core Docs](https://github.com/grace7040/AspNetCore-MVC-Docs)
+# 시퀀스 다이어그램
+- [시퀀스 다이어그램](https://github.com/grace7040/Server-Project-Com2us/blob/main/SequenceDiagram.md)
+
+***
+
+# DB 스키마
+- [DB 스키마](https://github.com/grace7040/Server-Project-Com2us/blob/main/DBSchema.md)
+
 
 ***
 
@@ -27,15 +33,6 @@
 |     로그아웃     |       ✅       |
 
 
-- **부가 기능**
-
-|  **기능** | **완료 여부** |
-|:---------:|:-------------:|
-| 출석 체크 |       ⬜       |
-|   우편함  |       ⬜       |
-|    친구   |       ⬜       |
-
-
 - **게임 기능**
 
 |    **기능**    | **완료 여부** |
@@ -50,3 +47,18 @@
 |    게임 종료   |       ✅       |
 |    방 나가기   |       ✅       |
 | 승패 기록 저장 |       ✅       |
+
+
+- **부가 기능**
+
+|  **기능** | **완료 여부** |
+|:---------:|:-------------:|
+| 출석 체크 |       ⬜       |
+|   우편함  |       ⬜       |
+|    친구   |       ⬜       |
+
+
+***
+
+# ASP.NET Core 학습 정리 문서
+- [ASP.NET Core Docs](https://github.com/grace7040/AspNetCore-MVC-Docs)
