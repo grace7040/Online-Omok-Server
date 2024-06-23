@@ -1,6 +1,10 @@
 # Server-Project-Com2us
 컴투스 서버캠퍼스 2기 한세은
 
+***
+
+# 전체 서버 구조
+![ServerArchitecture](https://github.com/grace7040/Server-Project-Com2us/assets/81251069/40e90361-7c38-4f38-b7d8-7fc166e8b7a8)
 
 ***
 
