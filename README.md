@@ -9,7 +9,7 @@
 ***
 
 # 시퀀스 다이어그램
-- [시퀀스 다이어그램](https://github.com/grace7040/Server-Project-Com2us/blob/main/SequenceDiagram.md)
+- [시퀀스 다이어그램(로그인, 계정 생성, 인증, 매칭)](https://github.com/grace7040/Server-Project-Com2us/blob/main/SequenceDiagram.md)
 
 ***
 
