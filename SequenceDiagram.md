@@ -39,3 +39,59 @@ sequenceDiagram
     HiveServer->>+HiveDB: 유저의 계정 데이터 생성 요청
     HiveServer-->>-User: 계정 생성 성공 응답
 ```
+
+---
+# HTTP 요청 시마다 유저 인증
+```mermaid
+sequenceDiagram
+    actor User
+    participant GameServer
+
+    User->>+GameServer: HTTP 요청 (email 및 토큰 포함)
+    GameServer->>GameServer: Redis에 검증 요청
+    alt 검증 성공
+        GameServer-->>User: HTTP 요청 처리 후 응답
+    else 검증 실패
+        GameServer-->>-User: 유저 인증 실패 응답
+    end
+```
+
+---
+# 유저 매칭
+```mermaid
+sequenceDiagram
+    actor User
+    participant GameServer
+    participant MatchingServer
+    participant OmokServer
+
+    loop Every Second && Not Matched
+        User-->>+GameServer: email을 통해 매칭 요청
+        GameServer-->>+MatchingServer: email 및 매칭 요청 전달
+        alt 매칭 완료 정보 존재
+            MatchingServer-->>-GameServer: 오목서버 주소 및 방 번호 전달
+            GameServer-->>-User: 오목서버 주소 및 방 번호 응답
+        else else
+            opt 매칭 대기 유저수 > 2
+                MatchingServer->>MatchingServer: redis request list에 요청 push
+                
+            end
+        end
+    end
+
+    loop Every Second
+        OmokServer->>OmokServer: redis request list 확인
+        opt request가 존재
+            OmokServer->>OmokServer: 해당 request를 pop
+            OmokServer->>OmokServer: redis complete list에 자신의 서버 주소 및 빈 방 정보 응답 push
+        end
+    end
+
+    loop Every Second
+        MatchingServer->>MatchingServer: redis complete list 확인
+        opt response가 존재
+            MatchingServer->>MatchingServer: 해당 response를 pop
+            MatchingServer->>MatchingServer: 매칭 완료 정보 저장
+        end
+    end    
+```
