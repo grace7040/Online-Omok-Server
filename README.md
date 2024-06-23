@@ -1,10 +1,21 @@
-# Server-Project-Com2us
-컴투스 서버캠퍼스 2기 한세은
+# 프로젝트 소개
+![오목시연gif](https://github.com/grace7040/Server-Project-Com2us/assets/81251069/bf2b83ab-679b-4c9d-baef-3c4e11eb00c2)
+- 온라인 오목 게임 서버를 제작한 프로젝트입니다. 
+- 3개의 API 서버(Hiva Auth 서버, Game API 서버, Matching 서버) 및 1개의 소켓 서버(오목 서버)로 구성되어 있습니다.
+- 오목 서버의 경우 Scale Out이 가능하도록 설계하였습니다. 
+
+***
+
+# 프로젝트 개요
+- 개발 기간: 2024.04. - 2024.06. (2개월)
+- 참여 인원: 1인
+- 사용 언어: C#
+- 사용 도구: ASP.NET Core 8, MySQL, Redis, AWS
 
 ***
 
 # 전체 서버 구조
-![ServerArchitecture](https://github.com/grace7040/Server-Project-Com2us/assets/81251069/40e90361-7c38-4f38-b7d8-7fc166e8b7a8)
+![ServerArchitecture](https://github.com/grace7040/Server-Project-Com2us/assets/81251069/9da89771-4ac8-48ce-8609-8cca61d77d2a)
 
 ***
 
