@@ -1,7 +1,7 @@
 # 프로젝트 소개
 ![오목시연gif](https://github.com/grace7040/Server-Project-Com2us/assets/81251069/bf2b83ab-679b-4c9d-baef-3c4e11eb00c2)
 - **온라인 오목 게임 서버**를 제작한 프로젝트입니다. 
-- **3개의 API 서버**(Hiva Auth 서버, Game API 서버, Matching 서버) 및 **1개의 소켓 서버**(오목 서버)로 구성되어 있습니다.
+- **3개의 API 서버**(Hive Auth 서버, Game API 서버, Matching 서버) 및 **1개의 소켓 서버**(오목 서버)로 구성되어 있습니다.
 - 오목 서버의 경우 **Scale Out**이 가능하도록 설계하였습니다. 
 
 ***
